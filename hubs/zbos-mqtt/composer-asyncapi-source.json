@@ -1,0 +1,1282 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "Composer",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/composition/start" : {
+      "publish" : {
+        "summary" : "Start composition",
+        "description" : "Payload is composition json\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/composition/start/id" : {
+      "publish" : {
+        "summary" : "Start composition by id",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "settings" : {
+                "type" : "object",
+                "properties" : {
+                  "pinned" : {
+                    "type" : "boolean"
+                  },
+                  "schedulerParallel" : {
+                    "type" : "boolean"
+                  }
+                }
+              },
+              "variables" : {
+                "type" : "object"
+              }
+            }
+          },
+          "name" : "CompositionStartRequest",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "settings" : {
+                "pinned" : false,
+                "schedulerParallel" : false
+              },
+              "variables" : {
+                "var1" : "var1_value",
+                "var2" : "var2_value"
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/{source}/start/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "source" : {
+          "description" : "The source that this composition belongs to",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "scheduler/timeline", "composition" ]
+          }
+        }
+      }
+    },
+    "zbos/{source}/stop" : {
+      "publish" : {
+        "summary" : "Stop composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "source" : {
+          "description" : "The source that this composition belongs to",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "scheduler/timeline", "composition" ]
+          }
+        }
+      }
+    },
+    "zbos/{source}/stop/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition stopped",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "source" : {
+          "description" : "The source that this composition belongs to",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "scheduler/timeline", "composition" ]
+          }
+        }
+      }
+    },
+    "zbos/composition/pause" : {
+      "publish" : {
+        "summary" : "Pause composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/pause/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition paused",
+        "description" : "Timeline ID\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/composition/resume" : {
+      "publish" : {
+        "summary" : "Resume composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/resume/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition Resumed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/{source}/loop/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition loop state",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "infinite" : {
+                "type" : "boolean"
+              },
+              "repeatTimes" : {
+                "type" : "integer",
+                "description" : "Total loop count"
+              },
+              "currentRepeatTimes" : {
+                "type" : "integer",
+                "description" : "current loop count"
+              }
+            }
+          },
+          "name" : "LoopProperty",
+          "examples" : [ {
+            "payload" : {
+              "infinite" : true,
+              "currentRepeatTimes" : 3
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "source" : {
+          "description" : "The source that this composition belongs to",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "scheduler/timeline", "composition" ]
+          }
+        }
+      }
+    },
+    "zbos/composition/settings" : {
+      "publish" : {
+        "summary" : "Settings for a given composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "properties" : {
+                "type" : "object",
+                "properties" : {
+                  "loop" : {
+                    "type" : "object",
+                    "properties" : {
+                      "infinite" : {
+                        "type" : "boolean"
+                      },
+                      "repeatTimes" : {
+                        "type" : "integer",
+                        "description" : "Total loop count"
+                      },
+                      "currentRepeatTimes" : {
+                        "type" : "integer",
+                        "description" : "current loop count"
+                      }
+                    }
+                  },
+                  "general" : {
+                    "type" : "object",
+                    "properties" : {
+                      "stoppable" : {
+                        "type" : "boolean"
+                      },
+                      "powerManagement" : {
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "DEFAULT", "AWARE", "DISABLED" ]
+                      }
+                    }
+                  }
+                }
+              },
+              "timelineId" : {
+                "type" : "string",
+                "description" : "Composition ID"
+              },
+              "isScheduler" : {
+                "type" : "boolean"
+              },
+              "isPinned" : {
+                "type" : "boolean"
+              },
+              "type" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
+              }
+            }
+          },
+          "name" : "TimelinePropertiesWrapper",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      }
+    },
+    "zbos/composition/save" : {
+      "publish" : {
+        "summary" : "Save composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/save/multiple" : {
+      "publish" : {
+        "summary" : "Save multiple compositions",
+        "description" : "see <<zbos/composition/save/multiple/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "Required key"
+              },
+              "compositions" : {
+                "type" : "array",
+                "description" : "Array of compositions",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "id" : {
+                      "type" : "string"
+                    },
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "type" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
+                    },
+                    "isDefault" : {
+                      "type" : "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "SaveMultipleCompositionRequest",
+          "examples" : [ {
+            "payload" : {
+              "compositions" : [ {
+                "id" : "string",
+                "name" : "string",
+                "type" : "SIMPLE_COMPOSITION",
+                "default" : false
+              } ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/composition/save/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition Saved",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String",
+          "examples" : [ {
+            "payload" : "string"
+          } ]
+        }
+      }
+    },
+    "zbos/composition/save/multiple/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Save multiple compositions",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object"
+          },
+          "name" : "Map"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/composition/load" : {
+      "publish" : {
+        "summary" : "Load composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "CompositionLoadRequest",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/composition/load/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition loaded",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/composition/list" : {
+      "publish" : {
+        "summary" : "Get list of compositions",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/list/event" : {
+      "subscribe" : {
+        "summary" : "event: Get list of compositions",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "ordinal" : {
+                      "type" : "integer"
+                    }
+                  },
+                  "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
+                },
+                "isDefault" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "name" : "Array<CompositionInfo>",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "name" : "string",
+              "type" : "SIMPLE_COMPOSITION",
+              "default" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/composition/delete" : {
+      "publish" : {
+        "summary" : "Delete composition by id",
+        "description" : "see <<zbos/composition/delete/response>> for response\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "CompositionDeleteRequest",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/composition/delete/all" : {
+      "publish" : {
+        "summary" : "Deletes all compositions",
+        "description" : "see <<zbos/composition/delete/response>> for response\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/delete/response" : {
+      "subscribe" : {
+        "summary" : "response: Delete composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      }
+    },
+    "zbos/composition/changed/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/audio/stop" : {
+      "publish" : {
+        "summary" : "Stop audio composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/video/stop" : {
+      "publish" : {
+        "summary" : "Stop video composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/image/stop" : {
+      "publish" : {
+        "summary" : "Stop image composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/composition/error" : {
+      "subscribe" : {
+        "summary" : "event: Composition encountered error",
+        "description" : "List of possible error reasons:\n'INVALID_ID': The block id is malformed/broken.\n'INVALID_TYPE': The block type is malformed/broken.\n'INVALID_BLOCK': One of the properties aside from id and type is malformed/broken.\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "type" : "string",
+                "description" : "Block type that caused the error, 'UNKNOWN' if not known"
+              },
+              "id" : {
+                "type" : "string",
+                "description" : "Block ID that caused the error, 'UNKNOWN' if not known"
+              },
+              "reasons" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "CompositionError",
+          "examples" : [ {
+            "payload" : {
+              "type" : "string",
+              "id" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/api/request" : {
+      "publish" : {
+        "summary" : "Get api",
+        "description" : "see <<zbos/api/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string"
+              },
+              "endpoint" : {
+                "type" : "string"
+              },
+              "body" : {
+                "type" : "string"
+              },
+              "params" : {
+                "type" : "object"
+              },
+              "headers" : {
+                "type" : "object"
+              }
+            }
+          },
+          "name" : "ApiRequestBlock",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      }
+    },
+    "zbos/api/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get api",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/composition/default/variable/request" : {
+      "publish" : {
+        "summary" : "Get default composition variables",
+        "description" : "Payload \"key\" is optionalsee <<zbos/composition/default/variable/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/composition/default/variable/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get default composition variables",
+        "description" : "Payload is array of variable names\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "name" : "Array<String>"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/composition/status/get" : {
+      "publish" : {
+        "summary" : "Get composition statussee <<zbos/composition/status/response/{key}>> for response",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/composition/status/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Composition status",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "state" : {
+                "type" : "object",
+                "description" : "Default, playing or paused",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "DEFAULT", "PLAYING", "PAUSED" ]
+              },
+              "activeBlocks" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "properties" : {
+                "type" : "object",
+                "description" : "Composition properties",
+                "properties" : {
+                  "loop" : {
+                    "type" : "object",
+                    "properties" : {
+                      "infinite" : {
+                        "type" : "boolean"
+                      },
+                      "repeatTimes" : {
+                        "type" : "integer",
+                        "description" : "Total loop count"
+                      },
+                      "currentRepeatTimes" : {
+                        "type" : "integer",
+                        "description" : "current loop count"
+                      }
+                    }
+                  },
+                  "general" : {
+                    "type" : "object",
+                    "properties" : {
+                      "stoppable" : {
+                        "type" : "boolean"
+                      },
+                      "powerManagement" : {
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "DEFAULT", "AWARE", "DISABLED" ]
+                      }
+                    }
+                  }
+                }
+              },
+              "playCount" : {
+                "type" : "integer",
+                "description" : "Current repeat iteration"
+              }
+            }
+          },
+          "name" : "CompositionStatus",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "state" : "DEFAULT",
+              "activeBlocks" : [ "string" ],
+              "properties" : {
+                "loop" : {
+                  "infinite" : true,
+                  "currentRepeatTimes" : 3
+                },
+                "general" : {
+                  "powerManagement" : "DEFAULT"
+                }
+              },
+              "playCount" : 5
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/composition/block/start" : {
+      "publish" : {
+        "summary" : "Start composition block",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "description" : "Block ID"
+              },
+              "index" : {
+                "type" : "integer"
+              },
+              "blocking" : {
+                "type" : "boolean"
+              },
+              "input" : {
+                "type" : "object",
+                "properties" : {
+                  "connectors" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "id" : {
+                          "type" : "string"
+                        },
+                        "connection" : {
+                          "type" : "object",
+                          "properties" : {
+                            "blockId" : {
+                              "type" : "string"
+                            },
+                            "connectorId" : {
+                              "type" : "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "output" : {
+                "type" : "object",
+                "properties" : {
+                  "connectors" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "id" : {
+                          "type" : "string"
+                        },
+                        "connection" : {
+                          "type" : "object",
+                          "properties" : {
+                            "blockId" : {
+                              "type" : "string"
+                            },
+                            "connectorId" : {
+                              "type" : "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "nextBlockId" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "Block",
+          "examples" : [ {
+            "payload" : {
+              "index" : 5,
+              "blocking" : false,
+              "nextBlockId" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/{source}/block/start/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition block started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "source" : {
+          "description" : "The source that this composition belongs to",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "scheduler/timeline", "composition" ]
+          }
+        }
+      }
+    },
+    "zbos/composition/block/stop" : {
+      "publish" : {
+        "summary" : "Stop composition block",
+        "description" : "Block ID to stop, when key = \"all\", all active blocks will be stopped.\n",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/{source}/block/end/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition block ended",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "source" : {
+          "description" : "The source that this composition belongs to",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "scheduler/timeline", "composition" ]
+          }
+        }
+      }
+    },
+    "zbos/{source}/block/pause/event" : {
+      "subscribe" : {
+        "summary" : "event: Composition block paused",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Composer",
+          "description" : "All composer related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "source" : {
+          "description" : "The source that this composition belongs to",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "scheduler/timeline", "composition" ]
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

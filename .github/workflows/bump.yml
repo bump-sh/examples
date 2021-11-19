@@ -1,0 +1,23 @@
+name: Deploy documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-doc:
+    runs-on: ubuntu-latest
+    name: Deploy API documentations on Bump
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: ./.github/scripts/deploy-all.sh
+        env:
+          AMADEUS_BUMP_TOKEN: ${{ secrets.AMADEUS_BUMP_TOKEN }}
+          MY_TRAIN_COMPANY_BUMP_TOKEN: ${{ secrets.MY_TRAIN_COMPANY_BUMP_TOKEN }}
+          ZBOS_MQTT_BUMP_TOKEN: ${{ secrets.ZBOS_MQTT_BUMP_TOKEN }}
+          BUMP_HOST: ${{ secrets.BUMP_HOST }}

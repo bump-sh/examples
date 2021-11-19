@@ -1,0 +1,634 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "Cloud",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/cloud/login" : {
+      "publish" : {
+        "summary" : "Login to the cloud",
+        "description" : "see <<zbos/cloud/login/response>> for response\n",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/cloud/login/response" : {
+      "subscribe" : {
+        "summary" : "response: Login to the cloud",
+        "description" : "Response indicating if login to the cloud was successful or not\n",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "token" : {
+                "type" : "string",
+                "description" : "jwt auth token"
+              },
+              "success" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "LoginResponse",
+          "examples" : [ {
+            "payload" : {
+              "token" : "string",
+              "success" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/cloud/config/get" : {
+      "publish" : {
+        "summary" : "Get cloud config",
+        "description" : "see <<zbos/cloud/config/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/cloud/config/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get cloud config",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object"
+          },
+          "name" : "Map"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/cloud/config/set" : {
+      "publish" : {
+        "summary" : "Set cloud config",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object"
+          },
+          "name" : "Map"
+        }
+      }
+    },
+    "zbos/cloud/config/event" : {
+      "subscribe" : {
+        "summary" : "event: Config cloud",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object"
+          },
+          "name" : "Map"
+        }
+      }
+    },
+    "zbos/media/library/resync" : {
+      "publish" : {
+        "summary" : "Resync all media libraries",
+        "description" : "see <<zbos/media/library/resync/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/media/library/resync/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Resync all media libraries",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/media/library/file/upload" : {
+      "publish" : {
+        "summary" : "Upload file in media library",
+        "description" : "see <<zbos/media/library/file/upload/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "file" : {
+                "type" : "string"
+              },
+              "storageAccount" : {
+                "type" : "string"
+              },
+              "key" : {
+                "type" : "string"
+              },
+              "metadata" : {
+                "type" : "object"
+              }
+            }
+          },
+          "name" : "FileUploadRequest",
+          "examples" : [ {
+            "payload" : {
+              "file" : "string",
+              "storageAccount" : "string",
+              "key" : "string",
+              "metadata" : { }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/media/library/file/upload/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Upload file in media library",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "success" : {
+                "type" : "boolean"
+              },
+              "cloudFileId" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "CloudResult",
+          "examples" : [ {
+            "payload" : {
+              "success" : false,
+              "cloudFileId" : "string"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/cloud/user/list" : {
+      "publish" : {
+        "summary" : "Request users linked to the robot",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "offset" : {
+                "type" : "number"
+              },
+              "limit" : {
+                "type" : "number"
+              }
+            }
+          },
+          "name" : "LinkedUsersRequest"
+        }
+      }
+    },
+    "zbos/cloud/user/list/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: users linked to the robot",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "accounts" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "id" : {
+                      "type" : "string"
+                    },
+                    "username" : {
+                      "type" : "string"
+                    },
+                    "email" : {
+                      "type" : "string"
+                    },
+                    "picture" : {
+                      "type" : "string"
+                    },
+                    "admin" : {
+                      "type" : "boolean"
+                    },
+                    "mqttAccount" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              },
+              "offset" : {
+                "type" : "number"
+              },
+              "limit" : {
+                "type" : "number"
+              },
+              "numResults" : {
+                "type" : "number"
+              }
+            }
+          },
+          "name" : "LinkedUsersResponse",
+          "examples" : [ {
+            "payload" : {
+              "accounts" : [ {
+                "id" : "cffb2596-662f-479a-8f43-af1651a61c6d",
+                "username" : "John Doe",
+                "email" : "someone@zorabots.be",
+                "picture" : "https://lh3.googleusercontent.com/a/AATXAJy1DGqwgHZMEiiz=s96-c",
+                "admin" : true,
+                "mqttAccount" : "c-1b32e964-0d76-4ce4-bc61-f8e05bdcebf9"
+              } ],
+              "offset" : 0,
+              "limit" : 20,
+              "numResults" : 1
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/cloud/license/list" : {
+      "publish" : {
+        "summary" : "Request a license list for the robot",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "offset" : {
+                "type" : "number"
+              },
+              "limit" : {
+                "type" : "number"
+              }
+            }
+          },
+          "name" : "LicenseListRequest"
+        }
+      }
+    },
+    "zbos/cloud/license/list/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Request linking a user to the robot",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Cloud",
+          "description" : "All cloud related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "licenses" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "id" : {
+                      "type" : "string"
+                    },
+                    "serial" : {
+                      "type" : "string"
+                    },
+                    "softwareId" : {
+                      "type" : "string"
+                    },
+                    "createdTimestamp" : {
+                      "type" : "integer"
+                    },
+                    "type" : {
+                      "type" : "string"
+                    },
+                    "validFrom" : {
+                      "type" : "integer"
+                    },
+                    "validUntil" : {
+                      "type" : "integer"
+                    }
+                  }
+                }
+              },
+              "offset" : {
+                "type" : "number"
+              },
+              "limit" : {
+                "type" : "number"
+              },
+              "numResults" : {
+                "type" : "number"
+              }
+            }
+          },
+          "name" : "LicenseListResponse",
+          "examples" : [ {
+            "payload" : {
+              "licenses" : [ {
+                "id" : "7c18ae59-1d2c-4fbb-b7e8-4f07fd7b20d4",
+                "serial" : "SH- J02 000596",
+                "createdTimestamp" : 1618783200,
+                "type" : "LICENSE_TYPE_ROBOT",
+                "validFrom" : 1618783200,
+                "validUntil" : 1651017599
+              }, {
+                "id" : "7c18ae59-1d2c-4fbb-b7e8-4f07fd7b20d4",
+                "serial" : "SH- J02 000596",
+                "softwareId" : "73143543-98bf-4ac6-8992-d8b097bbea27",
+                "createdTimestamp" : 1623329499,
+                "type" : "LICENSE_TYPE_SOFTWARE",
+                "validFrom" : 1623276000,
+                "validUntil" : 1654984799
+              } ],
+              "offset" : 0,
+              "limit" : 20,
+              "numResults" : 2
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

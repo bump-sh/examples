@@ -1,0 +1,552 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "Translations",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/translations/get" : {
+      "publish" : {
+        "summary" : "Get translations",
+        "description" : "Get translations for the provided category and language.\nYou have two ways to get the translations: either pass the category + the corresponding keys,\nor only pass the keys, but prefix each one with the category and a dot. Eg: {category}.{key}\n\n",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "category" : {
+                "type" : "string",
+                "description" : "Optional when using the dot notation in the translations keys."
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "ISO 639-1 language code, Eg: 'en' or 'en-US'"
+              },
+              "translation_keys" : {
+                "type" : "array",
+                "description" : "Optional if the category is set. In that case it will return all translations for that category.",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "GetTranslationsRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "category" : "category_1",
+              "language" : "en-US"
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "category" : "category_1",
+              "language" : "en-US",
+              "translation_keys" : [ "translation_key_1", "translation_key_2" ]
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "language" : "en-US",
+              "translation_keys" : [ "category_1.translation_key_1", "category_1.translation_key_2" ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/translations/get/response/{key}" : {
+      "publish" : {
+        "summary" : "Response: Get translations",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "translations" : {
+                "type" : "object"
+              }
+            }
+          },
+          "name" : "GetTranslationsResponse",
+          "examples" : [ {
+            "payload" : {
+              "translations" : {
+                "translation_key_1" : "Translation 1",
+                "translation_key_2" : "Translation 2"
+              },
+              "valid" : true
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/translations/request" : {
+      "publish" : {
+        "summary" : "Request translation registrations",
+        "description" : "Request all translation providers to register their translations using the topics below.\n",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/translations/add" : {
+      "publish" : {
+        "summary" : "Add translations",
+        "description" : "Add translations with their default values.\nThese default values will be used as long as they are not updated via zbos/translations/update\n",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "category" : {
+                "type" : "string"
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "ISO 639-1 language code, Eg: 'en' or 'en-US'"
+              },
+              "file" : {
+                "type" : "string",
+                "description" : "Optional. Use either translations or file.\nThe file location should be a path accessible for the RAIL.\nThe content should be a json object with key-value pairs.\nDots (.) are not allowed in the keys and will be replaced with underscores (_)\""
+              },
+              "translations" : {
+                "type" : "object",
+                "description" : "Optional. Use either translations or file\nDots (.) are not allowed in the keys and will be replaced with underscores (_)"
+              }
+            }
+          },
+          "name" : "AddTranslationsRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "category" : "category_1",
+              "language" : "en-US",
+              "translations" : {
+                "translation_key_1" : "Translation 1",
+                "translation_key_2" : "Translation 2"
+              },
+              "valid" : true
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "category" : "category_1",
+              "language" : "en-US",
+              "file" : "path/to/file.json",
+              "valid" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/translations/add/response/{key}" : {
+      "publish" : {
+        "summary" : "Response: Add translations",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/translations/update" : {
+      "publish" : {
+        "summary" : "Update translations",
+        "description" : "Update translations overriding the default values.\n",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "category" : {
+                "type" : "string"
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "ISO 639-1 language code, Eg: 'en' or 'en-US'"
+              },
+              "file" : {
+                "type" : "string",
+                "description" : "Optional. Use either translations or file.\nThe file location should be a path accessible for the RAIL.\nThe content should be a json object with key-value pairs."
+              },
+              "translations" : {
+                "type" : "object",
+                "description" : "Optional. Use either translations or file"
+              }
+            }
+          },
+          "name" : "UpdateTranslationsRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "category" : "category_1",
+              "language" : "en-US",
+              "translations" : {
+                "translation_key_1" : "Translation 1",
+                "translation_key_2" : "Translation 2"
+              },
+              "valid" : true
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "category" : "category_1",
+              "language" : "en-US",
+              "file" : "path/to/file.json",
+              "valid" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/translations/update/response/{key}" : {
+      "publish" : {
+        "summary" : "Response: Update translations",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/translations/changed/event/{category}" : {
+      "publish" : {
+        "summary" : "Event: Translations changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "category" : {
+                "type" : "string"
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "ISO 639-1 language code, Eg: 'en' or 'en-US'"
+              }
+            }
+          },
+          "name" : "TranslationsChangedEvent",
+          "examples" : [ {
+            "payload" : {
+              "category" : "category_1",
+              "language" : "en-US",
+              "valid" : true
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "category" : {
+          "description" : "ID of the translations category that was changed",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/translations/reset" : {
+      "publish" : {
+        "summary" : "Reset translations",
+        "description" : "Reset translations to their default values\n",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "category" : {
+                "type" : "string"
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "ISO 639-1 language code, Eg: 'en' or 'en-US'"
+              }
+            }
+          },
+          "name" : "ResetTranslationsRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "category" : "category_1",
+              "language" : "en-US",
+              "valid" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/translations/reset/response/{key}" : {
+      "publish" : {
+        "summary" : "Response: Reset translations",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Translations",
+          "description" : "All translations related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

@@ -1,0 +1,1222 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "Applications",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/applications/categories/get" : {
+      "publish" : {
+        "summary" : "Get application categories",
+        "description" : "Get all application categories.\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "Optional. Set the language to have all translations filled in.\nThe language format is ISO 639-1 language code, Eg: 'en' or 'en-US'"
+              }
+            }
+          },
+          "name" : "GetApplicationCategoriesRequest"
+        }
+      }
+    },
+    "zbos/applications/categories/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: Get application categories",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "Use name for a static name, or name_key for a translatable name"
+                },
+                "name_key" : {
+                  "type" : "string",
+                  "description" : "Use name for a static name, or name_key for a translatable name"
+                },
+                "weight" : {
+                  "type" : "integer"
+                }
+              }
+            }
+          },
+          "name" : "Array<ApplicationCategory>",
+          "examples" : [ {
+            "payload" : [ {
+              "id" : "category_1",
+              "name" : "Category 1",
+              "weight" : 10
+            }, {
+              "id" : "category_2",
+              "weight" : 20,
+              "name_key" : "category_2_key"
+            } ]
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/applications/apps/get" : {
+      "publish" : {
+        "summary" : "Get applications",
+        "description" : "Get all applications with optional filters.\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "limit" : {
+                "type" : "integer"
+              },
+              "offset" : {
+                "type" : "integer"
+              },
+              "filters" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "field" : {
+                      "type" : "string",
+                      "description" : "Field to check on. Note that the field should be camelCase, not snake_case"
+                    },
+                    "value" : {
+                      "type" : "string",
+                      "description" : "Value to check on. For numbers you should use 'min' and 'max'."
+                    },
+                    "min" : {
+                      "type" : "number",
+                      "description" : "Minimum value, only usable for number fields"
+                    },
+                    "max" : {
+                      "type" : "number",
+                      "description" : "Maximum value, only usable for number fields"
+                    },
+                    "direction" : {
+                      "type" : "object",
+                      "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "asc", "desc" ]
+                    },
+                    "operator" : {
+                      "type" : "object",
+                      "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
+                      "properties" : {
+                        "alternateNames" : {
+                          "type" : "array",
+                          "items" : {
+                            "type" : "string"
+                          }
+                        },
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "and", "or", "not" ]
+                    },
+                    "match_type" : {
+                      "type" : "object",
+                      "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
+                    },
+                    "filters" : {
+                      "type" : "array",
+                      "description" : "Filters on which the operator will be applied.\nIf there are no child filters, the operator will be applied to the filter object itself.",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    },
+                    "field_filters" : {
+                      "type" : "array",
+                      "description" : "Filters to apply on the child fields of the field.\nWill only work if the field is an object, array/list or map.",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    }
+                  }
+                }
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "Optional. Set the language to have all translations filled in.\nThe language format is ISO 639-1 language code, Eg: 'en' or 'en-US'"
+              }
+            }
+          },
+          "name" : "GetApplicationsRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "limit" : 20,
+              "offset" : 20,
+              "filters" : [ {
+                "field" : "category_id",
+                "value" : "category_1",
+                "operator" : "and",
+                "match_type" : "exact"
+              } ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/applications/apps/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: Get applications",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string",
+                  "description" : "This could be a package name, or some other defined unique ID"
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "Use name for a static name, or name_key for a translatable name"
+                },
+                "name_key" : {
+                  "type" : "string",
+                  "description" : "Use name for a static name, or name_key for a translatable name"
+                },
+                "category_id" : {
+                  "type" : "string"
+                },
+                "weight" : {
+                  "type" : "integer"
+                },
+                "actions" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      "application_id" : {
+                        "type" : "string"
+                      },
+                      "name" : {
+                        "type" : "string",
+                        "description" : "Use name for a static name, or name_key for a translatable name"
+                      },
+                      "name_key" : {
+                        "type" : "string",
+                        "description" : "Use name for a static name, or name_key for a translatable name"
+                      },
+                      "type" : {
+                        "type" : "object",
+                        "description" : "List of available actions:\nopen: Opens an application handled by the RAILopen_control: Opens an application handled by the control\nsettings: Opens the settings, handled by the control\ndatasource: Edit the datasource, handled by the control\nother: Should be handled by the app itself",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "open", "open_control", "settings", "datasources", "other" ]
+                      },
+                      "data" : {
+                        "type" : "object",
+                        "description" : "Optional data that an action might need."
+                      },
+                      "key" : {
+                        "type" : "string"
+                      }
+                    }
+                  }
+                },
+                "optional" : {
+                  "type" : "boolean",
+                  "description" : "Adds this application to the list of optional apps, which determines if the app is shown to the user"
+                },
+                "icon_uri" : {
+                  "type" : "string",
+                  "description" : "The path to an image on the robot or the url to an image"
+                }
+              }
+            }
+          },
+          "name" : "Array<Application>",
+          "examples" : [ {
+            "payload" : [ {
+              "id" : "com.zorabots.application.one",
+              "name" : "Application 1",
+              "weight" : 10,
+              "actions" : [ {
+                "name" : "Open",
+                "type" : "open",
+                "data" : {
+                  "key1" : "value1"
+                },
+                "valid" : true,
+                "application_id" : "com.zorabots.application.one"
+              }, {
+                "name" : "Settings",
+                "type" : "settings",
+                "valid" : true,
+                "application_id" : "com.zorabots.application.one"
+              }, {
+                "name" : "Datasource",
+                "type" : "datasources",
+                "valid" : true,
+                "application_id" : "com.zorabots.application.one"
+              } ],
+              "optional" : false,
+              "category_id" : "category_1"
+            }, {
+              "id" : "com.zorabots.application.two",
+              "weight" : 20,
+              "actions" : [ {
+                "type" : "open",
+                "data" : {
+                  "key1" : "value1"
+                },
+                "valid" : true,
+                "application_id" : "com.zorabots.application.two",
+                "name_key" : "Open"
+              }, {
+                "name" : "Some other action",
+                "type" : "other",
+                "data" : {
+                  "key1" : "value1"
+                },
+                "valid" : true,
+                "application_id" : "com.zorabots.application.two"
+              } ],
+              "optional" : false,
+              "name_key" : "application_2_key",
+              "category_id" : "category_1"
+            } ]
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/applications/apps/changed/event/{app}" : {
+      "publish" : {
+        "summary" : "Application changed",
+        "description" : "Fired when an app was added or changed.\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "description" : "This could be a package name, or some other defined unique ID"
+              },
+              "name" : {
+                "type" : "string",
+                "description" : "Use name for a static name, or name_key for a translatable name"
+              },
+              "name_key" : {
+                "type" : "string",
+                "description" : "Use name for a static name, or name_key for a translatable name"
+              },
+              "category_id" : {
+                "type" : "string"
+              },
+              "weight" : {
+                "type" : "integer"
+              },
+              "actions" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "application_id" : {
+                      "type" : "string"
+                    },
+                    "name" : {
+                      "type" : "string",
+                      "description" : "Use name for a static name, or name_key for a translatable name"
+                    },
+                    "name_key" : {
+                      "type" : "string",
+                      "description" : "Use name for a static name, or name_key for a translatable name"
+                    },
+                    "type" : {
+                      "type" : "object",
+                      "description" : "List of available actions:\nopen: Opens an application handled by the RAILopen_control: Opens an application handled by the control\nsettings: Opens the settings, handled by the control\ndatasource: Edit the datasource, handled by the control\nother: Should be handled by the app itself",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "open", "open_control", "settings", "datasources", "other" ]
+                    },
+                    "data" : {
+                      "type" : "object",
+                      "description" : "Optional data that an action might need."
+                    },
+                    "key" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              },
+              "optional" : {
+                "type" : "boolean",
+                "description" : "Adds this application to the list of optional apps, which determines if the app is shown to the user"
+              },
+              "icon_uri" : {
+                "type" : "string",
+                "description" : "The path to an image on the robot or the url to an image"
+              }
+            }
+          },
+          "name" : "Application",
+          "examples" : [ {
+            "payload" : {
+              "id" : "com.zorabots.application.one",
+              "name" : "Application 1",
+              "weight" : 10,
+              "actions" : [ {
+                "name" : "Open",
+                "type" : "open",
+                "data" : {
+                  "key1" : "value1"
+                },
+                "valid" : true,
+                "application_id" : "com.zorabots.application.one"
+              }, {
+                "name" : "Settings",
+                "type" : "settings",
+                "valid" : true,
+                "application_id" : "com.zorabots.application.one"
+              }, {
+                "name" : "Datasource",
+                "type" : "datasources",
+                "valid" : true,
+                "application_id" : "com.zorabots.application.one"
+              } ],
+              "optional" : false,
+              "category_id" : "category_1"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "app" : {
+          "description" : "ID of the app that was changed",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/applications/icons/get" : {
+      "publish" : {
+        "summary" : "Get application icon",
+        "description" : "Get the application icons for the passed application ID.\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "max_width" : {
+                "type" : "integer",
+                "description" : "Optional, can be used to decrease payload size"
+              },
+              "max_height" : {
+                "type" : "integer",
+                "description" : "Optional, can be used to decrease payload size"
+              },
+              "application_id" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "GetApplicationIconRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "valid" : true,
+              "max_width" : 100,
+              "max_height" : 100,
+              "application_id" : "com.zorabots.application.one"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/applications/icons/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: Get application icon",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "application_id" : {
+                "type" : "string"
+              },
+              "icon" : {
+                "type" : "string",
+                "description" : "Base 64 encoded PNG"
+              }
+            }
+          },
+          "name" : "ApplicationIcon",
+          "examples" : [ {
+            "payload" : {
+              "icon" : "{base64 encoded png}",
+              "application_id" : "com.zorabots.application.one"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/applications/actions/start" : {
+      "publish" : {
+        "summary" : "Start application action",
+        "description" : "Start an application action.\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "application_id" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string",
+                "description" : "Use name for a static name, or name_key for a translatable name"
+              },
+              "name_key" : {
+                "type" : "string",
+                "description" : "Use name for a static name, or name_key for a translatable name"
+              },
+              "type" : {
+                "type" : "object",
+                "description" : "List of available actions:\nopen: Opens an application handled by the RAILopen_control: Opens an application handled by the control\nsettings: Opens the settings, handled by the control\ndatasource: Edit the datasource, handled by the control\nother: Should be handled by the app itself",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "open", "open_control", "settings", "datasources", "other" ]
+              },
+              "data" : {
+                "type" : "object",
+                "description" : "Optional data that an action might need."
+              },
+              "key" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "ApplicationAction",
+          "examples" : [ {
+            "payload" : {
+              "name" : "Open",
+              "type" : "open",
+              "data" : {
+                "key1" : "value1"
+              },
+              "key" : "some_key",
+              "valid" : true,
+              "application_id" : "com.zorabots.application.one"
+            }
+          }, {
+            "payload" : {
+              "name" : "Settings",
+              "type" : "settings",
+              "key" : "some_key",
+              "valid" : true,
+              "application_id" : "com.zorabots.application.one"
+            }
+          }, {
+            "payload" : {
+              "name" : "Datasource",
+              "type" : "datasources",
+              "key" : "some_key",
+              "valid" : true,
+              "application_id" : "com.zorabots.application.one"
+            }
+          }, {
+            "payload" : {
+              "name" : "Some other action",
+              "type" : "other",
+              "data" : {
+                "key1" : "value1"
+              },
+              "key" : "some_key",
+              "valid" : true,
+              "application_id" : "com.zorabots.application.one"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/applications/actions/start/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: Start application action",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/applications/registration/request" : {
+      "publish" : {
+        "summary" : "Request application registrations",
+        "description" : "Request all apps to register themselves using the topics below.\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/applications/registration/add" : {
+      "publish" : {
+        "summary" : "Add application registration",
+        "description" : "Registers an application to the applications list. Should be executed every time the application is started.\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "application" : {
+                "type" : "object",
+                "properties" : {
+                  "id" : {
+                    "type" : "string",
+                    "description" : "This could be a package name, or some other defined unique ID"
+                  },
+                  "name" : {
+                    "type" : "string",
+                    "description" : "Use name for a static name, or name_key for a translatable name"
+                  },
+                  "name_key" : {
+                    "type" : "string",
+                    "description" : "Use name for a static name, or name_key for a translatable name"
+                  },
+                  "category_id" : {
+                    "type" : "string"
+                  },
+                  "weight" : {
+                    "type" : "integer"
+                  },
+                  "actions" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "application_id" : {
+                          "type" : "string"
+                        },
+                        "name" : {
+                          "type" : "string",
+                          "description" : "Use name for a static name, or name_key for a translatable name"
+                        },
+                        "name_key" : {
+                          "type" : "string",
+                          "description" : "Use name for a static name, or name_key for a translatable name"
+                        },
+                        "type" : {
+                          "type" : "object",
+                          "description" : "List of available actions:\nopen: Opens an application handled by the RAILopen_control: Opens an application handled by the control\nsettings: Opens the settings, handled by the control\ndatasource: Edit the datasource, handled by the control\nother: Should be handled by the app itself",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "open", "open_control", "settings", "datasources", "other" ]
+                        },
+                        "data" : {
+                          "type" : "object",
+                          "description" : "Optional data that an action might need."
+                        },
+                        "key" : {
+                          "type" : "string"
+                        }
+                      }
+                    }
+                  },
+                  "optional" : {
+                    "type" : "boolean",
+                    "description" : "Adds this application to the list of optional apps, which determines if the app is shown to the user"
+                  },
+                  "icon_uri" : {
+                    "type" : "string",
+                    "description" : "The path to an image on the robot or the url to an image"
+                  }
+                }
+              }
+            }
+          },
+          "name" : "RegisterApplicationRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "application" : {
+                "id" : "com.zorabots.application.one",
+                "name" : "Application 1",
+                "weight" : 10,
+                "actions" : [ {
+                  "name" : "Open",
+                  "type" : "open",
+                  "data" : {
+                    "key1" : "value1"
+                  },
+                  "valid" : true,
+                  "application_id" : "com.zorabots.application.one"
+                }, {
+                  "name" : "Settings",
+                  "type" : "settings",
+                  "valid" : true,
+                  "application_id" : "com.zorabots.application.one"
+                } ],
+                "optional" : false,
+                "category_id" : "category_1",
+                "icon_uri" : "/sdcard/zbos_media_library/background.jpg"
+              },
+              "valid" : true
+            }
+          }, {
+            "payload" : {
+              "key" : "def",
+              "application" : {
+                "id" : "com.zorabots.application.two",
+                "name" : "Application 2",
+                "weight" : 20,
+                "actions" : [ {
+                  "name" : "Open",
+                  "type" : "open",
+                  "data" : {
+                    "key1" : "value1"
+                  },
+                  "valid" : true,
+                  "application_id" : "com.zorabots.application.two"
+                }, {
+                  "name" : "Settings",
+                  "type" : "settings",
+                  "valid" : true,
+                  "application_id" : "com.zorabots.application.two"
+                } ],
+                "optional" : false,
+                "category_id" : "category_1",
+                "icon_uri" : "https://www.zorarobotics.be/sites/default/files/styles/desktop_fixed_height_1x/public/2020-05/zorabots-robot-james-web.png?itok=5kw5HYOg"
+              },
+              "valid" : true
+            }
+          }, {
+            "payload" : {
+              "key" : "ghi",
+              "application" : {
+                "id" : "com.zorabots.application.three",
+                "name" : "Application 3",
+                "weight" : 30,
+                "actions" : [ {
+                  "name" : "Open",
+                  "type" : "open",
+                  "data" : {
+                    "key1" : "value1"
+                  },
+                  "valid" : true,
+                  "application_id" : "com.zorabots.application.three"
+                }, {
+                  "name" : "Settings",
+                  "type" : "settings",
+                  "valid" : true,
+                  "application_id" : "com.zorabots.application.three"
+                } ],
+                "optional" : false,
+                "category_id" : "category_1"
+              },
+              "valid" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/applications/registration/add/response/{key}" : {
+      "publish" : {
+        "summary" : "Response: Add application registration",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/applications/registration/remove" : {
+      "publish" : {
+        "summary" : "Remove application registration",
+        "description" : "Unregister an application from the applications list.\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "id" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "UnregisterApplicationRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "id" : "com.zorabots.application.one",
+              "valid" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/applications/registration/remove/response/{key}" : {
+      "publish" : {
+        "summary" : "Response: Remove application registration",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/applications/datasources/get" : {
+      "publish" : {
+        "summary" : "Get the content of a specific application datasource file",
+        "description" : "Publish on this topic to get the content of a datasource\nPayload is json with a key for the response topic {\"key\":aKey}\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "applicationName" : {
+                "type" : "string"
+              },
+              "datasourceId" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "DatasourceGetRequest",
+          "examples" : [ {
+            "payload" : {
+              "applicationName" : "string",
+              "datasourceId" : "string",
+              "valid" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/applications/datasources/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: Get datasource",
+        "description" : "Will return a JSON string with the content of the datasource data file\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/applications/datasources/set" : {
+      "publish" : {
+        "summary" : "Save the datasource",
+        "description" : "Publish on this topic to save the datasource data (changes)\nPayload is json with a key for the response topic {\"key\":aKey}\nThe Payload is a JSON string of an object with following keys: application name, datasource id and datasource data\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "applicationName" : {
+                "type" : "string"
+              },
+              "datasourceId" : {
+                "type" : "string"
+              },
+              "datasourceData" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "DatasourceSetRequest",
+          "examples" : [ {
+            "payload" : {
+              "applicationName" : "string",
+              "datasourceId" : "string",
+              "datasourceData" : "string",
+              "valid" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/applications/datasources/set/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: Datasource saved",
+        "description" : "A message object (with key 'success') is publish on this topic when the datasource has been saved\n",
+        "tags" : [ {
+          "name" : "Applications",
+          "description" : "All applications related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}
