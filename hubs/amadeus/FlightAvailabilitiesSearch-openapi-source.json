@@ -792,10 +792,7 @@
       "description": "source of the flight offer",
       "type": "string",
       "enum": [
-        "GDS",
-        "LTC",
-        "PYTON",
-        "EAC"
+        "GDS"
       ],
       "example": "GDS"
     },
@@ -901,17 +898,14 @@
         },
         "sources": {
           "title": "sources",
-          "description": "Allows enable one or more sources. If present in the list, these sources will be called by the system. \nGDS : Full service carriers,\nEAC : Extended Air choice,\nLTC : Light Ticketing,\nPYTON : Direct connection Pyton\n",
+          "description": "Allows enable one or more sources. If present in the list, these sources will be called by the system. \nGDS : Full service carriers",
           "type": "array",
           "minItems": 1,
           "items": {
             "$ref": "#/definitions/FlightOfferSource"
           },
           "example": [
-            "GDS",
-            "LTC",
-            "PYTON",
-            "EAC"
+            "GDS"
           ]
         },
         "searchCriteria": {
@@ -925,7 +919,7 @@
                   "originLocationCode": "BOS",
                   "destinationLocationCode": "MAD",
                   "departureDateTime": {
-                      "date": "2021-05-14",
+                      "date": "2021-11-14",
                       "time": "21:15:00"
                   }
               }
