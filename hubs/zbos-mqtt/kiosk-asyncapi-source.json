@@ -1,0 +1,1680 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "Kiosk",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/kiosk/resume/event" : {
+      "subscribe" : {
+        "summary" : "event: Kiosk is active",
+        "description" : "Fired when kiosk is active after being moved to the background\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/apps/home" : {
+      "publish" : {
+        "summary" : "Open home screen",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/apps/start" : {
+      "publish" : {
+        "summary" : "Start application remotely on Kiosk",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "appName" : {
+                "type" : "string"
+              },
+              "extras" : {
+                "type" : "object"
+              }
+            }
+          },
+          "name" : "ApplicationStartRequest",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/apps/get" : {
+      "publish" : {
+        "summary" : "Get installed applications on Kiosk",
+        "description" : "Request a list of all installed & listed applications from the Kiosksee <<zbos/remote/kiosk/apps/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/apps/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get installed applications on Kiosk",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "app_name" : {
+                  "type" : "string"
+                },
+                "package_name" : {
+                  "type" : "string"
+                },
+                "image_base64" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "Array<SimpleApplicationNodeDto>",
+          "examples" : [ {
+            "payload" : {
+              "app_name" : "string",
+              "package_name" : "string",
+              "image_base64" : "string"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/apps/all/get" : {
+      "publish" : {
+        "summary" : "Get installed applications on Kiosk",
+        "description" : "Request a list of all installed & listed applications from the Kiosksee <<zbos/remote/kiosk/apps/all/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/apps/all/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get installed applications on Kiosk",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "app_name" : {
+                  "type" : "string"
+                },
+                "package_name" : {
+                  "type" : "string"
+                },
+                "image_base64" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "Array<SimpleApplicationNodeDto>",
+          "examples" : [ {
+            "payload" : {
+              "app_name" : "string",
+              "package_name" : "string",
+              "image_base64" : "string"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/{type}/show" : {
+      "publish" : {
+        "summary" : "Show multimedia",
+        "description" : "see <<zbos/remote/kiosk/multimedia/{type}/show/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "type" : {
+          "description" : "Type of multimedia",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/{type}/show/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Show multimedia",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "type" : {
+          "description" : "Type of multimedia",
+          "schema" : {
+            "type" : "string"
+          }
+        },
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/input/show" : {
+      "publish" : {
+        "summary" : "Show input prompt",
+        "description" : "see <<zbos/remote/kiosk/input/show/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "question" : {
+                "type" : "string"
+              },
+              "textType" : {
+                "type" : "string"
+              },
+              "confirmText" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "InputBlock",
+          "examples" : [ {
+            "payload" : {
+              "question" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/input/show/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Show input prompt",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "input" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "InputResponse",
+          "examples" : [ {
+            "payload" : {
+              "input" : "input"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/print/show" : {
+      "publish" : {
+        "summary" : "Show print dialog",
+        "description" : "see <<zbos/remote/kiosk/print/show/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "file_path" : {
+                "type" : "string",
+                "description" : "Required. The path to a PDF file to print."
+              },
+              "media_size" : {
+                "type" : "string",
+                "description" : "Optional. The format of the paper to be printed, defaults to 'Letter'"
+              },
+              "printer_name" : {
+                "type" : "string",
+                "description" : "Optional, only used when auto print is enabled. The name of or part of the name of a printer, defaults to first available printer"
+              },
+              "auto_print" : {
+                "type" : "boolean",
+                "description" : "Optional. Whether to use the accessibility service to automatically print to the desired printer without user input"
+              }
+            }
+          },
+          "name" : "PrintOptions",
+          "examples" : [ {
+            "payload" : {
+              "key" : "some_key",
+              "file_path" : "/sdcard/zbos_media_library/dummy.pdf",
+              "media_size" : "ISO_A4",
+              "printer_name" : "HP LaserJet Pro",
+              "auto_print" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/print/show/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Show print dialog",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/text/overlay/show" : {
+      "publish" : {
+        "summary" : "Show text overlay",
+        "description" : "see <<zbos/remote/kiosk/text/overlay/show/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "text" : {
+                "type" : "string"
+              },
+              "textColor" : {
+                "type" : "string"
+              },
+              "backgroundColor" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "TextOverlayOptions",
+          "examples" : [ {
+            "payload" : {
+              "key" : "some_key",
+              "text" : "Hello George, nice to meet you!",
+              "textColor" : "#00FF00",
+              "backgroundColor" : "#FF0000"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/text/overlay/show/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Show text overlay",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/text/overlay/hide" : {
+      "publish" : {
+        "summary" : "Hide text overlay",
+        "description" : "see <<zbos/remote/kiosk/text/overlay/hide/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/text/overlay/hide/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Hide text overlay",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/microphone/show" : {
+      "publish" : {
+        "summary" : "Show microphone in composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "showMic" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "VoiceInfo",
+          "examples" : [ {
+            "payload" : {
+              "showMic" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/image/show" : {
+      "publish" : {
+        "summary" : "Show image",
+        "description" : "see <<zbos/remote/kiosk/multimedia/image/show/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "path" : {
+                "type" : "string"
+              },
+              "extension" : {
+                "type" : "string"
+              },
+              "fileName" : {
+                "type" : "string"
+              },
+              "style" : {
+                "type" : "object",
+                "properties" : {
+                  "backgroundColor" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "url" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "Image",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "style" : {
+                "backgroundColor" : "string"
+              },
+              "url" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/image/show/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Show image",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "path" : {
+                "type" : "string"
+              },
+              "extension" : {
+                "type" : "string"
+              },
+              "fileName" : {
+                "type" : "string"
+              },
+              "style" : {
+                "type" : "object",
+                "properties" : {
+                  "backgroundColor" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "url" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "Image",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "style" : {
+                "backgroundColor" : "string"
+              },
+              "url" : "string"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/image/stop" : {
+      "publish" : {
+        "summary" : "Stop showing image",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/image/{filename}/end" : {
+      "subscribe" : {
+        "summary" : "event: Image ended",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "filename" : {
+          "description" : "Name of the file",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/video/show" : {
+      "publish" : {
+        "summary" : "Show video",
+        "description" : "see <<zbos/remote/kiosk/multimedia/video/show/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "url" : {
+                "type" : "string"
+              },
+              "repeat" : {
+                "type" : "boolean"
+              },
+              "audioUrl" : {
+                "type" : "string"
+              },
+              "videoOnly" : {
+                "type" : "boolean"
+              },
+              "showControls" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "Video",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "url" : "string",
+              "repeat" : true,
+              "audioUrl" : "string",
+              "videoOnly" : false,
+              "showControls" : true,
+              "remoteVideo" : false
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/video/show/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Show video",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "url" : {
+                "type" : "string"
+              },
+              "repeat" : {
+                "type" : "boolean"
+              },
+              "audioUrl" : {
+                "type" : "string"
+              },
+              "videoOnly" : {
+                "type" : "boolean"
+              },
+              "showControls" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "Video",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "url" : "string",
+              "repeat" : true,
+              "audioUrl" : "string",
+              "videoOnly" : false,
+              "showControls" : true,
+              "remoteVideo" : false
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/video/stop" : {
+      "publish" : {
+        "summary" : "Stop video",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/video/{filename}/end" : {
+      "subscribe" : {
+        "summary" : "event: Video ended",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "filename" : {
+          "description" : "Name of the file",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/page/show" : {
+      "publish" : {
+        "summary" : "Show page in kiosk",
+        "description" : "see <<zbos/remote/kiosk/multimedia/page/show/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "blocking" : {
+                "type" : "boolean"
+              },
+              "id" : {
+                "type" : "string"
+              },
+              "index" : {
+                "type" : "integer"
+              },
+              "url" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "OpenBrowserBlock",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/multimedia/page/show/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Show page in kiosk",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "blocking" : {
+                "type" : "boolean"
+              },
+              "id" : {
+                "type" : "string"
+              },
+              "index" : {
+                "type" : "integer"
+              },
+              "url" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "OpenBrowserBlock",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/remote/kiosk/action/start" : {
+      "publish" : {
+        "summary" : "Start action",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : { }
+          },
+          "name" : "Action"
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/lock/state/get" : {
+      "publish" : {
+        "summary" : "Get current lockstate",
+        "description" : "see <<zbos/remote/kiosk/settings/lock/state/response>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/lock/state/response" : {
+      "subscribe" : {
+        "summary" : "response: Get current lockstate",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "isLocked" : {
+                "type" : "boolean"
+              },
+              "isPincodeSet" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "LockStatus",
+          "examples" : [ {
+            "payload" : {
+              "pincodeSet" : false,
+              "locked" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/unlock" : {
+      "publish" : {
+        "summary" : "Unlock settings page",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/lock" : {
+      "publish" : {
+        "summary" : "Lock settings page",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/lock/event" : {
+      "subscribe" : {
+        "summary" : "response: Lock settings page",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "response" : {
+                "type" : "string"
+              },
+              "success" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "LockResponse",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/unlock/event" : {
+      "subscribe" : {
+        "summary" : "response: Unlock settings page",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "response" : {
+                "type" : "string"
+              },
+              "success" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "LockResponse",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/pincode/change/event" : {
+      "subscribe" : {
+        "summary" : "response: Change current pincode",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "response" : {
+                "type" : "string"
+              },
+              "success" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "LockResponse",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/pincode/remove" : {
+      "publish" : {
+        "summary" : "Remove current pincode",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/remote/kiosk/settings/pincode/remove/event" : {
+      "subscribe" : {
+        "summary" : "response: Remove current pincode",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "response" : {
+                "type" : "string"
+              },
+              "success" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "LockResponse",
+          "examples" : [ {
+            "payload" : { }
+          } ]
+        }
+      }
+    },
+    "zbos/kiosk/datasource/get/all" : {
+      "publish" : {
+        "summary" : "Get all datasources",
+        "description" : "see <<zbos/kiosk/datasource/get/all/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/kiosk/datasource/get/all/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get all datasources",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "Array<SimpleDataSource>",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "name" : "string"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/kiosk/datasource/get" : {
+      "publish" : {
+        "summary" : "Get specific datasources",
+        "description" : "see <<zbos/kiosk/datasource/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "SimpleDataSource",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "name" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/kiosk/datasource/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get specific datasources",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/kiosk/datasource/current/get" : {
+      "publish" : {
+        "summary" : "Get active datasources",
+        "description" : "see <<zbos/kiosk/datasource/current/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/kiosk/datasource/current/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get active datasources",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/kiosk/datasource/set" : {
+      "publish" : {
+        "summary" : "Set current Kiosk datasources",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "ChangeDatasourceRequest",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/kiosk/datasource/save" : {
+      "publish" : {
+        "summary" : "Save or add a datasource",
+        "description" : "see <<zbos/kiosk/datasource/save/event/{kiosk_id}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "SimpleDataSource",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "name" : "String"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/kiosk/datasource/save/event/{kiosk_id}" : {
+      "subscribe" : {
+        "summary" : "response: Get active datasources",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "kiosk_id" : {
+          "description" : "ID of kiosk",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/kiosk/datasource/delete" : {
+      "publish" : {
+        "summary" : "Delete a datasource",
+        "description" : "see <<zbos/kiosk/datasource/delete/event/{kiosk_id}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "SimpleDataSource",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/kiosk/datasource/delete/event/{kiosk_id}" : {
+      "subscribe" : {
+        "summary" : "response: Delete a datasource",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "kiosk_id" : {
+          "description" : "ID of kiosk",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/kiosk/composition/pin/lock" : {
+      "publish" : {
+        "summary" : "Pin a composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "PinnedComposition",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/kiosk/composition/pin/unlock" : {
+      "publish" : {
+        "summary" : "Unpin a composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/kiosk/composition/pin/get" : {
+      "publish" : {
+        "summary" : "Request the current pin status & pinned composition.",
+        "description" : "see <<zbos/kiosk/composition/pin/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/kiosk/composition/pin/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: pin status & pinned composition",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "isPinned" : {
+                "type" : "boolean"
+              },
+              "id" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "PinnedCompositionState",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "pinned" : true
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/kiosk/app/pin/lock" : {
+      "publish" : {
+        "summary" : "Pin an app, if installed",
+        "description" : "A locked app will be launched immediately when the kiosk opens.\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "packageName" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "PinnedApplication",
+          "examples" : [ {
+            "payload" : {
+              "packageName" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/kiosk/app/pin/unlock" : {
+      "publish" : {
+        "summary" : "Unpin an app.",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/kiosk/app/pin/get" : {
+      "publish" : {
+        "summary" : "Request the current pin status & pinned app.",
+        "description" : "see <<zbos/kiosk/app/pin/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/kiosk/app/pin/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: pin status & pinned app",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Kiosk",
+          "description" : "All kiosk related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "isPinned" : {
+                "type" : "boolean"
+              },
+              "packageName" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "PinnedApplicationState",
+          "examples" : [ {
+            "payload" : {
+              "packageName" : "string",
+              "pinned" : true
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

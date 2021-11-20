@@ -1,0 +1,3372 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "System",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/alarm/trigger" : {
+      "publish" : {
+        "summary" : "Call for help",
+        "description" : "Send an Alarm message, trigger alarm, call for help.\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "serverDomain" : {
+                "type" : "string"
+              },
+              "localUsername" : {
+                "type" : "string"
+              },
+              "localPassword" : {
+                "type" : "string"
+              },
+              "localPort" : {
+                "type" : "integer"
+              },
+              "peerUsername" : {
+                "type" : "string"
+              },
+              "peerPassword" : {
+                "type" : "string"
+              },
+              "peerPort" : {
+                "type" : "integer"
+              },
+              "metaData" : {
+                "type" : "object"
+              },
+              "alarmType" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "DEFAULT", "VERKLIZAN", "SENSOR" ]
+              },
+              "callTimeout" : {
+                "type" : "integer"
+              },
+              "hangupAllowed" : {
+                "type" : "boolean"
+              },
+              "enabled" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "SipConfig",
+          "examples" : [ {
+            "payload" : {
+              "serverDomain" : "string",
+              "localUsername" : "string",
+              "localPassword" : "string",
+              "localPort" : 5060,
+              "peerUsername" : "string",
+              "peerPassword" : "string",
+              "peerPort" : 5060,
+              "metaData" : { },
+              "alarmType" : "DEFAULT",
+              "callTimeout" : 120000,
+              "hangupAllowed" : false,
+              "enabled" : false
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/alarm/trigger/event" : {
+      "subscribe" : {
+        "summary" : "event: Trigger alarm and call for help",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/alarm/call/started" : {
+      "subscribe" : {
+        "summary" : "Alarm call started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/alarm/call/established" : {
+      "subscribe" : {
+        "summary" : "Alarm call established",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/alarm/call/ended" : {
+      "subscribe" : {
+        "summary" : "Alarm call ended",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/alarm/set" : {
+      "publish" : {
+        "summary" : "Set alarm call",
+        "description" : "see <<zbos/alarm/set/response>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "alarmServiceProvider" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "verklizan", "sensor" ]
+              },
+              "metadata" : {
+                "type" : "object"
+              }
+            }
+          },
+          "name" : "ZbosAlarm",
+          "examples" : [ {
+            "payload" : {
+              "key" : "string",
+              "alarmServiceProvider" : "sensor",
+              "metadata" : { }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/alarm/set/response" : {
+      "subscribe" : {
+        "summary" : "response: Set alarm call",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      }
+    },
+    "zbos/alarm/event" : {
+      "subscribe" : {
+        "summary" : "Alarm has been received",
+        "description" : "An event indicating an alarm was triggered\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object"
+          },
+          "name" : "Map"
+        }
+      }
+    },
+    "zbos/alarm/config/get" : {
+      "publish" : {
+        "summary" : "Get alarm configs",
+        "description" : "Get an object containing all alarm configssee <<zbos/alarm/config/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/alarm/config/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Get alarm configs response",
+        "description" : "Response of configs by alarm name\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object"
+          },
+          "name" : "HashMap"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/alarm/config/set" : {
+      "publish" : {
+        "summary" : "Set alarm config ",
+        "description" : "Sets the config for a specific alarm type\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "type" : {
+                "type" : "string"
+              },
+              "config" : {
+                "type" : "object"
+              }
+            }
+          },
+          "name" : "AlarmConfigRequest",
+          "examples" : [ {
+            "payload" : {
+              "type" : "string",
+              "config" : {
+                "string" : "string"
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/alarm/config/set/event" : {
+      "subscribe" : {
+        "summary" : "Set alarm config response",
+        "description" : "An event indicating the alarm config was changed\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "success" : {
+                "type" : "boolean"
+              },
+              "error" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "MALFORMED_REQUEST", "MISSING_CONFIG_PROPERTY", "TYPE_NOT_FOUND" ]
+              }
+            }
+          },
+          "name" : "AlarmConfigResult",
+          "examples" : [ {
+            "payload" : {
+              "type" : "string",
+              "config" : {
+                "string" : "string"
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/alarm/database/get" : {
+      "publish" : {
+        "summary" : "Get alarm database",
+        "description" : "Retrieves a list of all the alarms stored in the databasesee <<zbos/alarm/database/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/alarm/database/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Get alarm database response",
+        "description" : "The response to a database get request\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "string"
+                },
+                "downloadPath" : {
+                  "type" : "string"
+                },
+                "previewPath" : {
+                  "type" : "string"
+                },
+                "mediaFile" : {
+                  "type" : "string"
+                },
+                "timestamp" : {
+                  "type" : "number"
+                },
+                "metadata" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "name" : "Array<MonitoringResult>",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "type" : "string",
+              "downloadPath" : "string",
+              "previewPath" : "string",
+              "mediaFile" : "string",
+              "timestamp" : 1012001,
+              "metadata" : { }
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/alarm/database/remove" : {
+      "publish" : {
+        "summary" : "Remove alarm database",
+        "description" : "Remove all alarms from the database\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/alarm/database/remove/event" : {
+      "subscribe" : {
+        "summary" : "Remove alarm database response",
+        "description" : "An event indicating the alarm database was removed\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      }
+    },
+    "zbos/alarm/images/remove" : {
+      "publish" : {
+        "summary" : "Remove alarm images",
+        "description" : "Remove all alarm images from the robot\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/alarm/images/remove/event" : {
+      "subscribe" : {
+        "summary" : "Remove alarm images response",
+        "description" : "An event indicating images were removed\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      }
+    },
+    "zbos/alarm/all/remove" : {
+      "publish" : {
+        "summary" : "Remove alarm images and database",
+        "description" : "Remove all alarm images and database entries from the robot\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/alarm/all/remove/event" : {
+      "subscribe" : {
+        "summary" : "Remove alarm images and database response",
+        "description" : "An event indicating images and databases were removed\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      }
+    },
+    "zbos/status/battery/get" : {
+      "publish" : {
+        "summary" : "Get battery status",
+        "description" : "see <<zbos/status/battery/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/status/battery/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get battery status",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "level" : {
+                "type" : "integer",
+                "$ref" : "#/components/schemas/percentage"
+              },
+              "charging" : {
+                "type" : "boolean"
+              },
+              "docked" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "BatteryEvent",
+          "examples" : [ {
+            "payload" : {
+              "level" : 50,
+              "charging" : true,
+              "docked" : true
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/status/battery/event" : {
+      "subscribe" : {
+        "summary" : "event: Battery change",
+        "description" : "A message (json) is published on this topic when the robot battery status changes. Level is the battery level in percent. If the battery status is not yet available, then the level is -1.\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "level" : {
+                "type" : "integer",
+                "$ref" : "#/components/schemas/percentage"
+              },
+              "charging" : {
+                "type" : "boolean"
+              },
+              "docked" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "BatteryEvent",
+          "examples" : [ {
+            "payload" : {
+              "level" : 50,
+              "charging" : true,
+              "docked" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/status/battery/low/set" : {
+      "publish" : {
+        "summary" : "Set the battery low level threshold",
+        "description" : "At what battery percentage the robot will act as if it is at low battery\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "percent" : {
+                "type" : "integer",
+                "$ref" : "#/components/schemas/percentage"
+              }
+            }
+          },
+          "name" : "BatterySetRequest",
+          "examples" : [ {
+            "payload" : {
+              "percent" : 30
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/status/battery/low/get" : {
+      "publish" : {
+        "summary" : "Get the battery low level threshold",
+        "description" : "see <<zbos/status/battery/low/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/status/battery/low/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: battery low level",
+        "description" : "Response which shows the battery low level threshold\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/status/battery/critical/set" : {
+      "publish" : {
+        "summary" : "Set the battery critical level threshold",
+        "description" : "At what battery percentage the robot will act as if it is at critical battery\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "percent" : {
+                "type" : "integer",
+                "$ref" : "#/components/schemas/percentage"
+              }
+            }
+          },
+          "name" : "BatterySetRequest",
+          "examples" : [ {
+            "payload" : {
+              "percent" : 10
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/status/battery/critical/get" : {
+      "publish" : {
+        "summary" : "Get the battery critical level threshold",
+        "description" : "see <<zbos/status/battery/critical/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/status/battery/critical/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: battery critical level",
+        "description" : "Response which shows the battery critical level threshold\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/system/robot/identification/get" : {
+      "publish" : {
+        "summary" : "Request robot identification",
+        "description" : "Use this to ask a detailed list of robot specifics like serial, features, ...\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/system/robot/identification/event" : {
+      "subscribe" : {
+        "summary" : "response: Robot identification",
+        "description" : "A detailed list of robot specifics\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "robot_type" : {
+                "type" : "string"
+              },
+              "body_id" : {
+                "type" : "string"
+              },
+              "serial" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              },
+              "versions" : {
+                "type" : "object"
+              },
+              "network_info" : {
+                "type" : "object",
+                "properties" : {
+                  "ip" : {
+                    "type" : "string"
+                  },
+                  "mac_address" : {
+                    "type" : "string"
+                  },
+                  "ssid" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "features" : {
+                "type" : "object",
+                "properties" : {
+                  "audio" : {
+                    "type" : "object",
+                    "properties" : {
+                      "control_parameters" : {
+                        "type" : "object",
+                        "properties" : {
+                          "pitch" : {
+                            "type" : "object",
+                            "properties" : {
+                              "min" : {
+                                "type" : "integer"
+                              },
+                              "step" : {
+                                "type" : "integer"
+                              },
+                              "default" : {
+                                "type" : "integer"
+                              },
+                              "max" : {
+                                "type" : "integer"
+                              }
+                            }
+                          },
+                          "speed" : {
+                            "type" : "object",
+                            "properties" : {
+                              "min" : {
+                                "type" : "integer"
+                              },
+                              "step" : {
+                                "type" : "integer"
+                              },
+                              "default" : {
+                                "type" : "integer"
+                              },
+                              "max" : {
+                                "type" : "integer"
+                              }
+                            }
+                          },
+                          "volume" : {
+                            "type" : "object",
+                            "properties" : {
+                              "min" : {
+                                "type" : "integer"
+                              },
+                              "step" : {
+                                "type" : "integer"
+                              },
+                              "default" : {
+                                "type" : "integer"
+                              },
+                              "max" : {
+                                "type" : "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "external_displays" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "video" : {
+                          "type" : "boolean"
+                        },
+                        "audio" : {
+                          "type" : "boolean"
+                        },
+                        "width" : {
+                          "type" : "integer"
+                        },
+                        "height" : {
+                          "type" : "integer"
+                        }
+                      }
+                    }
+                  },
+                  "cameras" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "key" : {
+                          "type" : "string"
+                        },
+                        "primary" : {
+                          "type" : "boolean"
+                        },
+                        "rotation" : {
+                          "type" : "integer"
+                        },
+                        "image_rotation" : {
+                          "type" : "integer"
+                        },
+                        "preview_scale_x" : {
+                          "type" : "number",
+                          "description" : "Scale the camera preview on the horizontal axis, can be mirrored using negative values"
+                        }
+                      }
+                    }
+                  },
+                  "can_poi" : {
+                    "type" : "boolean"
+                  },
+                  "can_move" : {
+                    "type" : "boolean"
+                  },
+                  "can_dance" : {
+                    "type" : "boolean"
+                  },
+                  "can_speech" : {
+                    "type" : "boolean"
+                  },
+                  "can_execute_speech_commands" : {
+                    "type" : "boolean"
+                  },
+                  "has_storage" : {
+                    "type" : "boolean"
+                  },
+                  "can_animate" : {
+                    "type" : "boolean"
+                  },
+                  "can_gym" : {
+                    "type" : "boolean"
+                  },
+                  "has_sensors" : {
+                    "type" : "boolean"
+                  },
+                  "has_emotions" : {
+                    "type" : "boolean"
+                  },
+                  "can_video_stream" : {
+                    "type" : "boolean"
+                  },
+                  "can_take_picture" : {
+                    "type" : "boolean"
+                  },
+                  "has_slam_image_map" : {
+                    "type" : "boolean"
+                  },
+                  "has_security_mode" : {
+                    "type" : "boolean"
+                  },
+                  "can_detect_motion" : {
+                    "type" : "boolean"
+                  },
+                  "can_face_recognize" : {
+                    "type" : "boolean"
+                  },
+                  "can_poi_interactive" : {
+                    "type" : "boolean"
+                  },
+                  "has_monitoring" : {
+                    "type" : "boolean"
+                  },
+                  "has_qr_scanner" : {
+                    "type" : "boolean"
+                  },
+                  "can_change_ntp_server" : {
+                    "type" : "boolean"
+                  },
+                  "voice_feature" : {
+                    "type" : "object",
+                    "properties" : {
+                      "supports_gesticulate" : {
+                        "type" : "boolean"
+                      },
+                      "supports_language" : {
+                        "type" : "boolean"
+                      },
+                      "supports_pitch" : {
+                        "type" : "boolean"
+                      },
+                      "supports_speed" : {
+                        "type" : "boolean"
+                      },
+                      "supports_volume" : {
+                        "type" : "boolean"
+                      },
+                      "supports_speech_volume" : {
+                        "type" : "boolean"
+                      },
+                      "control_parameters" : {
+                        "type" : "object",
+                        "properties" : {
+                          "pitch" : {
+                            "type" : "object",
+                            "properties" : {
+                              "min" : {
+                                "type" : "integer"
+                              },
+                              "step" : {
+                                "type" : "integer"
+                              },
+                              "default" : {
+                                "type" : "integer"
+                              },
+                              "max" : {
+                                "type" : "integer"
+                              }
+                            }
+                          },
+                          "speed" : {
+                            "type" : "object",
+                            "properties" : {
+                              "min" : {
+                                "type" : "integer"
+                              },
+                              "step" : {
+                                "type" : "integer"
+                              },
+                              "default" : {
+                                "type" : "integer"
+                              },
+                              "max" : {
+                                "type" : "integer"
+                              }
+                            }
+                          },
+                          "volume" : {
+                            "type" : "object",
+                            "properties" : {
+                              "min" : {
+                                "type" : "integer"
+                              },
+                              "step" : {
+                                "type" : "integer"
+                              },
+                              "default" : {
+                                "type" : "integer"
+                              },
+                              "max" : {
+                                "type" : "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "listen_feature" : {
+                    "type" : "object",
+                    "properties" : {
+                      "can_trigger_manual" : {
+                        "type" : "boolean"
+                      },
+                      "can_trigger_hotword" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  },
+                  "slam_feature" : {
+                    "type" : "object",
+                    "properties" : {
+                      "can_navigate" : {
+                        "type" : "boolean"
+                      },
+                      "can_extend_map" : {
+                        "type" : "boolean"
+                      },
+                      "can_manage_pois" : {
+                        "type" : "boolean"
+                      },
+                      "can_manage_walls" : {
+                        "type" : "boolean"
+                      },
+                      "has_docking_station" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  },
+                  "voip_feature" : {
+                    "type" : "object",
+                    "properties" : {
+                      "supports_voip" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  },
+                  "face_recognition_feature" : {
+                    "type" : "object",
+                    "properties" : {
+                      "can_detect_known_faces" : {
+                        "type" : "boolean"
+                      },
+                      "can_detect_number_of_faces" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  },
+                  "time_feature" : {
+                    "type" : "object",
+                    "properties" : {
+                      "can_change_time_zone" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  },
+                  "print_feature" : {
+                    "type" : "object",
+                    "properties" : {
+                      "can_print" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  },
+                  "health_certificates_feature" : {
+                    "type" : "object",
+                    "properties" : {
+                      "can_check_certificates" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  }
+                }
+              },
+              "hardware" : {
+                "type" : "object",
+                "properties" : {
+                  "heads" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "moveable" : {
+                          "type" : "boolean"
+                        },
+                        "can_reset_to_default_position" : {
+                          "type" : "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "parts" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "moveable" : {
+                          "type" : "boolean"
+                        },
+                        "can_reset_to_default_position" : {
+                          "type" : "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "usb" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "type" : {
+                          "type" : "object",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "USB_1", "USB_1_1", "USB_2", "USB_3", "USB_3_1", "USB_3_2", "USB_4" ]
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "composer" : {
+                "type" : "object",
+                "properties" : {
+                  "simple" : {
+                    "type" : "object",
+                    "properties" : {
+                      "dance" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "speech" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "animation" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "emotion" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "wait_duration" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "wait_sensor" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "wait_face" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "wait_voice" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "wait_qr_code" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "wait_monitoring" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "motion_head" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "motion_detection" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "multimedia" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "poi" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "mqtt" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "app_start" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "change_datasource" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "input" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "multimedia_stop" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "browser" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "gym" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "print" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "text_overlay" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "domotics_action" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "domotics_wait" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "domotics_state" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "advanced" : {
+                    "type" : "object",
+                    "properties" : {
+                      "math_formula" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "math_operations" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "if_else" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "variables" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "api" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "loop" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "start" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "stop" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      },
+                      "health_certificate" : {
+                        "type" : "object",
+                        "properties" : {
+                          "enabled" : {
+                            "type" : "boolean"
+                          },
+                          "enabled_sources" : {
+                            "type" : "array",
+                            "items" : {
+                              "type" : "object",
+                              "properties" : {
+                                "topicName" : {
+                                  "type" : "string"
+                                },
+                                "name" : {
+                                  "type" : "string"
+                                },
+                                "ordinal" : {
+                                  "type" : "integer"
+                                }
+                              },
+                              "enum" : [ "scheduler", "composer" ]
+                            }
+                          },
+                          "can_block" : {
+                            "type" : "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "supported_file_types" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "mime_type" : {
+                      "type" : "string"
+                    },
+                    "type" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              },
+              "connection_features" : {
+                "type" : "object",
+                "properties" : {
+                  "has_wifi" : {
+                    "type" : "boolean"
+                  },
+                  "has_cable" : {
+                    "type" : "boolean"
+                  },
+                  "has_hotspot" : {
+                    "type" : "boolean"
+                  },
+                  "cable_features" : {
+                    "type" : "object",
+                    "properties" : {
+                      "adapter_names" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string"
+                        }
+                      }
+                    }
+                  },
+                  "wifi_features" : {
+                    "type" : "object",
+                    "properties" : {
+                      "can_configure" : {
+                        "type" : "boolean"
+                      },
+                      "adapter_names" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string"
+                        }
+                      }
+                    }
+                  },
+                  "hotspot_features" : {
+                    "type" : "object",
+                    "properties" : {
+                      "can_activate" : {
+                        "type" : "boolean"
+                      },
+                      "can_change_ssid" : {
+                        "type" : "boolean"
+                      },
+                      "can_change_password" : {
+                        "type" : "boolean"
+                      },
+                      "adapter_names" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "RobotIdentification",
+          "examples" : [ {
+            "payload" : {
+              "serial" : "SH-J01-00096",
+              "name" : "Jamesy",
+              "versions" : { },
+              "features" : {
+                "audio" : {
+                  "control_parameters" : {
+                    "pitch" : {
+                      "min" : 0,
+                      "step" : 1,
+                      "default" : 50,
+                      "max" : 100
+                    },
+                    "speed" : {
+                      "min" : 0,
+                      "step" : 1,
+                      "default" : 50,
+                      "max" : 100
+                    },
+                    "volume" : {
+                      "min" : 0,
+                      "step" : 1,
+                      "default" : 50,
+                      "max" : 100
+                    }
+                  }
+                },
+                "cameras" : [ {
+                  "key" : "kiosk",
+                  "primary" : true,
+                  "rotation" : 0,
+                  "preview_scale_x" : -1.0
+                } ],
+                "external_displays" : [ {
+                  "video" : true,
+                  "audio" : true,
+                  "width" : 1280,
+                  "height" : 800
+                } ],
+                "can_poi" : true,
+                "can_move" : true,
+                "can_dance" : false,
+                "can_speech" : true,
+                "can_execute_speech_commands" : true,
+                "has_storage" : true,
+                "can_animate" : false,
+                "can_gym" : false,
+                "has_sensors" : true,
+                "has_emotions" : false,
+                "can_video_stream" : true,
+                "can_take_picture" : true,
+                "has_slam_image_map" : true,
+                "has_security_mode" : true,
+                "can_detect_motion" : true,
+                "can_face_recognize" : true,
+                "can_poi_interactive" : true,
+                "has_monitoring" : false,
+                "has_qr_scanner" : false,
+                "can_change_ntp_server" : false,
+                "voice_feature" : {
+                  "supports_gesticulate" : false,
+                  "supports_language" : true,
+                  "supports_pitch" : true,
+                  "supports_speed" : true,
+                  "supports_volume" : true,
+                  "supports_speech_volume" : true
+                },
+                "listen_feature" : {
+                  "can_trigger_manual" : true,
+                  "can_trigger_hotword" : true
+                },
+                "slam_feature" : {
+                  "can_navigate" : true,
+                  "can_extend_map" : true,
+                  "can_manage_pois" : true,
+                  "can_manage_walls" : true,
+                  "has_docking_station" : false
+                },
+                "voip_feature" : {
+                  "supports_voip" : true
+                },
+                "face_recognition_feature" : {
+                  "can_detect_known_faces" : false,
+                  "can_detect_number_of_faces" : true
+                },
+                "time_feature" : {
+                  "can_change_time_zone" : true
+                },
+                "print_feature" : {
+                  "can_print" : true
+                },
+                "health_certificates_feature" : {
+                  "can_check_certificates" : true
+                }
+              },
+              "hardware" : {
+                "heads" : [ {
+                  "moveable" : true,
+                  "can_reset_to_default_position" : true
+                } ],
+                "parts" : [ {
+                  "name" : "Leg",
+                  "moveable" : false,
+                  "can_reset_to_default_position" : false
+                } ]
+              },
+              "composer" : {
+                "simple" : {
+                  "dance" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "speech" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  },
+                  "animation" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "emotion" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "multimedia" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  },
+                  "poi" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  },
+                  "mqtt" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  },
+                  "input" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "composer" ],
+                    "can_block" : true
+                  },
+                  "browser" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  },
+                  "gym" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "wait_duration" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "composer" ],
+                    "can_block" : true
+                  },
+                  "wait_sensor" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "composer" ],
+                    "can_block" : true
+                  },
+                  "wait_face" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "wait_voice" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "wait_qr_code" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "motion_head" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  },
+                  "motion_detection" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "composer" ],
+                    "can_block" : true
+                  },
+                  "app_start" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  },
+                  "change_datasource" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  },
+                  "multimedia_stop" : {
+                    "enabled" : true,
+                    "enabled_sources" : [ "scheduler", "composer" ],
+                    "can_block" : true
+                  }
+                },
+                "advanced" : {
+                  "variables" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "api" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "loop" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "start" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "stop" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "math_formula" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "math_operations" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  },
+                  "if_else" : {
+                    "enabled" : false,
+                    "enabled_sources" : [ ],
+                    "can_block" : true
+                  }
+                }
+              },
+              "robot_type" : "James",
+              "body_id" : "D2EE32C8F3EFF59FDFEAF6E21834F71C",
+              "network_info" : {
+                "ip" : "172.16.0.100",
+                "ssid" : "string",
+                "mac_address" : "02:00:00:00:00:00"
+              },
+              "supported_file_types" : [ {
+                "type" : "string",
+                "mime_type" : "string"
+              } ],
+              "connection_features" : {
+                "has_wifi" : true,
+                "has_cable" : false,
+                "has_hotspot" : true,
+                "cable_features" : {
+                  "adapter_names" : [ ]
+                },
+                "wifi_features" : {
+                  "can_configure" : false,
+                  "adapter_names" : [ "wlan0" ]
+                },
+                "hotspot_features" : {
+                  "can_activate" : true,
+                  "can_change_ssid" : true,
+                  "can_change_password" : true,
+                  "adapter_names" : [ "WIFI1", "WIFI2" ]
+                }
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/system/name/set" : {
+      "publish" : {
+        "summary" : "Set robot name",
+        "description" : "Use this to change the robot name. The change will be published through <<zbos/system/robot/identification/event>>\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String",
+          "examples" : [ {
+            "payload" : "Betsy"
+          } ]
+        }
+      }
+    },
+    "zbos/system/version/get" : {
+      "publish" : {
+        "summary" : "Get system version",
+        "description" : "see <<zbos/system/version/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/system/version/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get system version",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string"
+              },
+              "version" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "AppVersion",
+          "examples" : [ {
+            "payload" : {
+              "name" : "CR-16",
+              "version" : "4.2.0"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/system/serial/get" : {
+      "publish" : {
+        "summary" : "Get system serial number",
+        "description" : "see <<zbos/system/serial/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/system/serial/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get system serial number",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/event/system/poke" : {
+      "subscribe" : {
+        "summary" : "Poke robot",
+        "description" : "When robot receives this event, it responds by showing he received the event. This can be by flashing a led. This is useful to see which robot your are controlling.\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/event/system/poke/response" : {
+      "subscribe" : {
+        "summary" : "Poke robot response",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/system/ready/event" : {
+      "subscribe" : {
+        "summary" : "event: System ready",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/system/ready/request" : {
+      "publish" : {
+        "summary" : "Get system ready",
+        "description" : "see <<zbos/system/ready/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/system/ready/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: System ready",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/system/hotword/rotation" : {
+      "publish" : {
+        "summary" : "Enable hotword rotation",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/system/hotword/rotation/changed/event" : {
+      "subscribe" : {
+        "summary" : "Hotword rotation changed event",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/system/hotword/rotation/get" : {
+      "publish" : {
+        "summary" : "Get hotword rotation",
+        "description" : "see <<zbos/system/hotword/rotation/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/system/hotword/rotation/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: hotword rotation",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/system/adblogs/upload" : {
+      "publish" : {
+        "summary" : "Enable adb logs upload",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/system/adblogs/changed/event" : {
+      "subscribe" : {
+        "summary" : "Adb logs changed event",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/system/adblogs/get" : {
+      "publish" : {
+        "summary" : "Get adb logs",
+        "description" : "see <<zbos/system/adblogs/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/system/adblogs/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: Get adb logs",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/system/cloud/enable" : {
+      "publish" : {
+        "summary" : "Enable cloud broker",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/system/cloud/enable/changing/event" : {
+      "subscribe" : {
+        "summary" : "Cloud broker state is currently changing",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/system/cloud/enable/changed/event" : {
+      "subscribe" : {
+        "summary" : "Cloud broker enable changed event",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/system/cloud/enable/get" : {
+      "publish" : {
+        "summary" : "Get cloud broker enabled state",
+        "description" : "see <<zbos/system/cloud/enable/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/system/cloud/enable/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: cloud broker enabled state",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/system/license/get" : {
+      "publish" : {
+        "summary" : "Retrieve license information about this robot",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/system/license/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Retrieve license information about this robot",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "valid_until" : {
+                "type" : "number"
+              },
+              "created_timestamp" : {
+                "type" : "number"
+              },
+              "status" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "valid", "expired", "missing", "factory" ]
+              },
+              "valid_from" : {
+                "type" : "number"
+              }
+            }
+          },
+          "name" : "LicenseResult",
+          "examples" : [ {
+            "payload" : {
+              "id" : "some_id",
+              "status" : "valid",
+              "valid_until" : 1.7764632E9,
+              "created_timestamp" : 1.6187832E9,
+              "valid_from" : 1.6187832E9
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/system/license/event" : {
+      "subscribe" : {
+        "summary" : "event: License information has changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "valid_until" : {
+                "type" : "number"
+              },
+              "created_timestamp" : {
+                "type" : "number"
+              },
+              "status" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "valid", "expired", "missing", "factory" ]
+              },
+              "valid_from" : {
+                "type" : "number"
+              }
+            }
+          },
+          "name" : "LicenseResult",
+          "examples" : [ {
+            "payload" : {
+              "id" : "some_id",
+              "status" : "valid",
+              "valid_until" : 1.7764632E9,
+              "created_timestamp" : 1.6187832E9,
+              "valid_from" : 1.6187832E9
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/cloud/broker/status/event" : {
+      "subscribe" : {
+        "summary" : "event: Broker status",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "connected" : {
+                "type" : "boolean"
+              },
+              "graceful" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "BrokerStatus",
+          "examples" : [ {
+            "payload" : {
+              "connected" : true,
+              "graceful" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/system/multimedia/rename" : {
+      "publish" : {
+        "summary" : "Rename file",
+        "description" : "Rename a multimedia filesee <<zbos/system/multimedia/rename/response>> for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "path" : {
+                "type" : "string",
+                "description" : "Path of existing file"
+              },
+              "name" : {
+                "type" : "string",
+                "description" : "New name of file with extension"
+              }
+            }
+          },
+          "name" : "RenameRequest",
+          "examples" : [ {
+            "payload" : {
+              "path" : "string",
+              "name" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/system/multimedia/rename/response" : {
+      "subscribe" : {
+        "summary" : "response: Rename file",
+        "description" : "",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      }
+    },
+    "zbos/system/multimedia/delete/request" : {
+      "publish" : {
+        "summary" : "Remove a file from the robot",
+        "description" : "Removes a file from the robot; limited to files inside of the zbos_media_library directory.see zbos/system/multimedia/delete/response/{key} for response\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "path" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "DeleteRequest",
+          "examples" : [ {
+            "payload" : {
+              "path" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/system/multimedia/delete/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Remove a file from the robot",
+        "description" : "Result if file is successfully deleted\n",
+        "tags" : [ {
+          "name" : "System",
+          "description" : "All system related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "success" : {
+                "type" : "boolean"
+              },
+              "error" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "FILE_NOT_EXIST", "NOT_PERMITTED", "FAILED" ]
+              }
+            }
+          },
+          "name" : "DeleteResponse",
+          "examples" : [ {
+            "payload" : {
+              "success" : false,
+              "error" : "FILE_NOT_EXIST"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

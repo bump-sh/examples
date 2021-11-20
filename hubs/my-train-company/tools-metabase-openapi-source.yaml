@@ -1,0 +1,763 @@
+openapi: 3.0.0
+info:
+  title: Metabase
+  version: 1.0.0
+servers:
+- url: http://metabase.example.com/
+paths:
+  /api/database:
+    get:
+      description: Fetch all Databases. include_tables means we should hydrate the Tables belonging to each DB. include_cards here means we should also include virtual Table entries for saved Questions, e.g. so we can easily use them as source Tables in queries. Default for both is false.
+      operationId: listDatabases
+      parameters:
+      - description: value may be nil, or if non-nil, value must be a valid boolean string ('true' or 'false').
+        explode: true
+        in: query
+        name: include_tables
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - description: value may be nil, or if non-nil, value must be a valid boolean string ('true' or 'false').
+        explode: true
+        in: query
+        name: include_cards
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Database'
+                type: array
+          description: successful operation
+      summary: List Databases
+      tags:
+      - database
+  /api/dataset:
+    post:
+      description: Execute a query and retrieve the results in the usual format.
+      operationId: queryDatabase
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasetQueryJsonQuery'
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetQueryResults'
+          description: successful operation
+      summary: Execute a query
+      tags:
+      - dataset
+components:
+  schemas:
+    DatabaseDetails:
+      example:
+        connProperties: connProperties
+        let-user-control-scheduling: true
+        password: password
+        dbname: dbname
+        port: 6
+        host: host
+        user: user
+        authMech: 1
+      properties:
+        host:
+          type: string
+        port:
+          format: int32
+          type: integer
+        dbname:
+          type: string
+        authMech:
+          format: int32
+          type: integer
+        user:
+          type: string
+        password:
+          type: string
+        connProperties:
+          type: string
+        let-user-control-scheduling:
+          type: boolean
+      type: object
+    DatabaseTable:
+      example:
+        schema: schema
+        entity_name: entity_name
+        description: description
+        active: true
+        created_at: 2000-01-23T04:56:07.000+00:00
+        rows: 5
+        display_name: display_name
+        raw_table_id: raw_table_id
+        caveats: caveats
+        entity_type: entity_type
+        show_in_getting_started: true
+        db_id: 2
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        name: name
+        points_of_interest: points_of_interest
+        id: 5
+        visibility_type: visibility_type
+      properties:
+        description:
+          type: string
+        entity_type:
+          description: unknown type
+          type: string
+        schema:
+          type: string
+        raw_table_id:
+          description: unknown type
+          type: string
+        show_in_getting_started:
+          type: boolean
+        name:
+          type: string
+        caveats:
+          description: unknown type
+          type: string
+        rows:
+          format: int64
+          type: integer
+        updated_at:
+          format: date-time
+          type: string
+        entity_name:
+          description: unknown type
+          type: string
+        active:
+          type: boolean
+        id:
+          format: int64
+          type: integer
+        db_id:
+          format: int64
+          type: integer
+        visibility_type:
+          description: unknown type
+          type: string
+        display_name:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        points_of_interest:
+          description: unknown type
+          type: string
+      type: object
+    Database:
+      example:
+        description: description
+        created_at: 2000-01-23T04:56:07.000+00:00
+        caveats: caveats
+        is_sample: true
+        features:
+        - features
+        - features
+        metadata_sync_schedule: metadata_sync_schedule
+        tables:
+        - schema: schema
+          entity_name: entity_name
+          description: description
+          active: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+          rows: 5
+          display_name: display_name
+          raw_table_id: raw_table_id
+          caveats: caveats
+          entity_type: entity_type
+          show_in_getting_started: true
+          db_id: 2
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          name: name
+          points_of_interest: points_of_interest
+          id: 5
+          visibility_type: visibility_type
+        - schema: schema
+          entity_name: entity_name
+          description: description
+          active: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+          rows: 5
+          display_name: display_name
+          raw_table_id: raw_table_id
+          caveats: caveats
+          entity_type: entity_type
+          show_in_getting_started: true
+          db_id: 2
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          name: name
+          points_of_interest: points_of_interest
+          id: 5
+          visibility_type: visibility_type
+        is_full_sync: true
+        native_permissions: native_permissions
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        engine: engine
+        name: name
+        points_of_interest: points_of_interest
+        details:
+          connProperties: connProperties
+          let-user-control-scheduling: true
+          password: password
+          dbname: dbname
+          port: 6
+          host: host
+          user: user
+          authMech: 1
+        id: 0
+        cache_field_values_schedule: cache_field_values_schedule
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        features:
+          items:
+            type: string
+          type: array
+        is_full_sync:
+          type: boolean
+        is_sample:
+          type: boolean
+        cache_field_values_schedule:
+          format: cron-schedule
+          type: string
+        metadata_sync_schedule:
+          format: cron-schedule
+          type: string
+        caveats:
+          description: type unknown
+          type: string
+        engine:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        native_permissions:
+          type: string
+        points_of_interest:
+          description: type unknown
+          type: string
+        details:
+          $ref: '#/components/schemas/DatabaseDetails'
+        tables:
+          items:
+            $ref: '#/components/schemas/DatabaseTable'
+          type: array
+      required:
+      - id
+      type: object
+    DatasetQueryOpts:
+      properties:
+        description:
+          type: string
+        entity_type:
+          description: unknown type
+      type: object
+    DatasetQueryJsonQuery:
+      example:
+        database: 0
+        native:
+          query: query
+        query:
+          limit: 1
+          page:
+            page: 5
+            items: 5
+          source_table: 6
+        type: native
+        constraints:
+          max-results: 2
+          max-results-bare-rows: 7
+      properties:
+        database:
+          format: int64
+          type: integer
+        type:
+          enum:
+          - native
+          - query
+          type: string
+        native:
+          $ref: '#/components/schemas/DatasetQueryNative'
+        query:
+          $ref: '#/components/schemas/DatasetQueryDsl'
+        constraints:
+          $ref: '#/components/schemas/DatasetQueryConstraints'
+      type: object
+    DatasetQueryNative:
+      example:
+        query: query
+      properties:
+        query:
+          type: string
+      type: object
+    DatasetQueryDsl:
+      description: Dataset query request and response object
+      example:
+        limit: 1
+        page:
+          page: 5
+          items: 5
+        source_table: 6
+      properties:
+        source_table:
+          format: int64
+          type: integer
+        limit:
+          format: int64
+          type: integer
+        page:
+          $ref: '#/components/schemas/DatasetQueryDslPage'
+      type: object
+    DatasetQueryDslPage:
+      example:
+        page: 5
+        items: 5
+      properties:
+        page:
+          format: int64
+          type: integer
+        items:
+          format: int64
+          type: integer
+      type: object
+    DatasetQueryConstraints:
+      example:
+        max-results: 2
+        max-results-bare-rows: 7
+      properties:
+        max-results:
+          format: int64
+          type: integer
+        max-results-bare-rows:
+          format: int64
+          type: integer
+      type: object
+    DatasetQueryResults:
+      example:
+        json_query:
+          database: 0
+          native:
+            query: query
+          query:
+            limit: 1
+            page:
+              page: 5
+              items: 5
+            source_table: 6
+          type: native
+          constraints:
+            max-results: 2
+            max-results-bare-rows: 7
+        data:
+          results_metadata:
+            columns:
+            - special_type: special_type
+              base_type: base_type
+              name: name
+              display_name: display_name
+            - special_type: special_type
+              base_type: base_type
+              name: name
+              display_name: display_name
+            checksum: checksum
+          rows_truncated: 1
+          native_form:
+            query: query
+            params: params
+          columns:
+          - columns
+          - columns
+          rows:
+          - - '{}'
+            - '{}'
+          - - '{}'
+            - '{}'
+          cols:
+          - special_type: special_type
+            description: description
+            remapped_to: remapped_to
+            schema_name: schema_name
+            source: source
+            table_id: 2
+            display_name: display_name
+            fk_field_id: fk_field_id
+            target:
+              special_type: special_type
+              base_type: base_type
+              name: name
+              description: description
+              id: 7
+              display_name: display_name
+              table_id: 1
+              visibility_type: visibility_type
+            extra_info: '{}'
+            base_type: base_type
+            name: name
+            fingerprint:
+              global:
+                distinct-count: 1
+              type: '{}'
+            id: 4
+            remapped_from: remapped_from
+            visibility_type: visibility_type
+          - special_type: special_type
+            description: description
+            remapped_to: remapped_to
+            schema_name: schema_name
+            source: source
+            table_id: 2
+            display_name: display_name
+            fk_field_id: fk_field_id
+            target:
+              special_type: special_type
+              base_type: base_type
+              name: name
+              description: description
+              id: 7
+              display_name: display_name
+              table_id: 1
+              visibility_type: visibility_type
+            extra_info: '{}'
+            base_type: base_type
+            name: name
+            fingerprint:
+              global:
+                distinct-count: 1
+              type: '{}'
+            id: 4
+            remapped_from: remapped_from
+            visibility_type: visibility_type
+        context: context
+        started_at: 2000-01-23T04:56:07.000+00:00
+        running_time: 3
+        average_execution_time: average_execution_time
+        status: status
+        row_count: 9
+      properties:
+        started_at:
+          format: date-time
+          type: string
+        json_query:
+          $ref: '#/components/schemas/DatasetQueryJsonQuery'
+        average_execution_time:
+          description: type unknown
+          type: string
+        status:
+          type: string
+        context:
+          type: string
+        row_count:
+          format: int64
+          type: integer
+        running_time:
+          format: int64
+          type: integer
+        data:
+          $ref: '#/components/schemas/DatasetQueryResultsData'
+      type: object
+    DatasetQueryResultsCol:
+      example:
+        special_type: special_type
+        description: description
+        remapped_to: remapped_to
+        schema_name: schema_name
+        source: source
+        table_id: 2
+        display_name: display_name
+        fk_field_id: fk_field_id
+        target:
+          special_type: special_type
+          base_type: base_type
+          name: name
+          description: description
+          id: 7
+          display_name: display_name
+          table_id: 1
+          visibility_type: visibility_type
+        extra_info: '{}'
+        base_type: base_type
+        name: name
+        fingerprint:
+          global:
+            distinct-count: 1
+          type: '{}'
+        id: 4
+        remapped_from: remapped_from
+        visibility_type: visibility_type
+      properties:
+        description:
+          type: string
+        table_id:
+          format: int64
+          type: integer
+        schema_name:
+          type: string
+        special_type:
+          type: string
+        name:
+          type: string
+        source:
+          type: string
+        remapped_from:
+          description: unknown type
+          type: string
+        extra_info:
+          description: can be '{"target_table_id":517}'
+          type: object
+        fk_field_id:
+          description: unknown type
+          type: string
+        remapped_to:
+          description: unknown type
+          type: string
+        id:
+          format: int64
+          type: integer
+        visibility_type:
+          type: string
+        target:
+          $ref: '#/components/schemas/DatasetQueryResultsColTarget'
+        display_name:
+          type: string
+        fingerprint:
+          $ref: '#/components/schemas/DatasetQueryResultsColFingerprint'
+        base_type:
+          type: string
+      type: object
+    DatasetQueryResultsColTarget:
+      example:
+        special_type: special_type
+        base_type: base_type
+        name: name
+        description: description
+        id: 7
+        display_name: display_name
+        table_id: 1
+        visibility_type: visibility_type
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        display_name:
+          type: string
+        table_id:
+          format: int64
+          type: integer
+        description:
+          type: string
+        base_type:
+          type: string
+        special_type:
+          type: string
+        visibility_type:
+          type: string
+      type: object
+    DatasetQueryResultsColFingerprint:
+      example:
+        global:
+          distinct-count: 1
+        type: '{}'
+      properties:
+        global:
+          $ref: '#/components/schemas/DatasetQueryResultsColFingerprintGlobal'
+        type:
+          description: map[string]DatasetQueryResultsColFingerprintType results in map[string]interface{}
+          type: object
+      type: object
+    DatasetQueryResultsColFingerprintGlobal:
+      example:
+        distinct-count: 1
+      properties:
+        distinct-count:
+          format: int64
+          type: integer
+      type: object
+    DatasetQueryResultsColFingerprintType:
+      properties:
+        percent-json:
+          format: double
+          type: number
+        percent-url:
+          format: double
+          type: number
+        percent-email:
+          format: double
+          type: number
+        average-length:
+          format: double
+          type: number
+      type: object
+    DatasetQueryResultsNativeForm:
+      example:
+        query: query
+        params: params
+      properties:
+        query:
+          type: string
+        params:
+          description: unknown type
+          type: string
+      type: object
+    DatasetQueryResultsData:
+      example:
+        results_metadata:
+          columns:
+          - special_type: special_type
+            base_type: base_type
+            name: name
+            display_name: display_name
+          - special_type: special_type
+            base_type: base_type
+            name: name
+            display_name: display_name
+          checksum: checksum
+        rows_truncated: 1
+        native_form:
+          query: query
+          params: params
+        columns:
+        - columns
+        - columns
+        rows:
+        - - '{}'
+          - '{}'
+        - - '{}'
+          - '{}'
+        cols:
+        - special_type: special_type
+          description: description
+          remapped_to: remapped_to
+          schema_name: schema_name
+          source: source
+          table_id: 2
+          display_name: display_name
+          fk_field_id: fk_field_id
+          target:
+            special_type: special_type
+            base_type: base_type
+            name: name
+            description: description
+            id: 7
+            display_name: display_name
+            table_id: 1
+            visibility_type: visibility_type
+          extra_info: '{}'
+          base_type: base_type
+          name: name
+          fingerprint:
+            global:
+              distinct-count: 1
+            type: '{}'
+          id: 4
+          remapped_from: remapped_from
+          visibility_type: visibility_type
+        - special_type: special_type
+          description: description
+          remapped_to: remapped_to
+          schema_name: schema_name
+          source: source
+          table_id: 2
+          display_name: display_name
+          fk_field_id: fk_field_id
+          target:
+            special_type: special_type
+            base_type: base_type
+            name: name
+            description: description
+            id: 7
+            display_name: display_name
+            table_id: 1
+            visibility_type: visibility_type
+          extra_info: '{}'
+          base_type: base_type
+          name: name
+          fingerprint:
+            global:
+              distinct-count: 1
+            type: '{}'
+          id: 4
+          remapped_from: remapped_from
+          visibility_type: visibility_type
+      properties:
+        columns:
+          items:
+            type: string
+          type: array
+        rows:
+          items:
+            items:
+              type: object
+            type: array
+          type: array
+        native_form:
+          $ref: '#/components/schemas/DatasetQueryResultsNativeForm'
+        cols:
+          items:
+            $ref: '#/components/schemas/DatasetQueryResultsCol'
+          type: array
+        results_metadata:
+          $ref: '#/components/schemas/DatasetQueryResultsMetadata'
+        rows_truncated:
+          format: int64
+          type: integer
+      type: object
+    DatasetQueryResultsMetadata:
+      example:
+        columns:
+        - special_type: special_type
+          base_type: base_type
+          name: name
+          display_name: display_name
+        - special_type: special_type
+          base_type: base_type
+          name: name
+          display_name: display_name
+        checksum: checksum
+      properties:
+        checksum:
+          type: string
+        columns:
+          items:
+            $ref: '#/components/schemas/DatasetQueryResultsMetadataColumn'
+          type: array
+      type: object
+    DatasetQueryResultsMetadataColumn:
+      example:
+        special_type: special_type
+        base_type: base_type
+        name: name
+        display_name: display_name
+      properties:
+        base_type:
+          type: string
+        display_name:
+          type: string
+        name:
+          type: string
+        special_type:
+          type: string
+      type: object

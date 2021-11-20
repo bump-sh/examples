@@ -1,0 +1,3733 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "SLAM",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/slam/start" : {
+      "publish" : {
+        "summary" : "Start slam service",
+        "description" : "see <<zbos/slam/start/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/start/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Start slam",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/stop" : {
+      "publish" : {
+        "summary" : "Stop slam service",
+        "description" : "see <<zbos/slam/stop/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/stop/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Stop slam",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/error" : {
+      "subscribe" : {
+        "summary" : "ERROR in Slam",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "errorCode" : {
+                "type" : "string"
+              },
+              "message" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "SlamError",
+          "examples" : [ {
+            "payload" : {
+              "errorCode" : "String",
+              "message" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/collision/start/event" : {
+      "subscribe" : {
+        "summary" : "One or more collisions have started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "ordinal" : {
+                      "type" : "integer"
+                    }
+                  },
+                  "enum" : [ "TOUCHSENSOR", "TOUCHSENSOR_GROUP" ]
+                },
+                "translationkey" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "Array<AvailableSensor>",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "type" : "TOUCHSENSOR",
+              "translationkey" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/collision/end/event" : {
+      "subscribe" : {
+        "summary" : "One or more collisions have stopped",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "ordinal" : {
+                      "type" : "integer"
+                    }
+                  },
+                  "enum" : [ "TOUCHSENSOR", "TOUCHSENSOR_GROUP" ]
+                },
+                "translationkey" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "Array<AvailableSensor>",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "type" : "TOUCHSENSOR",
+              "translationkey" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/status/get" : {
+      "publish" : {
+        "summary" : "Get SLAM status",
+        "description" : "see <<zbos/slam/status/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/status/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get SLAM status",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mappingConfigurable" : {
+                "type" : "boolean"
+              },
+              "mappingEnabled" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "SlamStatus",
+          "examples" : [ {
+            "payload" : {
+              "mappingConfigurable" : true,
+              "mappingEnabled" : true
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/status/event" : {
+      "subscribe" : {
+        "summary" : "event: Status SLAM",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mappingConfigurable" : {
+                "type" : "boolean"
+              },
+              "mappingEnabled" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "SlamStatus",
+          "examples" : [ {
+            "payload" : {
+              "mappingConfigurable" : true,
+              "mappingEnabled" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/mapview/clear" : {
+      "publish" : {
+        "summary" : "Clear current map view",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapview/clear/event" : {
+      "subscribe" : {
+        "summary" : "event: Map view cleared",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapview/current" : {
+      "subscribe" : {
+        "summary" : "event: Map view changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/slam/mapview/current/get" : {
+      "publish" : {
+        "summary" : "Get current map view",
+        "description" : "see <<zbos/slam/mapview/current/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapview/current/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get current map view",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "data" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "RemoteMapResponseObject",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "string",
+              "data" : "string"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/mapping/enable" : {
+      "publish" : {
+        "summary" : "Enable SLAM mapping",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapping/disable" : {
+      "publish" : {
+        "summary" : "Disable SLAM mapping",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapping/extend/start" : {
+      "publish" : {
+        "summary" : "Start extending SLAM mapping",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapping/extend/cancel" : {
+      "publish" : {
+        "summary" : "Stop extending SLAM mapping",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapping/extend/get" : {
+      "publish" : {
+        "summary" : "Get extending SLAM mapping",
+        "description" : "see <<zbos/slam/mapping/extend/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapping/extend/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get extending SLAM mapping",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/mapping/extend/started" : {
+      "subscribe" : {
+        "summary" : "event: SLAM mapping extending started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapping/extend/stopped" : {
+      "subscribe" : {
+        "summary" : "event: SLAM mapping extending stopped",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapping/extend/failed" : {
+      "subscribe" : {
+        "summary" : "event: SLAM mapping extending failed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/mapping/extend/canceled" : {
+      "subscribe" : {
+        "summary" : "event: SLAM mapping extending canceled",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/maps/list/get" : {
+      "publish" : {
+        "summary" : "Get maps",
+        "description" : "see <<zbos/slam/maps/list/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/maps/list/response/{key}" : {
+      "subscribe" : {
+        "summary" : "event: Get all maps",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "name" : "Array<String>"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/maps/get/current" : {
+      "publish" : {
+        "summary" : "Get current maps",
+        "description" : "see <<zbos/slam/maps/get/current/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/maps/get/current/response/{key}" : {
+      "subscribe" : {
+        "summary" : "event: Get current maps",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "poiList" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "uuid" : {
+                      "type" : "string"
+                    },
+                    "type" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
+                    },
+                    "coordinate" : {
+                      "type" : "object",
+                      "properties" : {
+                        "x" : {
+                          "type" : "number"
+                        },
+                        "y" : {
+                          "type" : "number"
+                        },
+                        "z" : {
+                          "type" : "number"
+                        },
+                        "rotation" : {
+                          "type" : "number"
+                        },
+                        "rawX" : {
+                          "type" : "number"
+                        },
+                        "rawY" : {
+                          "type" : "number"
+                        },
+                        "rawZ" : {
+                          "type" : "number"
+                        },
+                        "orientation" : {
+                          "type" : "object",
+                          "properties" : {
+                            "yaw" : {
+                              "type" : "number"
+                            },
+                            "pitch" : {
+                              "type" : "number"
+                            },
+                            "roll" : {
+                              "type" : "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "inAction" : {
+                      "type" : "object",
+                      "properties" : {
+                        "actionType" : {
+                          "type" : "object",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "MQTT", "API" ]
+                        },
+                        "radius" : {
+                          "type" : "number"
+                        },
+                        "target" : {
+                          "type" : "string",
+                          "description" : "Mqtt topic or API url"
+                        },
+                        "data" : {
+                          "type" : "string",
+                          "description" : "Mqtt payload or post body"
+                        }
+                      }
+                    },
+                    "outAction" : {
+                      "type" : "object",
+                      "properties" : {
+                        "actionType" : {
+                          "type" : "object",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "MQTT", "API" ]
+                        },
+                        "radius" : {
+                          "type" : "number"
+                        },
+                        "target" : {
+                          "type" : "string",
+                          "description" : "Mqtt topic or API url"
+                        },
+                        "data" : {
+                          "type" : "string",
+                          "description" : "Mqtt payload or post body"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "SlamMap",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "string",
+              "poiList" : [ {
+                "name" : "string",
+                "uuid" : "string",
+                "type" : "DEFAULT",
+                "coordinate" : {
+                  "x" : 15.0,
+                  "y" : 15.0,
+                  "rotation" : 90.0,
+                  "rawX" : 14.8,
+                  "rawY" : 15.4
+                },
+                "inAction" : {
+                  "actionType" : "MQTT",
+                  "radius" : 270.0,
+                  "target" : "string",
+                  "data" : "string"
+                },
+                "outAction" : {
+                  "actionType" : "MQTT",
+                  "radius" : 270.0,
+                  "target" : "string",
+                  "data" : "string"
+                }
+              } ]
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/maps/load" : {
+      "publish" : {
+        "summary" : "Load map",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String",
+          "examples" : [ {
+            "payload" : "string"
+          } ]
+        }
+      }
+    },
+    "zbos/slam/maps/load/event" : {
+      "subscribe" : {
+        "summary" : "event: Load map",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/maps/save" : {
+      "publish" : {
+        "summary" : "Save map",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String",
+          "examples" : [ {
+            "payload" : "string"
+          } ]
+        }
+      }
+    },
+    "zbos/slam/maps/save/event" : {
+      "subscribe" : {
+        "summary" : "event: Save map",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/maps/delete" : {
+      "publish" : {
+        "summary" : "Delete map",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String",
+          "examples" : [ {
+            "payload" : "string"
+          } ]
+        }
+      }
+    },
+    "zbos/slam/maps/delete/all" : {
+      "publish" : {
+        "summary" : "Deletes all maps",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/maps/delete/event" : {
+      "subscribe" : {
+        "summary" : "event: Delete map",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/current" : {
+      "subscribe" : {
+        "summary" : "event: Location changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "x" : {
+                "type" : "number"
+              },
+              "y" : {
+                "type" : "number"
+              },
+              "z" : {
+                "type" : "number"
+              },
+              "rotation" : {
+                "type" : "number"
+              },
+              "rawX" : {
+                "type" : "number"
+              },
+              "rawY" : {
+                "type" : "number"
+              },
+              "rawZ" : {
+                "type" : "number"
+              },
+              "orientation" : {
+                "type" : "object",
+                "properties" : {
+                  "yaw" : {
+                    "type" : "number"
+                  },
+                  "pitch" : {
+                    "type" : "number"
+                  },
+                  "roll" : {
+                    "type" : "number"
+                  }
+                }
+              }
+            }
+          },
+          "name" : "ZbosLocation",
+          "examples" : [ {
+            "payload" : {
+              "x" : 15.0,
+              "y" : 15.0,
+              "rotation" : 90.0,
+              "rawX" : 14.8,
+              "rawY" : 15.4
+            }
+          }, {
+            "payload" : {
+              "rawX" : 0.5,
+              "rawY" : -0.4,
+              "rawZ" : 0.8,
+              "orientation" : {
+                "yaw" : 0.0,
+                "pitch" : 0.0,
+                "roll" : 3.14
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/location/current/get" : {
+      "publish" : {
+        "summary" : "Get robot location",
+        "description" : "see <<zbos/slam/location/current/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/current/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get robot location",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "x" : {
+                "type" : "number"
+              },
+              "y" : {
+                "type" : "number"
+              },
+              "z" : {
+                "type" : "number"
+              },
+              "rotation" : {
+                "type" : "number"
+              },
+              "rawX" : {
+                "type" : "number"
+              },
+              "rawY" : {
+                "type" : "number"
+              },
+              "rawZ" : {
+                "type" : "number"
+              },
+              "orientation" : {
+                "type" : "object",
+                "properties" : {
+                  "yaw" : {
+                    "type" : "number"
+                  },
+                  "pitch" : {
+                    "type" : "number"
+                  },
+                  "roll" : {
+                    "type" : "number"
+                  }
+                }
+              }
+            }
+          },
+          "name" : "ZbosLocation",
+          "examples" : [ {
+            "payload" : {
+              "x" : 15.0,
+              "y" : 15.0,
+              "rotation" : 90.0,
+              "rawX" : 14.8,
+              "rawY" : 15.4
+            }
+          }, {
+            "payload" : {
+              "rawX" : 0.5,
+              "rawY" : -0.4,
+              "rawZ" : 0.8,
+              "orientation" : {
+                "yaw" : 0.0,
+                "pitch" : 0.0,
+                "roll" : 3.14
+              }
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/location/current/set" : {
+      "publish" : {
+        "summary" : "Set robot location",
+        "description" : "see <<zbos/slam/location/current/set/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "Required random key"
+              },
+              "coordinate" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  },
+                  "z" : {
+                    "type" : "number"
+                  },
+                  "rotation" : {
+                    "type" : "number"
+                  },
+                  "rawX" : {
+                    "type" : "number"
+                  },
+                  "rawY" : {
+                    "type" : "number"
+                  },
+                  "rawZ" : {
+                    "type" : "number"
+                  },
+                  "orientation" : {
+                    "type" : "object",
+                    "properties" : {
+                      "yaw" : {
+                        "type" : "number"
+                      },
+                      "pitch" : {
+                        "type" : "number"
+                      },
+                      "roll" : {
+                        "type" : "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "ZbosSetLocationRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "string",
+              "coordinate" : {
+                "x" : 15.0,
+                "y" : 15.0,
+                "rotation" : 90.0,
+                "rawX" : 14.8,
+                "rawY" : 15.4
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/location/current/set/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Set robot location",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/location/recover" : {
+      "publish" : {
+        "summary" : "Recover robot location",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/recover/started" : {
+      "subscribe" : {
+        "summary" : "Location revocery started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/recover/stopped" : {
+      "subscribe" : {
+        "summary" : "Location revocery stopped",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/recover/failed" : {
+      "subscribe" : {
+        "summary" : "Location revocery failed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/reset/chargingstation" : {
+      "publish" : {
+        "summary" : "Reset robot to charging station",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/reset/chargingstation/started" : {
+      "subscribe" : {
+        "summary" : "Reset robot to charging station started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/reset/chargingstation/stopped" : {
+      "subscribe" : {
+        "summary" : "Reset robot to charging station stopped",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/home" : {
+      "subscribe" : {
+        "summary" : "Home location changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "x" : {
+                "type" : "number"
+              },
+              "y" : {
+                "type" : "number"
+              },
+              "z" : {
+                "type" : "number"
+              },
+              "rotation" : {
+                "type" : "number"
+              },
+              "rawX" : {
+                "type" : "number"
+              },
+              "rawY" : {
+                "type" : "number"
+              },
+              "rawZ" : {
+                "type" : "number"
+              },
+              "orientation" : {
+                "type" : "object",
+                "properties" : {
+                  "yaw" : {
+                    "type" : "number"
+                  },
+                  "pitch" : {
+                    "type" : "number"
+                  },
+                  "roll" : {
+                    "type" : "number"
+                  }
+                }
+              }
+            }
+          },
+          "name" : "ZbosLocation",
+          "examples" : [ {
+            "payload" : {
+              "x" : 15.0,
+              "y" : 15.0,
+              "rotation" : 90.0,
+              "rawX" : 14.8,
+              "rawY" : 15.4
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/location/home/get" : {
+      "publish" : {
+        "summary" : "Get home location",
+        "description" : "see <<zbos/slam/location/home/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/location/home/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get home location",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "x" : {
+                "type" : "number"
+              },
+              "y" : {
+                "type" : "number"
+              },
+              "z" : {
+                "type" : "number"
+              },
+              "rotation" : {
+                "type" : "number"
+              },
+              "rawX" : {
+                "type" : "number"
+              },
+              "rawY" : {
+                "type" : "number"
+              },
+              "rawZ" : {
+                "type" : "number"
+              },
+              "orientation" : {
+                "type" : "object",
+                "properties" : {
+                  "yaw" : {
+                    "type" : "number"
+                  },
+                  "pitch" : {
+                    "type" : "number"
+                  },
+                  "roll" : {
+                    "type" : "number"
+                  }
+                }
+              }
+            }
+          },
+          "name" : "ZbosLocation",
+          "examples" : [ {
+            "payload" : {
+              "x" : 15.0,
+              "y" : 15.0,
+              "rotation" : 90.0,
+              "rawX" : 14.8,
+              "rawY" : 15.4
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/walls/clear" : {
+      "publish" : {
+        "summary" : "clear all walls",
+        "description" : "Save is optional, if false, then the map will not be saved. By default the map will be saved.\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "WallClearRequest",
+          "examples" : [ {
+            "payload" : {
+              "save" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/walls/clear/event" : {
+      "subscribe" : {
+        "summary" : "response: Clear all walls",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/walls/current" : {
+      "subscribe" : {
+        "summary" : "Walls changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/slam/walls/current/get" : {
+      "publish" : {
+        "summary" : "Get current walls",
+        "description" : "see <<zbos/slam/walls/current/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/walls/current/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get current walls",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "startPoint" : {
+                  "type" : "object",
+                  "properties" : {
+                    "x" : {
+                      "type" : "number"
+                    },
+                    "y" : {
+                      "type" : "number"
+                    }
+                  }
+                },
+                "endPoint" : {
+                  "type" : "object",
+                  "properties" : {
+                    "x" : {
+                      "type" : "number"
+                    },
+                    "y" : {
+                      "type" : "number"
+                    }
+                  }
+                },
+                "segmentId" : {
+                  "type" : "string"
+                },
+                "save" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "name" : "Array<Wall>",
+          "examples" : [ {
+            "payload" : {
+              "startPoint" : {
+                "x" : 1.0,
+                "y" : 1.0
+              },
+              "endPoint" : {
+                "x" : 5.0,
+                "y" : 5.0
+              },
+              "segmentId" : "string",
+              "save" : true
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/walls/add" : {
+      "publish" : {
+        "summary" : "Add wall",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "startPoint" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "endPoint" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "segmentId" : {
+                "type" : "string"
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "Wall",
+          "examples" : [ {
+            "payload" : {
+              "startPoint" : {
+                "x" : 1.0,
+                "y" : 1.0
+              },
+              "endPoint" : {
+                "x" : 5.0,
+                "y" : 5.0
+              },
+              "segmentId" : "string",
+              "save" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/walls/add/event" : {
+      "subscribe" : {
+        "summary" : "event: Add wall",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "startPoint" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "endPoint" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "segmentId" : {
+                "type" : "string"
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "Wall",
+          "examples" : [ {
+            "payload" : {
+              "startPoint" : {
+                "x" : 1.0,
+                "y" : 1.0
+              },
+              "endPoint" : {
+                "x" : 5.0,
+                "y" : 5.0
+              },
+              "segmentId" : "string",
+              "save" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/walls/remove" : {
+      "publish" : {
+        "summary" : "Remove wall",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "segmentId" : {
+                "type" : "string"
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "WallRemoveRequest",
+          "examples" : [ {
+            "payload" : {
+              "segmentId" : "id5",
+              "save" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/walls/remove/multiple" : {
+      "publish" : {
+        "summary" : "Remove walls",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "segmentId" : {
+                  "type" : "string"
+                },
+                "save" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "name" : "Array<WallRemoveRequest>",
+          "examples" : [ {
+            "payload" : [ {
+              "segmentId" : "id5",
+              "save" : true
+            }, {
+              "segmentId" : "id7",
+              "save" : true
+            } ]
+          } ]
+        }
+      }
+    },
+    "zbos/slam/walls/remove/event" : {
+      "subscribe" : {
+        "summary" : "event: Remove wall",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/walls/update" : {
+      "publish" : {
+        "summary" : "Update wall",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "startPoint" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "endPoint" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "segmentId" : {
+                "type" : "string"
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "Wall",
+          "examples" : [ {
+            "payload" : {
+              "startPoint" : {
+                "x" : 1.0,
+                "y" : 1.0
+              },
+              "endPoint" : {
+                "x" : 5.0,
+                "y" : 5.0
+              },
+              "segmentId" : "string",
+              "save" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/walls/update/multiple" : {
+      "publish" : {
+        "summary" : "Update walls",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "startPoint" : {
+                  "type" : "object",
+                  "properties" : {
+                    "x" : {
+                      "type" : "number"
+                    },
+                    "y" : {
+                      "type" : "number"
+                    }
+                  }
+                },
+                "endPoint" : {
+                  "type" : "object",
+                  "properties" : {
+                    "x" : {
+                      "type" : "number"
+                    },
+                    "y" : {
+                      "type" : "number"
+                    }
+                  }
+                },
+                "segmentId" : {
+                  "type" : "string"
+                },
+                "save" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "name" : "Array<Wall>",
+          "examples" : [ {
+            "payload" : [ {
+              "startPoint" : {
+                "x" : 1.0,
+                "y" : 1.0
+              },
+              "endPoint" : {
+                "x" : 5.0,
+                "y" : 5.0
+              },
+              "segmentId" : "string",
+              "save" : true
+            }, {
+              "startPoint" : {
+                "x" : 10.0,
+                "y" : 5.0
+              },
+              "endPoint" : {
+                "x" : 20.0,
+                "y" : 10.0
+              },
+              "segmentId" : "another_id",
+              "save" : true
+            } ]
+          } ]
+        }
+      }
+    },
+    "zbos/slam/walls/update/event" : {
+      "subscribe" : {
+        "summary" : "event: Update wall",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "startPoint" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "endPoint" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "segmentId" : {
+                "type" : "string"
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "Wall",
+          "examples" : [ {
+            "payload" : {
+              "startPoint" : {
+                "x" : 1.0,
+                "y" : 1.0
+              },
+              "endPoint" : {
+                "x" : 5.0,
+                "y" : 5.0
+              },
+              "segmentId" : "string",
+              "save" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/interaction/moveto" : {
+      "publish" : {
+        "summary" : "Move robot to coordinates",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "coordinate" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  },
+                  "z" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "orientation" : {
+                "type" : "object",
+                "properties" : {
+                  "yaw" : {
+                    "type" : "number"
+                  },
+                  "pitch" : {
+                    "type" : "number"
+                  },
+                  "roll" : {
+                    "type" : "number"
+                  }
+                }
+              },
+              "speed" : {
+                "type" : "integer"
+              }
+            }
+          },
+          "name" : "ZbosMoveToPointRequest",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "coordinate" : {
+                "x" : 39.0,
+                "y" : 40.0,
+                "z" : 0.0
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/interaction/moveto/started" : {
+      "subscribe" : {
+        "summary" : "MoveTo started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/slam/interaction/moveto/stopped" : {
+      "subscribe" : {
+        "summary" : "MoveTo stopped",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/slam/interaction/moveto/failed" : {
+      "subscribe" : {
+        "summary" : "MoveTo failed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/slam/interaction/moveto/aborted" : {
+      "subscribe" : {
+        "summary" : "MoveTo aborted",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/slam/interaction/moveto/blocked" : {
+      "subscribe" : {
+        "summary" : "MoveTo Blocked",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/slam/interaction/moveto/retrying" : {
+      "subscribe" : {
+        "summary" : "MoveTo retrying",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "string"
+          },
+          "name" : "String"
+        }
+      }
+    },
+    "zbos/slam/interaction/stop" : {
+      "publish" : {
+        "summary" : "Stop moving",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/interaction/stop/event" : {
+      "subscribe" : {
+        "summary" : "event: Movement stopped",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/laserscan/enable" : {
+      "publish" : {
+        "summary" : "Enable laserscan",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/laserscan/disable" : {
+      "publish" : {
+        "summary" : "disable laserscan",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/laserscan/current" : {
+      "subscribe" : {
+        "summary" : "event: Laserscan changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "angle" : {
+                "type" : "number"
+              },
+              "distance" : {
+                "type" : "number"
+              }
+            }
+          },
+          "name" : "ZbosLaserScan",
+          "examples" : [ {
+            "payload" : {
+              "angle" : 0.0,
+              "distance" : 15.0
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/current" : {
+      "subscribe" : {
+        "summary" : "event: POI changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "poiList" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "uuid" : {
+                      "type" : "string"
+                    },
+                    "type" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
+                    },
+                    "coordinate" : {
+                      "type" : "object",
+                      "properties" : {
+                        "x" : {
+                          "type" : "number"
+                        },
+                        "y" : {
+                          "type" : "number"
+                        },
+                        "z" : {
+                          "type" : "number"
+                        },
+                        "rotation" : {
+                          "type" : "number"
+                        },
+                        "rawX" : {
+                          "type" : "number"
+                        },
+                        "rawY" : {
+                          "type" : "number"
+                        },
+                        "rawZ" : {
+                          "type" : "number"
+                        },
+                        "orientation" : {
+                          "type" : "object",
+                          "properties" : {
+                            "yaw" : {
+                              "type" : "number"
+                            },
+                            "pitch" : {
+                              "type" : "number"
+                            },
+                            "roll" : {
+                              "type" : "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "inAction" : {
+                      "type" : "object",
+                      "properties" : {
+                        "actionType" : {
+                          "type" : "object",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "MQTT", "API" ]
+                        },
+                        "radius" : {
+                          "type" : "number"
+                        },
+                        "target" : {
+                          "type" : "string",
+                          "description" : "Mqtt topic or API url"
+                        },
+                        "data" : {
+                          "type" : "string",
+                          "description" : "Mqtt payload or post body"
+                        }
+                      }
+                    },
+                    "outAction" : {
+                      "type" : "object",
+                      "properties" : {
+                        "actionType" : {
+                          "type" : "object",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "MQTT", "API" ]
+                        },
+                        "radius" : {
+                          "type" : "number"
+                        },
+                        "target" : {
+                          "type" : "string",
+                          "description" : "Mqtt topic or API url"
+                        },
+                        "data" : {
+                          "type" : "string",
+                          "description" : "Mqtt payload or post body"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "SlamMap",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "poiList" : [ {
+                "name" : "string",
+                "uuid" : "string",
+                "type" : "DEFAULT",
+                "coordinate" : {
+                  "x" : 15.0,
+                  "y" : 15.0,
+                  "rotation" : 90.0,
+                  "rawX" : 14.8,
+                  "rawY" : 15.4
+                },
+                "inAction" : {
+                  "actionType" : "MQTT",
+                  "radius" : 270.0,
+                  "target" : "string",
+                  "data" : "string"
+                },
+                "outAction" : {
+                  "actionType" : "MQTT",
+                  "radius" : 270.0,
+                  "target" : "string",
+                  "data" : "string"
+                }
+              } ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/clear" : {
+      "publish" : {
+        "summary" : "Clear all pois",
+        "description" : "Save is optional, if false, then the map will not be saved. By default the map will be saved.\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "ZbosClearPoiRequest",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "save" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/clear/event" : {
+      "subscribe" : {
+        "summary" : "event: Clear all pois",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/poi/list/all/get" : {
+      "publish" : {
+        "summary" : "Get list of pois for all maps",
+        "description" : "see <<zbos/slam/poi/list/all/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/slam/poi/list/all/response/{key}" : {
+      "subscribe" : {
+        "summary" : "event: Get list of pois for all maps",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "mapName" : {
+                  "type" : "string"
+                },
+                "poiList" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "type" : "string"
+                      },
+                      "uuid" : {
+                        "type" : "string"
+                      },
+                      "type" : {
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
+                      },
+                      "coordinate" : {
+                        "type" : "object",
+                        "properties" : {
+                          "x" : {
+                            "type" : "number"
+                          },
+                          "y" : {
+                            "type" : "number"
+                          },
+                          "z" : {
+                            "type" : "number"
+                          },
+                          "rotation" : {
+                            "type" : "number"
+                          },
+                          "rawX" : {
+                            "type" : "number"
+                          },
+                          "rawY" : {
+                            "type" : "number"
+                          },
+                          "rawZ" : {
+                            "type" : "number"
+                          },
+                          "orientation" : {
+                            "type" : "object",
+                            "properties" : {
+                              "yaw" : {
+                                "type" : "number"
+                              },
+                              "pitch" : {
+                                "type" : "number"
+                              },
+                              "roll" : {
+                                "type" : "number"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "inAction" : {
+                        "type" : "object",
+                        "properties" : {
+                          "actionType" : {
+                            "type" : "object",
+                            "properties" : {
+                              "name" : {
+                                "type" : "string"
+                              },
+                              "ordinal" : {
+                                "type" : "integer"
+                              }
+                            },
+                            "enum" : [ "MQTT", "API" ]
+                          },
+                          "radius" : {
+                            "type" : "number"
+                          },
+                          "target" : {
+                            "type" : "string",
+                            "description" : "Mqtt topic or API url"
+                          },
+                          "data" : {
+                            "type" : "string",
+                            "description" : "Mqtt payload or post body"
+                          }
+                        }
+                      },
+                      "outAction" : {
+                        "type" : "object",
+                        "properties" : {
+                          "actionType" : {
+                            "type" : "object",
+                            "properties" : {
+                              "name" : {
+                                "type" : "string"
+                              },
+                              "ordinal" : {
+                                "type" : "integer"
+                              }
+                            },
+                            "enum" : [ "MQTT", "API" ]
+                          },
+                          "radius" : {
+                            "type" : "number"
+                          },
+                          "target" : {
+                            "type" : "string",
+                            "description" : "Mqtt topic or API url"
+                          },
+                          "data" : {
+                            "type" : "string",
+                            "description" : "Mqtt payload or post body"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "Array<SlamMap>",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "poiList" : [ {
+                "name" : "string",
+                "uuid" : "string",
+                "type" : "DEFAULT",
+                "coordinate" : {
+                  "x" : 15.0,
+                  "y" : 15.0,
+                  "rotation" : 90.0,
+                  "rawX" : 14.8,
+                  "rawY" : 15.4
+                },
+                "inAction" : {
+                  "actionType" : "MQTT",
+                  "radius" : 270.0,
+                  "target" : "string",
+                  "data" : "string"
+                },
+                "outAction" : {
+                  "actionType" : "MQTT",
+                  "radius" : 270.0,
+                  "target" : "string",
+                  "data" : "string"
+                }
+              } ]
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/poi/list/get" : {
+      "publish" : {
+        "summary" : "Get list of pois for current map",
+        "description" : "see <<zbos/slam/poi/list/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "Required random key"
+              },
+              "mapName" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "ZbosMapDetailRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "_dfse",
+              "mapName" : "First floor"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/list/response/{key}" : {
+      "subscribe" : {
+        "summary" : "event: Get list of pois for current map",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "poiList" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "uuid" : {
+                      "type" : "string"
+                    },
+                    "type" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
+                    },
+                    "coordinate" : {
+                      "type" : "object",
+                      "properties" : {
+                        "x" : {
+                          "type" : "number"
+                        },
+                        "y" : {
+                          "type" : "number"
+                        },
+                        "z" : {
+                          "type" : "number"
+                        },
+                        "rotation" : {
+                          "type" : "number"
+                        },
+                        "rawX" : {
+                          "type" : "number"
+                        },
+                        "rawY" : {
+                          "type" : "number"
+                        },
+                        "rawZ" : {
+                          "type" : "number"
+                        },
+                        "orientation" : {
+                          "type" : "object",
+                          "properties" : {
+                            "yaw" : {
+                              "type" : "number"
+                            },
+                            "pitch" : {
+                              "type" : "number"
+                            },
+                            "roll" : {
+                              "type" : "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "inAction" : {
+                      "type" : "object",
+                      "properties" : {
+                        "actionType" : {
+                          "type" : "object",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "MQTT", "API" ]
+                        },
+                        "radius" : {
+                          "type" : "number"
+                        },
+                        "target" : {
+                          "type" : "string",
+                          "description" : "Mqtt topic or API url"
+                        },
+                        "data" : {
+                          "type" : "string",
+                          "description" : "Mqtt payload or post body"
+                        }
+                      }
+                    },
+                    "outAction" : {
+                      "type" : "object",
+                      "properties" : {
+                        "actionType" : {
+                          "type" : "object",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "MQTT", "API" ]
+                        },
+                        "radius" : {
+                          "type" : "number"
+                        },
+                        "target" : {
+                          "type" : "string",
+                          "description" : "Mqtt topic or API url"
+                        },
+                        "data" : {
+                          "type" : "string",
+                          "description" : "Mqtt payload or post body"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "SlamMap",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "poiList" : [ {
+                "name" : "string",
+                "uuid" : "string",
+                "type" : "DEFAULT",
+                "coordinate" : {
+                  "x" : 15.0,
+                  "y" : 15.0,
+                  "rotation" : 90.0,
+                  "rawX" : 14.8,
+                  "rawY" : 15.4
+                },
+                "inAction" : {
+                  "actionType" : "MQTT",
+                  "radius" : 270.0,
+                  "target" : "string",
+                  "data" : "string"
+                },
+                "outAction" : {
+                  "actionType" : "MQTT",
+                  "radius" : 270.0,
+                  "target" : "string",
+                  "data" : "string"
+                }
+              } ]
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/slam/poi/add" : {
+      "publish" : {
+        "summary" : "Add poi",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "poi" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "uuid" : {
+                    "type" : "string"
+                  },
+                  "type" : {
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "type" : "string"
+                      },
+                      "ordinal" : {
+                        "type" : "integer"
+                      }
+                    },
+                    "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
+                  },
+                  "coordinate" : {
+                    "type" : "object",
+                    "properties" : {
+                      "x" : {
+                        "type" : "number"
+                      },
+                      "y" : {
+                        "type" : "number"
+                      },
+                      "z" : {
+                        "type" : "number"
+                      },
+                      "rotation" : {
+                        "type" : "number"
+                      },
+                      "rawX" : {
+                        "type" : "number"
+                      },
+                      "rawY" : {
+                        "type" : "number"
+                      },
+                      "rawZ" : {
+                        "type" : "number"
+                      },
+                      "orientation" : {
+                        "type" : "object",
+                        "properties" : {
+                          "yaw" : {
+                            "type" : "number"
+                          },
+                          "pitch" : {
+                            "type" : "number"
+                          },
+                          "roll" : {
+                            "type" : "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "inAction" : {
+                    "type" : "object",
+                    "properties" : {
+                      "actionType" : {
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "MQTT", "API" ]
+                      },
+                      "radius" : {
+                        "type" : "number"
+                      },
+                      "target" : {
+                        "type" : "string",
+                        "description" : "Mqtt topic or API url"
+                      },
+                      "data" : {
+                        "type" : "string",
+                        "description" : "Mqtt payload or post body"
+                      }
+                    }
+                  },
+                  "outAction" : {
+                    "type" : "object",
+                    "properties" : {
+                      "actionType" : {
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "MQTT", "API" ]
+                      },
+                      "radius" : {
+                        "type" : "number"
+                      },
+                      "target" : {
+                        "type" : "string",
+                        "description" : "Mqtt topic or API url"
+                      },
+                      "data" : {
+                        "type" : "string",
+                        "description" : "Mqtt payload or post body"
+                      }
+                    }
+                  }
+                }
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "ZbosAddPoiRequest",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "poi" : {
+                "name" : "Home",
+                "uuid" : "string",
+                "type" : "DEFAULT",
+                "coordinate" : {
+                  "x" : 15.0,
+                  "y" : 15.0,
+                  "rotation" : 90.0
+                }
+              },
+              "save" : false
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/add/event" : {
+      "subscribe" : {
+        "summary" : "event: Add poi",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string"
+              },
+              "uuid" : {
+                "type" : "string"
+              },
+              "type" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "ordinal" : {
+                    "type" : "integer"
+                  }
+                },
+                "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
+              },
+              "coordinate" : {
+                "type" : "object",
+                "properties" : {
+                  "x" : {
+                    "type" : "number"
+                  },
+                  "y" : {
+                    "type" : "number"
+                  },
+                  "z" : {
+                    "type" : "number"
+                  },
+                  "rotation" : {
+                    "type" : "number"
+                  },
+                  "rawX" : {
+                    "type" : "number"
+                  },
+                  "rawY" : {
+                    "type" : "number"
+                  },
+                  "rawZ" : {
+                    "type" : "number"
+                  },
+                  "orientation" : {
+                    "type" : "object",
+                    "properties" : {
+                      "yaw" : {
+                        "type" : "number"
+                      },
+                      "pitch" : {
+                        "type" : "number"
+                      },
+                      "roll" : {
+                        "type" : "number"
+                      }
+                    }
+                  }
+                }
+              },
+              "inAction" : {
+                "type" : "object",
+                "properties" : {
+                  "actionType" : {
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "type" : "string"
+                      },
+                      "ordinal" : {
+                        "type" : "integer"
+                      }
+                    },
+                    "enum" : [ "MQTT", "API" ]
+                  },
+                  "radius" : {
+                    "type" : "number"
+                  },
+                  "target" : {
+                    "type" : "string",
+                    "description" : "Mqtt topic or API url"
+                  },
+                  "data" : {
+                    "type" : "string",
+                    "description" : "Mqtt payload or post body"
+                  }
+                }
+              },
+              "outAction" : {
+                "type" : "object",
+                "properties" : {
+                  "actionType" : {
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "type" : "string"
+                      },
+                      "ordinal" : {
+                        "type" : "integer"
+                      }
+                    },
+                    "enum" : [ "MQTT", "API" ]
+                  },
+                  "radius" : {
+                    "type" : "number"
+                  },
+                  "target" : {
+                    "type" : "string",
+                    "description" : "Mqtt topic or API url"
+                  },
+                  "data" : {
+                    "type" : "string",
+                    "description" : "Mqtt payload or post body"
+                  }
+                }
+              }
+            }
+          },
+          "name" : "Poi",
+          "examples" : [ {
+            "payload" : {
+              "name" : "string",
+              "uuid" : "string",
+              "type" : "DEFAULT",
+              "coordinate" : {
+                "x" : 15.0,
+                "y" : 15.0,
+                "rotation" : 90.0
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/edit" : {
+      "publish" : {
+        "summary" : "Edit poi",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "poi" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "uuid" : {
+                    "type" : "string"
+                  },
+                  "type" : {
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "type" : "string"
+                      },
+                      "ordinal" : {
+                        "type" : "integer"
+                      }
+                    },
+                    "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
+                  },
+                  "coordinate" : {
+                    "type" : "object",
+                    "properties" : {
+                      "x" : {
+                        "type" : "number"
+                      },
+                      "y" : {
+                        "type" : "number"
+                      },
+                      "z" : {
+                        "type" : "number"
+                      },
+                      "rotation" : {
+                        "type" : "number"
+                      },
+                      "rawX" : {
+                        "type" : "number"
+                      },
+                      "rawY" : {
+                        "type" : "number"
+                      },
+                      "rawZ" : {
+                        "type" : "number"
+                      },
+                      "orientation" : {
+                        "type" : "object",
+                        "properties" : {
+                          "yaw" : {
+                            "type" : "number"
+                          },
+                          "pitch" : {
+                            "type" : "number"
+                          },
+                          "roll" : {
+                            "type" : "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "inAction" : {
+                    "type" : "object",
+                    "properties" : {
+                      "actionType" : {
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "MQTT", "API" ]
+                      },
+                      "radius" : {
+                        "type" : "number"
+                      },
+                      "target" : {
+                        "type" : "string",
+                        "description" : "Mqtt topic or API url"
+                      },
+                      "data" : {
+                        "type" : "string",
+                        "description" : "Mqtt payload or post body"
+                      }
+                    }
+                  },
+                  "outAction" : {
+                    "type" : "object",
+                    "properties" : {
+                      "actionType" : {
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "MQTT", "API" ]
+                      },
+                      "radius" : {
+                        "type" : "number"
+                      },
+                      "target" : {
+                        "type" : "string",
+                        "description" : "Mqtt topic or API url"
+                      },
+                      "data" : {
+                        "type" : "string",
+                        "description" : "Mqtt payload or post body"
+                      }
+                    }
+                  }
+                }
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "ZbosEditPoiRequest",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "poi" : {
+                "name" : "Home",
+                "uuid" : "string",
+                "type" : "DEFAULT",
+                "coordinate" : {
+                  "x" : 15.0,
+                  "y" : 15.0,
+                  "rotation" : 90.0
+                }
+              },
+              "save" : false
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/edit/event" : {
+      "subscribe" : {
+        "summary" : "event: Edit poi",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/poi/remove/name" : {
+      "publish" : {
+        "summary" : "Remove poi by name",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "ZbosRemovePoiByNameRequest",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "name" : "Home",
+              "save" : false
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/remove/name/event" : {
+      "subscribe" : {
+        "summary" : "event: Remove poi by name",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/poi/remove/uuid" : {
+      "publish" : {
+        "summary" : "Remove poi by uuid",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "uuid" : {
+                "type" : "string"
+              },
+              "save" : {
+                "type" : "boolean"
+              }
+            }
+          },
+          "name" : "ZbosRemovePoiByUUIDRequest",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "uuid" : "abcd-qsdf-qsdfd-qsdf",
+              "save" : false
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/poi/remove/uuid/event" : {
+      "subscribe" : {
+        "summary" : "event: Remove poi by uuid",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/poi/moveto/uuid" : {
+      "publish" : {
+        "summary" : "Move robot to poi",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "mapName" : {
+                "type" : "string"
+              },
+              "uuid" : {
+                "type" : "string"
+              },
+              "speed" : {
+                "type" : "integer",
+                "$ref" : "#/components/schemas/percentage"
+              }
+            }
+          },
+          "name" : "ZbosMoveToPoiByUUIDRequest",
+          "examples" : [ {
+            "payload" : {
+              "mapName" : "First floor",
+              "uuid" : "abcd-qsdf-qsdfd-qsdf",
+              "speed" : 50
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/path/remaining/current" : {
+      "subscribe" : {
+        "summary" : "Path remaining changed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "remainingPathPoints" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "x" : {
+                      "type" : "number"
+                    },
+                    "y" : {
+                      "type" : "number"
+                    },
+                    "z" : {
+                      "type" : "number"
+                    }
+                  }
+                }
+              },
+              "remainingMilestones" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "x" : {
+                      "type" : "number"
+                    },
+                    "y" : {
+                      "type" : "number"
+                    },
+                    "z" : {
+                      "type" : "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "ZbosRemainingPathObject",
+          "examples" : [ {
+            "payload" : {
+              "remainingPathPoints" : [ {
+                "x" : 50.0,
+                "y" : 35.0,
+                "z" : 1.0
+              } ],
+              "remainingMilestones" : [ {
+                "x" : 50.0,
+                "y" : 35.0,
+                "z" : 1.0
+              } ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/slam/charging/required/started" : {
+      "subscribe" : {
+        "summary" : "Charging required",
+        "description" : "Is published when battery is low/critical to indicate the robot is going to try charge itself.\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/charging/required/stopped" : {
+      "subscribe" : {
+        "summary" : "Battery is not critical",
+        "description" : "Is published when robot has stopped charging itself\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/charging/goto" : {
+      "publish" : {
+        "summary" : "Go to charging station",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/charging/goto/started" : {
+      "subscribe" : {
+        "summary" : "Move to charging station started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/charging/goto/stopped" : {
+      "subscribe" : {
+        "summary" : "Move to charging station stopped",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/charging/goto/failed" : {
+      "subscribe" : {
+        "summary" : "Move to charging station failed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/docking/undock/start" : {
+      "publish" : {
+        "summary" : "Undock",
+        "description" : "Leave charging station\n",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/docking/undock/started" : {
+      "subscribe" : {
+        "summary" : "Undocking started",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/docking/undock/finished" : {
+      "subscribe" : {
+        "summary" : "Undocking finished",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/slam/docking/undock/failed" : {
+      "subscribe" : {
+        "summary" : "Undocking failed",
+        "description" : "",
+        "tags" : [ {
+          "name" : "SLAM",
+          "description" : "All slam related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

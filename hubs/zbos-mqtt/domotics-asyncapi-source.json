@@ -1,0 +1,1323 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "Domotics",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/domotics/systems/get" : {
+      "publish" : {
+        "summary" : "Get domotics systems",
+        "description" : "see <<zbos/domotics/systems/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/domotics/systems/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Get domotics systems response",
+        "description" : "All domotics systems that are configured\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string",
+                  "description" : "unique id of the domotics system"
+                },
+                "brand" : {
+                  "type" : "string",
+                  "description" : "brand of the domotics system, eg: homeassistant, creadomotics, ..."
+                },
+                "state" : {
+                  "type" : "object",
+                  "description" : "state of the domotics system",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "ordinal" : {
+                      "type" : "integer"
+                    }
+                  },
+                  "enum" : [ "initializing", "connecting", "connected", "not_connected" ]
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "human-readable name of the domotics system"
+                }
+              }
+            }
+          },
+          "name" : "Array<DomoticsSystem>",
+          "examples" : [ {
+            "payload" : [ {
+              "id" : "homeassistant_0d8cfe8b42594518975c10ebafe04c0c",
+              "brand" : "homeassistant",
+              "state" : "initializing",
+              "name" : "Home Assistant - Home"
+            } ]
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/domotics/systems/changed/event" : {
+      "subscribe" : {
+        "summary" : "Domotics systems changed event",
+        "description" : "Fires all systems when the configuration of any of the domotics systems changes\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string",
+                  "description" : "unique id of the domotics system"
+                },
+                "brand" : {
+                  "type" : "string",
+                  "description" : "brand of the domotics system, eg: homeassistant, creadomotics, ..."
+                },
+                "state" : {
+                  "type" : "object",
+                  "description" : "state of the domotics system",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "ordinal" : {
+                      "type" : "integer"
+                    }
+                  },
+                  "enum" : [ "initializing", "connecting", "connected", "not_connected" ]
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "human-readable name of the domotics system"
+                }
+              }
+            }
+          },
+          "name" : "Array<DomoticsSystem>",
+          "examples" : [ {
+            "payload" : [ {
+              "id" : "homeassistant_0d8cfe8b42594518975c10ebafe04c0c",
+              "brand" : "homeassistant",
+              "state" : "connected",
+              "name" : "Home Assistant - Home"
+            } ]
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/devices/get" : {
+      "publish" : {
+        "summary" : "Get domotics devices",
+        "description" : "see <<zbos/domotics/devices/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "Required random key"
+              },
+              "ids" : {
+                "type" : "array",
+                "description" : "Optional, device ids to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "rooms" : {
+                "type" : "array",
+                "description" : "Optional, room ids to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "tags" : {
+                "type" : "array",
+                "description" : "Optional, tags to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "type" : {
+                "type" : "string",
+                "description" : "Optional, device type to filter on"
+              },
+              "system_ids" : {
+                "type" : "array",
+                "description" : "Optional, system ids to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "with_actions_only" : {
+                "type" : "boolean",
+                "description" : "Optional, if set to true, only devices with actions will be returned"
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "Optional. Set the language for all labels. Otherwise it will be the default language.\nThe language format is ISO 639-1 language code, Eg: 'en' or 'en-US'"
+              }
+            }
+          },
+          "name" : "DomoticsDevicesGetRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc"
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "ids" : [ "light.kitchen" ]
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "rooms" : [ "kitchen" ]
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "tags" : [ "kitchen", "central" ]
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "type" : "light"
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "system_ids" : [ "homeassistant_0d8cfe8b42594518975c10ebafe04c0c" ]
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "with_actions_only" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/devices/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Get domotics devices response",
+        "description" : "All domotics devices that are configured\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string",
+                  "description" : "Unique id"
+                },
+                "type" : {
+                  "type" : "string",
+                  "description" : "Device type"
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "Human-readable name"
+                },
+                "room" : {
+                  "type" : "string",
+                  "description" : "Optional, id of the room the device is in"
+                },
+                "tags" : {
+                  "type" : "array",
+                  "description" : "Optional, list of tags the device has",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "system_id" : {
+                  "type" : "string",
+                  "description" : "System ID this device belongs to"
+                },
+                "brand" : {
+                  "type" : "string",
+                  "description" : "Brand of the system this device belongs to"
+                },
+                "actions" : {
+                  "type" : "object",
+                  "description" : "Definitions of all actions you can perform with the device"
+                },
+                "attributes" : {
+                  "type" : "object",
+                  "description" : "Definitions of all attributes of the device"
+                }
+              }
+            }
+          },
+          "name" : "Array<DomoticsDevice>",
+          "examples" : [ {
+            "payload" : [ {
+              "id" : "light.kitchen",
+              "type" : "light",
+              "name" : "Central light in the kitchen",
+              "room" : "kitchen",
+              "tags" : [ "kitchen", "central" ],
+              "brand" : "homeassistant",
+              "actions" : {
+                "turn_on" : {
+                  "label" : "Turn On",
+                  "components" : {
+                    "brightness" : {
+                      "required" : false,
+                      "type" : "integer",
+                      "label" : "Brightness",
+                      "range" : {
+                        "min" : 0,
+                        "max" : 255
+                      }
+                    }
+                  }
+                },
+                "turn_off" : {
+                  "label" : "Turn Off"
+                },
+                "toggle" : {
+                  "label" : "Toggle",
+                  "components" : {
+                    "brightness" : {
+                      "required" : false,
+                      "type" : "integer",
+                      "label" : "Brightness",
+                      "range" : {
+                        "min" : 0,
+                        "max" : 255
+                      }
+                    }
+                  }
+                }
+              },
+              "attributes" : {
+                "state" : {
+                  "type" : "select_single",
+                  "label" : "State",
+                  "options" : [ {
+                    "key" : "on",
+                    "value" : "on",
+                    "label" : "On"
+                  }, {
+                    "key" : "off",
+                    "value" : "off",
+                    "label" : "Off"
+                  } ]
+                },
+                "brightness" : {
+                  "type" : "integer",
+                  "label" : "Brightness",
+                  "range" : {
+                    "min" : 0,
+                    "max" : 255
+                  }
+                }
+              },
+              "system_id" : "homeassistant_0d8cfe8b42594518975c10ebafe04c0c"
+            } ]
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/domotics/devices/actions/execute" : {
+      "publish" : {
+        "summary" : "Update device state",
+        "description" : "Updates all devices that match the \"ids\", \"rooms\", \"tags\", and \"system_ids\" filter\n                |Leave any of the filters empty to ignore them.\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "Required random key"
+              },
+              "ids" : {
+                "type" : "array",
+                "description" : "Optional, Ids of the devices",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "rooms" : {
+                "type" : "array",
+                "description" : "Optional, Rooms of the devices",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "tags" : {
+                "type" : "array",
+                "description" : "Optional, Tags of the devices",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "system_ids" : {
+                "type" : "array",
+                "description" : "Optional, System Ids of devices",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "type" : {
+                "type" : "string",
+                "description" : "Type of the device"
+              },
+              "action" : {
+                "type" : "string",
+                "description" : "Action that should be performed"
+              },
+              "attributes" : {
+                "type" : "object",
+                "description" : "Map of attributes for the action"
+              }
+            }
+          },
+          "name" : "DomoticsDevicesActionsExecuteRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "ids" : [ "light.kitchen" ],
+              "type" : "light",
+              "action" : "turn_on",
+              "attributes" : {
+                "brightness" : 112
+              }
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "rooms" : [ "kitchen" ],
+              "tags" : [ "central" ],
+              "type" : "light",
+              "action" : "turn_off",
+              "system_ids" : [ "homeassistant_0d8cfe8b42594518975c10ebafe04c0c" ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/devices/actions/execute/response" : {
+      "subscribe" : {
+        "summary" : "Update device state response",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      }
+    },
+    "zbos/domotics/states/get" : {
+      "publish" : {
+        "summary" : "Get domotics states",
+        "description" : "see <<zbos/domotics/states/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "Required random key"
+              },
+              "ids" : {
+                "type" : "array",
+                "description" : "Optional, ids to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "rooms" : {
+                "type" : "array",
+                "description" : "Optional, room ids to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "tags" : {
+                "type" : "array",
+                "description" : "Optional, tags to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "type" : {
+                "type" : "string",
+                "description" : "Optional, type to filter on"
+              },
+              "system_ids" : {
+                "type" : "array",
+                "description" : "Optional, system ids to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "DomoticsStatesGetRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc"
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "ids" : [ "light.kitchen" ]
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "rooms" : [ "kitchen" ]
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "tags" : [ "kitchen", "central" ]
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "type" : "light"
+            }
+          }, {
+            "payload" : {
+              "key" : "abc",
+              "system_ids" : [ "homeassistant_0d8cfe8b42594518975c10ebafe04c0c" ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/states/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Get domotics states response",
+        "description" : "All the domotics states with their full data\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string",
+                  "description" : "Unique id"
+                },
+                "type" : {
+                  "type" : "string",
+                  "description" : "Device type"
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "Human-readable name"
+                },
+                "room" : {
+                  "type" : "string",
+                  "description" : "Optional, id of the room the device is in"
+                },
+                "tags" : {
+                  "type" : "array",
+                  "description" : "Optional, list of tags the device has",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "system_id" : {
+                  "type" : "string",
+                  "description" : "System ID this device belongs to"
+                },
+                "brand" : {
+                  "type" : "string",
+                  "description" : "Brand of the system this device belongs to"
+                },
+                "state" : {
+                  "type" : "string",
+                  "description" : "The main state value"
+                },
+                "data" : {
+                  "type" : "object",
+                  "description" : "The entire JSON as returned by the domotics system"
+                }
+              }
+            }
+          },
+          "name" : "Array<DomoticsState>",
+          "examples" : [ {
+            "payload" : [ {
+              "id" : "light.kitchen",
+              "type" : "light",
+              "name" : "Central light in the kitchen",
+              "room" : "kitchen",
+              "tags" : [ "kitchen", "central" ],
+              "brand" : "homeassistant",
+              "state" : "on",
+              "data" : {
+                "entity_id" : {
+                  "content" : "light.kitchen",
+                  "string" : true
+                },
+                "state" : {
+                  "content" : "on",
+                  "string" : true
+                },
+                "attributes" : {
+                  "supported_color_modes" : [ {
+                    "content" : "brightness",
+                    "string" : true
+                  } ],
+                  "color_mode" : {
+                    "content" : "brightness",
+                    "string" : true
+                  },
+                  "brightness" : {
+                    "content" : "22",
+                    "string" : false
+                  },
+                  "friendly_name" : {
+                    "content" : "Central light in the kitchen",
+                    "string" : true
+                  },
+                  "supported_features" : {
+                    "content" : "0",
+                    "string" : false
+                  }
+                },
+                "last_changed" : {
+                  "content" : "2021-07-08T07:06:46.351322+00:00",
+                  "string" : true
+                },
+                "last_updated" : {
+                  "content" : "2021-07-08T07:07:14.279327+00:00",
+                  "string" : true
+                },
+                "context" : {
+                  "id" : {
+                    "content" : "4dd02cfa0ba03df611e6b468d84a61b0",
+                    "string" : true
+                  },
+                  "parent_id" : {
+                    "content" : "null",
+                    "string" : false
+                  },
+                  "user_id" : {
+                    "content" : "null",
+                    "string" : false
+                  }
+                }
+              },
+              "system_id" : "homeassistant_0d8cfe8b42594518975c10ebafe04c0c"
+            } ]
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/domotics/states/changed/event" : {
+      "subscribe" : {
+        "summary" : "Domotics state changed event",
+        "description" : "Fired when a state changed\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "description" : "Unique id"
+              },
+              "type" : {
+                "type" : "string",
+                "description" : "Device type"
+              },
+              "name" : {
+                "type" : "string",
+                "description" : "Human-readable name"
+              },
+              "room" : {
+                "type" : "string",
+                "description" : "Optional, id of the room the device is in"
+              },
+              "tags" : {
+                "type" : "array",
+                "description" : "Optional, list of tags the device has",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "system_id" : {
+                "type" : "string",
+                "description" : "System ID this device belongs to"
+              },
+              "brand" : {
+                "type" : "string",
+                "description" : "Brand of the system this device belongs to"
+              },
+              "state" : {
+                "type" : "string",
+                "description" : "The main state value"
+              },
+              "data" : {
+                "type" : "object",
+                "description" : "The entire JSON as returned by the domotics system"
+              }
+            }
+          },
+          "name" : "DomoticsState",
+          "examples" : [ {
+            "payload" : {
+              "id" : "light.kitchen",
+              "type" : "light",
+              "name" : "Central light in the kitchen",
+              "room" : "kitchen",
+              "tags" : [ "kitchen", "central" ],
+              "brand" : "homeassistant",
+              "state" : "on",
+              "data" : {
+                "entity_id" : {
+                  "content" : "light.kitchen",
+                  "string" : true
+                },
+                "old_state" : {
+                  "entity_id" : {
+                    "content" : "light.kitchen",
+                    "string" : true
+                  },
+                  "state" : {
+                    "content" : "on",
+                    "string" : true
+                  },
+                  "attributes" : {
+                    "supported_color_modes" : [ {
+                      "content" : "brightness",
+                      "string" : true
+                    } ],
+                    "color_mode" : {
+                      "content" : "brightness",
+                      "string" : true
+                    },
+                    "brightness" : {
+                      "content" : "22",
+                      "string" : false
+                    },
+                    "friendly_name" : {
+                      "content" : "Central light in the kitchen",
+                      "string" : true
+                    },
+                    "supported_features" : {
+                      "content" : "0",
+                      "string" : false
+                    }
+                  },
+                  "last_changed" : {
+                    "content" : "2021-07-08T07:06:46.351322+00:00",
+                    "string" : true
+                  },
+                  "last_updated" : {
+                    "content" : "2021-07-08T07:07:14.279327+00:00",
+                    "string" : true
+                  },
+                  "context" : {
+                    "id" : {
+                      "content" : "4dd02cfa0ba03df611e6b468d84a61b0",
+                      "string" : true
+                    },
+                    "parent_id" : {
+                      "content" : "null",
+                      "string" : false
+                    },
+                    "user_id" : {
+                      "content" : "null",
+                      "string" : false
+                    }
+                  }
+                },
+                "new_state" : {
+                  "entity_id" : {
+                    "content" : "light.kitchen",
+                    "string" : true
+                  },
+                  "state" : {
+                    "content" : "off",
+                    "string" : true
+                  },
+                  "attributes" : {
+                    "supported_color_modes" : [ {
+                      "content" : "brightness",
+                      "string" : true
+                    } ],
+                    "color_mode" : {
+                      "content" : "brightness",
+                      "string" : true
+                    },
+                    "brightness" : {
+                      "content" : "0",
+                      "string" : false
+                    },
+                    "friendly_name" : {
+                      "content" : "Central light in the kitchen",
+                      "string" : true
+                    },
+                    "supported_features" : {
+                      "content" : "0",
+                      "string" : false
+                    }
+                  },
+                  "last_changed" : {
+                    "content" : "2021-07-08T07:06:46.351322+00:00",
+                    "string" : true
+                  },
+                  "last_updated" : {
+                    "content" : "2021-07-08T07:07:14.279327+00:00",
+                    "string" : true
+                  },
+                  "context" : {
+                    "id" : {
+                      "content" : "4dd02cfa0ba03df611e6b468d84a61b0",
+                      "string" : true
+                    },
+                    "parent_id" : {
+                      "content" : "null",
+                      "string" : false
+                    },
+                    "user_id" : {
+                      "content" : "null",
+                      "string" : false
+                    }
+                  }
+                }
+              },
+              "system_id" : "homeassistant_0d8cfe8b42594518975c10ebafe04c0c"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/events/types/get" : {
+      "publish" : {
+        "summary" : "Get domotics event types",
+        "description" : "see <<zbos/domotics/events/types/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "Required random key"
+              },
+              "system_ids" : {
+                "type" : "array",
+                "description" : "Optional, system ids to filter on",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "DomoticsEventTypesGetRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "system_ids" : [ "homeassistant_0d8cfe8b42594518975c10ebafe04c0c" ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/events/types/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Get domotics event types response",
+        "description" : "All the possible event types that can occur\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "type" : {
+                  "type" : "string",
+                  "description" : "Type key of the event type"
+                },
+                "system_ids" : {
+                  "type" : "array",
+                  "description" : "System ids that have this event type",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "name" : "Array<DomoticsEventType>",
+          "examples" : [ {
+            "payload" : [ {
+              "type" : "knx_event",
+              "system_ids" : [ "homeassistant_0d8cfe8b42594518975c10ebafe04c0c" ]
+            } ]
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/domotics/events/event" : {
+      "subscribe" : {
+        "summary" : "Domotics event",
+        "description" : "Fired when a domotics event is fired\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "type" : "string",
+                "description" : "Type of the event"
+              },
+              "system_id" : {
+                "type" : "string",
+                "description" : "System ID this event originates from"
+              },
+              "data" : {
+                "type" : "object",
+                "description" : "The entire JSON of the event data, as returned by the domotics system"
+              }
+            }
+          },
+          "name" : "DomoticsEvent",
+          "examples" : [ {
+            "payload" : {
+              "type" : "knx_event",
+              "data" : {
+                "data" : [ {
+                  "content" : "255",
+                  "string" : false
+                } ],
+                "destination" : {
+                  "content" : "0/4/1",
+                  "string" : true
+                },
+                "direction" : {
+                  "content" : "Incoming",
+                  "string" : true
+                },
+                "source" : {
+                  "content" : "1.1.1",
+                  "string" : true
+                },
+                "telegramtype" : {
+                  "content" : "GroupValueWrite",
+                  "string" : true
+                }
+              },
+              "system_id" : "homeassistant_0d8cfe8b42594518975c10ebafe04c0c"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/camera/image/get" : {
+      "publish" : {
+        "summary" : "Get camera image",
+        "description" : "see <<zbos/domotics/camera/image/get/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "Required random key"
+              },
+              "id" : {
+                "type" : "string",
+                "description" : "Required ID of the camera device"
+              },
+              "system_id" : {
+                "type" : "string",
+                "description" : "Optional, system id to filter on"
+              }
+            }
+          },
+          "name" : "DomoticsCameraImageGetRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "abc",
+              "id" : "camera.frontdoor",
+              "system_id" : "homeassistant_0d8cfe8b42594518975c10ebafe04c0c"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/camera/image/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Get domotics image response",
+        "description" : "Image of the camera\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "base64" : {
+                "type" : "string",
+                "description" : "Base64-encoded representation of the image"
+              }
+            }
+          },
+          "name" : "DomoticsCameraImageResponse",
+          "examples" : [ {
+            "payload" : {
+              "base64" : "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM81MX1HwAFwwJXcxcsuQAAAABJRU5ErkJggg"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/domotics/homeassistant/services/call" : {
+      "publish" : {
+        "summary" : "Call Home Assistant service",
+        "description" : "Call a Home Assistant service, see https://www.home-assistant.io/docs/scripts/service-calls[^] for more information.\n",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "domain" : {
+                "type" : "string",
+                "description" : "The domain of the service, eg: 'light'"
+              },
+              "service" : {
+                "type" : "string",
+                "description" : "The service itself, eg: 'turn_on'"
+              },
+              "data" : {
+                "type" : "object",
+                "description" : "The data that should be passed to the service"
+              },
+              "system_ids" : {
+                "type" : "array",
+                "description" : "Optional, system ids of Home Assistant instances this call should execute on",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "HomeAssistantServiceCall",
+          "examples" : [ {
+            "payload" : {
+              "domain" : "light",
+              "service" : "turn_on",
+              "data" : {
+                "entity_id" : "light.kitchen",
+                "brightness" : 50
+              },
+              "system_ids" : [ "homeassistant_0d8cfe8b42594518975c10ebafe04c0c" ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/domotics/homeassistant/services/call_response" : {
+      "subscribe" : {
+        "summary" : "Call Home Assistant service response",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Domotics",
+          "description" : "All domotics related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

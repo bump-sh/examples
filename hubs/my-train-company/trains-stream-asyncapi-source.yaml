@@ -1,0 +1,95 @@
+asyncapi: '2.0.0'
+info:
+  title: trains/stream
+  version: '1.0.0'
+  description: |
+    Follow trains departures and arrivals live, in any station.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  production:
+    url: trains.mycompany.com:{port}
+    protocol: mqtt
+    description: Trains stream
+    variables:
+      port:
+        description: Secure connection (TLS) is available through port 8883.
+        default: '1883'
+        enum:
+          - '1883'
+          - '8883'
+    security:
+      - apiKey: []
+      - openIdConnectWellKnown: []
+
+defaultContentType: application/json
+
+channels:
+  trains/departures:
+    publish:
+      summary: Inform of a train departure
+      operationId: TrainDeparture
+      message:
+        $ref: '#/components/messages/trainHasLeft'
+    subscribe:
+      summary: Be informed of all train departures
+      operationId: TrainDeparture
+      message:
+        $ref: '#/components/messages/trainHasLeft'
+  trains/arrivals:
+    publish:
+      summary: Inform of a train arrival
+      operationId: TrainArrival
+      message:
+        $ref: '#/components/messages/trainHasArrived'
+    subscribe:
+      summary: Be informed of all train departures
+      operationId: TrainArrival
+      message:
+        $ref: '#/components/messages/trainHasArrived'
+
+
+components:
+  messages:
+    trainHasLeft:
+      name: trainHasLeft
+      title: Train has left a station
+      summary: Attributes of a train leaving a station.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/trainEventPayload"
+    trainHasArrived:
+      name: trainHasArrived
+      title: Train has arrived in a station
+      summary: Attributes of a train arriving in a station.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/trainEventPayload"
+
+  schemas:
+    trainEventPayload:
+      type: object
+      properties:
+        event:
+          type: string
+          description: Type of the event.
+          enum:
+            - left
+            - arrived
+        sent_at:
+          type: string
+          format: date-time
+        train_code:
+          type: string
+          description: Train's code.
+        train_passengers_count:
+          type: integer
+          description: Current number of passengers in the train.
+        station_code:
+          type: string
+          description: Station's code.
+        station_name:
+          type: string
+          description: Station's full name.

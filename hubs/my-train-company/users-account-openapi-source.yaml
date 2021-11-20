@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: users/account
+  version: '1.0'
+servers:
+  - url: 'http://api.mycompany.com/v1/users'
+paths:
+  /account:
+    get:
+      summary: Account
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    description: ''
+                  email:
+                    type: string
+                    format: email
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  id:
+                    type: string
+                    format: uuid
+      operationId: get-account
+      description: Get the current user account properties.
+      parameters: []
+components:
+  schemas: {}

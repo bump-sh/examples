@@ -1,0 +1,988 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "Monitoring",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/monitoring/event/{source}/{type}" : {
+      "subscribe" : {
+        "summary" : "Monitoring event",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "description" : "Mandatory. A unique ID for the event"
+              },
+              "timestamp" : {
+                "type" : "number",
+                "description" : "Mandatory. The time at which the event occurred"
+              },
+              "type" : {
+                "type" : "string",
+                "description" : "Mandatory. The type of event this is, no dots allowed"
+              },
+              "source" : {
+                "type" : "string",
+                "description" : "Mandatory. What device produced this event, no dots allowed"
+              },
+              "value" : {
+                "type" : "string",
+                "description" : "Optional. A value relating to the event such as a temperature"
+              },
+              "data" : {
+                "type" : "object",
+                "description" : "Optional. Extra data related to the event"
+              },
+              "unit" : {
+                "type" : "string",
+                "description" : "Optional. The type of unit the value is expressed in such as °C"
+              },
+              "alarms" : {
+                "type" : "array",
+                "description" : "Optional. Alarms attached to this event",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "type" : {
+                      "type" : "object",
+                      "description" : "Mandatory. The type of alarm",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "ItemOmission", "ItemCommission", "ServiceOmission", "ServiceCommission", "TransientServiceOmission", "TransientServiceCommission", "EarlyServiceOmission", "LateServiceCommission", "EarlyServiceStart", "LateServiceStart", "BoundedOmissionInterval", "UndetectableValueError", "BelowRange", "AboveRange", "BoundedValueChange", "StuckValue", "OutOfBounds", "OutOfOrder", "OutOfCalibration", "EarlyDelivery", "LateDelivery", "HighRate", "LowRate", "RateJitter", "EarlyService", "DelayedService", "SymmetricReplicationError", "AsymmetricApproximateValue", "AsymmetricExactValue", "AsymmetricItemOmission", "AsymmetricServiceOmission", "AsymmetricTiming", "ReadWriteRace", "WriteWriteRace", "Deadlock", "Starvation", "AuthorizationError", "AuthenticationError" ]
+                    },
+                    "severity" : {
+                      "type" : "integer",
+                      "description" : "Mandatory. How critical the alarm is"
+                    },
+                    "persist" : {
+                      "type" : "boolean",
+                      "description" : "Mandatory. If this is an ongoing alarm"
+                    },
+                    "timestamp" : {
+                      "type" : "number",
+                      "description" : "Mandatory. When the alarm initially started"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "MonitoringEvent"
+        }
+      },
+      "parameters" : {
+        "source" : {
+          "description" : "Source of monitoring event",
+          "schema" : {
+            "type" : "string"
+          }
+        },
+        "type" : {
+          "description" : "Type of monitoring event",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/monitoring/list/get" : {
+      "publish" : {
+        "summary" : "Get monitoring events",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "limit" : {
+                "type" : "integer"
+              },
+              "offset" : {
+                "type" : "integer"
+              },
+              "filters" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "field" : {
+                      "type" : "string",
+                      "description" : "Field to check on. Note that the field should be camelCase, not snake_case"
+                    },
+                    "value" : {
+                      "type" : "string",
+                      "description" : "Value to check on. For numbers you should use 'min' and 'max'."
+                    },
+                    "min" : {
+                      "type" : "number",
+                      "description" : "Minimum value, only usable for number fields"
+                    },
+                    "max" : {
+                      "type" : "number",
+                      "description" : "Maximum value, only usable for number fields"
+                    },
+                    "direction" : {
+                      "type" : "object",
+                      "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "asc", "desc" ]
+                    },
+                    "operator" : {
+                      "type" : "object",
+                      "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
+                      "properties" : {
+                        "alternateNames" : {
+                          "type" : "array",
+                          "items" : {
+                            "type" : "string"
+                          }
+                        },
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "and", "or", "not" ]
+                    },
+                    "match_type" : {
+                      "type" : "object",
+                      "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
+                    },
+                    "filters" : {
+                      "type" : "array",
+                      "description" : "Filters on which the operator will be applied.\nIf there are no child filters, the operator will be applied to the filter object itself.",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    },
+                    "field_filters" : {
+                      "type" : "array",
+                      "description" : "Filters to apply on the child fields of the field.\nWill only work if the field is an object, array/list or map.",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    }
+                  }
+                }
+              },
+              "sort" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "field" : {
+                      "type" : "string",
+                      "description" : "Field to check on. Note that the field should be camelCase, not snake_case"
+                    },
+                    "value" : {
+                      "type" : "string",
+                      "description" : "Value to check on. For numbers you should use 'min' and 'max'."
+                    },
+                    "min" : {
+                      "type" : "number",
+                      "description" : "Minimum value, only usable for number fields"
+                    },
+                    "max" : {
+                      "type" : "number",
+                      "description" : "Maximum value, only usable for number fields"
+                    },
+                    "direction" : {
+                      "type" : "object",
+                      "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "asc", "desc" ]
+                    },
+                    "operator" : {
+                      "type" : "object",
+                      "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
+                      "properties" : {
+                        "alternateNames" : {
+                          "type" : "array",
+                          "items" : {
+                            "type" : "string"
+                          }
+                        },
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "and", "or", "not" ]
+                    },
+                    "match_type" : {
+                      "type" : "object",
+                      "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
+                    },
+                    "filters" : {
+                      "type" : "array",
+                      "description" : "Filters on which the operator will be applied.\nIf there are no child filters, the operator will be applied to the filter object itself.",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    },
+                    "field_filters" : {
+                      "type" : "array",
+                      "description" : "Filters to apply on the child fields of the field.\nWill only work if the field is an object, array/list or map.",
+                      "items" : {
+                        "type" : "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "FilteringRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "Test123",
+              "limit" : 50,
+              "offset" : 10,
+              "filters" : [ {
+                "operator" : "or",
+                "match_type" : "contains"
+              }, {
+                "field" : "type",
+                "value" : "image",
+                "operator" : "and",
+                "match_type" : "contains"
+              }, {
+                "field" : "date",
+                "operator" : "and",
+                "match_type" : "contains"
+              } ],
+              "sort" : [ {
+                "field" : "extension",
+                "operator" : "and",
+                "match_type" : "contains"
+              }, {
+                "field" : "name",
+                "operator" : "and",
+                "match_type" : "contains"
+              } ]
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/monitoring/list/get/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get monitoring events",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string",
+                  "description" : "Mandatory. A unique ID for the event"
+                },
+                "timestamp" : {
+                  "type" : "number",
+                  "description" : "Mandatory. The time at which the event occurred"
+                },
+                "type" : {
+                  "type" : "string",
+                  "description" : "Mandatory. The type of event this is, no dots allowed"
+                },
+                "source" : {
+                  "type" : "string",
+                  "description" : "Mandatory. What device produced this event, no dots allowed"
+                },
+                "value" : {
+                  "type" : "string",
+                  "description" : "Optional. A value relating to the event such as a temperature"
+                },
+                "data" : {
+                  "type" : "object",
+                  "description" : "Optional. Extra data related to the event"
+                },
+                "unit" : {
+                  "type" : "string",
+                  "description" : "Optional. The type of unit the value is expressed in such as °C"
+                },
+                "alarms" : {
+                  "type" : "array",
+                  "description" : "Optional. Alarms attached to this event",
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      "type" : {
+                        "type" : "object",
+                        "description" : "Mandatory. The type of alarm",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "ItemOmission", "ItemCommission", "ServiceOmission", "ServiceCommission", "TransientServiceOmission", "TransientServiceCommission", "EarlyServiceOmission", "LateServiceCommission", "EarlyServiceStart", "LateServiceStart", "BoundedOmissionInterval", "UndetectableValueError", "BelowRange", "AboveRange", "BoundedValueChange", "StuckValue", "OutOfBounds", "OutOfOrder", "OutOfCalibration", "EarlyDelivery", "LateDelivery", "HighRate", "LowRate", "RateJitter", "EarlyService", "DelayedService", "SymmetricReplicationError", "AsymmetricApproximateValue", "AsymmetricExactValue", "AsymmetricItemOmission", "AsymmetricServiceOmission", "AsymmetricTiming", "ReadWriteRace", "WriteWriteRace", "Deadlock", "Starvation", "AuthorizationError", "AuthenticationError" ]
+                      },
+                      "severity" : {
+                        "type" : "integer",
+                        "description" : "Mandatory. How critical the alarm is"
+                      },
+                      "persist" : {
+                        "type" : "boolean",
+                        "description" : "Mandatory. If this is an ongoing alarm"
+                      },
+                      "timestamp" : {
+                        "type" : "number",
+                        "description" : "Mandatory. When the alarm initially started"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "Array<MonitoringEvent>"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/monitoring/registration/request" : {
+      "subscribe" : {
+        "summary" : "Request monitoring registrations",
+        "description" : "Request all monitoring services to register themselves using the topics below.\n",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/monitoring/add" : {
+      "publish" : {
+        "summary" : "Add monitoring service",
+        "description" : "Add monitoring service with their default values and extra settings.\nSettings can be retrieved using the settings API, see <<zbos/settings/get>>\n",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "service" : {
+                "type" : "object",
+                "properties" : {
+                  "source" : {
+                    "type" : "string",
+                    "description" : "Mandatory. The source of this monitoring service"
+                  },
+                  "type" : {
+                    "type" : "string",
+                    "description" : "Mandatory. The type of this monitoring service"
+                  },
+                  "default_settings" : {
+                    "type" : "object",
+                    "description" : "Optional. Any default settings to be overridden",
+                    "properties" : {
+                      "enabled" : {
+                        "type" : "boolean"
+                      },
+                      "storage_type" : {
+                        "type" : "object",
+                        "properties" : {
+                          "labelKey" : {
+                            "type" : "string"
+                          },
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "disk", "memory" ]
+                      },
+                      "persistence_type" : {
+                        "type" : "object",
+                        "properties" : {
+                          "labelKey" : {
+                            "type" : "string"
+                          },
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "ordinal" : {
+                            "type" : "integer"
+                          }
+                        },
+                        "enum" : [ "hours", "days", "weeks", "months", "items" ]
+                      },
+                      "persistence_value" : {
+                        "type" : "integer"
+                      },
+                      "cloud_sync" : {
+                        "type" : "boolean"
+                      },
+                      "push_notifications" : {
+                        "type" : "boolean"
+                      },
+                      "email_notifications" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  },
+                  "hidden_default_settings" : {
+                    "type" : "array",
+                    "description" : "Optional. Hide certain default settings so the user can't change it",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "extraSettings" : {
+                    "type" : "object",
+                    "description" : "Optional. Any extra settings to be registered"
+                  }
+                }
+              }
+            }
+          },
+          "name" : "AddMonitoringServiceRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "some_key",
+              "service" : {
+                "source" : "camera",
+                "type" : "mask",
+                "extraSettings" : {
+                  "some_setting" : {
+                    "type" : "boolean",
+                    "default_value" : "true",
+                    "label_key" : "some_setting"
+                  }
+                },
+                "default_settings" : {
+                  "enabled" : true,
+                  "storage_type" : "disk",
+                  "persistence_type" : "days",
+                  "persistence_value" : 7
+                }
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/monitoring/add/response/{key}" : {
+      "subscribe" : {
+        "summary" : "Response: Add monitoring service",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/monitoring/event/add" : {
+      "publish" : {
+        "summary" : "Add a new event",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string"
+              },
+              "event" : {
+                "type" : "object",
+                "properties" : {
+                  "timestamp" : {
+                    "type" : "number",
+                    "description" : "Mandatory. The time at which the event occurred"
+                  },
+                  "type" : {
+                    "type" : "string",
+                    "description" : "Mandatory. The type of event this is, no dots allowed"
+                  },
+                  "source" : {
+                    "type" : "string",
+                    "description" : "Mandatory. What device produced this event, no dots allowed"
+                  },
+                  "value" : {
+                    "type" : "string",
+                    "description" : "Optional. A value relating to the event such as a temperature"
+                  },
+                  "data" : {
+                    "type" : "object",
+                    "description" : "Optional. Extra data related to the event"
+                  },
+                  "unit" : {
+                    "type" : "string",
+                    "description" : "Optional. The type of unit the value is expressed in such as °C"
+                  },
+                  "alarms" : {
+                    "type" : "array",
+                    "description" : "Optional. Alarms attached to this event",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "type" : {
+                          "type" : "object",
+                          "description" : "Mandatory. The type of alarm",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "ordinal" : {
+                              "type" : "integer"
+                            }
+                          },
+                          "enum" : [ "ItemOmission", "ItemCommission", "ServiceOmission", "ServiceCommission", "TransientServiceOmission", "TransientServiceCommission", "EarlyServiceOmission", "LateServiceCommission", "EarlyServiceStart", "LateServiceStart", "BoundedOmissionInterval", "UndetectableValueError", "BelowRange", "AboveRange", "BoundedValueChange", "StuckValue", "OutOfBounds", "OutOfOrder", "OutOfCalibration", "EarlyDelivery", "LateDelivery", "HighRate", "LowRate", "RateJitter", "EarlyService", "DelayedService", "SymmetricReplicationError", "AsymmetricApproximateValue", "AsymmetricExactValue", "AsymmetricItemOmission", "AsymmetricServiceOmission", "AsymmetricTiming", "ReadWriteRace", "WriteWriteRace", "Deadlock", "Starvation", "AuthorizationError", "AuthenticationError" ]
+                        },
+                        "severity" : {
+                          "type" : "integer",
+                          "description" : "Mandatory. How critical the alarm is"
+                        },
+                        "persist" : {
+                          "type" : "boolean",
+                          "description" : "Mandatory. If this is an ongoing alarm"
+                        },
+                        "timestamp" : {
+                          "type" : "number",
+                          "description" : "Mandatory. When the alarm initially started"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "AddMonitoringEventRequest",
+          "examples" : [ {
+            "payload" : {
+              "key" : "some_key",
+              "event" : {
+                "timestamp" : 1.349333576093E12,
+                "type" : "SomeType",
+                "source" : "SomeSource",
+                "valid" : true
+              }
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/monitoring/event/add/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Add a new event",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/successMessage"
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/monitoring/event/delete" : {
+      "publish" : {
+        "summary" : "Delete an event",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "description" : "Mandatory. A unique ID for the event"
+              },
+              "timestamp" : {
+                "type" : "number",
+                "description" : "Mandatory. The time at which the event occurred"
+              },
+              "type" : {
+                "type" : "string",
+                "description" : "Mandatory. The type of event this is, no dots allowed"
+              },
+              "source" : {
+                "type" : "string",
+                "description" : "Mandatory. What device produced this event, no dots allowed"
+              },
+              "value" : {
+                "type" : "string",
+                "description" : "Optional. A value relating to the event such as a temperature"
+              },
+              "data" : {
+                "type" : "object",
+                "description" : "Optional. Extra data related to the event"
+              },
+              "unit" : {
+                "type" : "string",
+                "description" : "Optional. The type of unit the value is expressed in such as °C"
+              },
+              "alarms" : {
+                "type" : "array",
+                "description" : "Optional. Alarms attached to this event",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "type" : {
+                      "type" : "object",
+                      "description" : "Mandatory. The type of alarm",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "ordinal" : {
+                          "type" : "integer"
+                        }
+                      },
+                      "enum" : [ "ItemOmission", "ItemCommission", "ServiceOmission", "ServiceCommission", "TransientServiceOmission", "TransientServiceCommission", "EarlyServiceOmission", "LateServiceCommission", "EarlyServiceStart", "LateServiceStart", "BoundedOmissionInterval", "UndetectableValueError", "BelowRange", "AboveRange", "BoundedValueChange", "StuckValue", "OutOfBounds", "OutOfOrder", "OutOfCalibration", "EarlyDelivery", "LateDelivery", "HighRate", "LowRate", "RateJitter", "EarlyService", "DelayedService", "SymmetricReplicationError", "AsymmetricApproximateValue", "AsymmetricExactValue", "AsymmetricItemOmission", "AsymmetricServiceOmission", "AsymmetricTiming", "ReadWriteRace", "WriteWriteRace", "Deadlock", "Starvation", "AuthorizationError", "AuthenticationError" ]
+                    },
+                    "severity" : {
+                      "type" : "integer",
+                      "description" : "Mandatory. How critical the alarm is"
+                    },
+                    "persist" : {
+                      "type" : "boolean",
+                      "description" : "Mandatory. If this is an ongoing alarm"
+                    },
+                    "timestamp" : {
+                      "type" : "number",
+                      "description" : "Mandatory. When the alarm initially started"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "MonitoringEvent",
+          "examples" : [ {
+            "payload" : {
+              "id" : "some_id",
+              "timestamp" : 1.349333576093E12,
+              "type" : "SomeType",
+              "source" : "SomeSource",
+              "valid" : true
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/monitoring/event/delete/event" : {
+      "subscribe" : {
+        "summary" : "event: Delete an event",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Monitoring",
+          "description" : "All monitoring related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "The key used by the add request"
+              },
+              "success" : {
+                "type" : "boolean",
+                "description" : "Did the operation succeed"
+              },
+              "id" : {
+                "type" : "string",
+                "description" : "The ID of the new event"
+              }
+            }
+          },
+          "name" : "MonitoringResponse"
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

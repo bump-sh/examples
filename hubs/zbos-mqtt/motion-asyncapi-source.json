@@ -1,0 +1,963 @@
+{
+  "asyncapi" : "2.0.0",
+  "id" : "urn:zbos-mqtt-api",
+  "defaultContentType" : "application/json",
+  "info" : {
+    "title" : "Motion",
+    "version" : "2.7.0",
+    "description" : "API for communication with ZBOS by Zora Robotics.",
+    "contact" : {
+      "email" : "info@zorarobotics.be"
+    }
+  },
+  "channels" : {
+    "zbos/motion/animation/run" : {
+      "publish" : {
+        "summary" : "Fires specific animation ID",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "requestId" : {
+                "type" : "string"
+              },
+              "type" : {
+                "type" : "string"
+              },
+              "animationId" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "AnimationOptions",
+          "examples" : [ {
+            "payload" : {
+              "requestId" : "string",
+              "type" : "string",
+              "animationId" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/motion/animation/stop" : {
+      "publish" : {
+        "summary" : "Stops all animations",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/motion/animation/get" : {
+      "publish" : {
+        "summary" : "Get available animations",
+        "description" : "see <<zbos/motion/animation/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/motion/animation/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get available animations",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string"
+                },
+                "animation" : {
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "Array<AvailableAnimation>",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "name" : "string",
+              "animation" : "string",
+              "type" : "string"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/motion/animation/event" : {
+      "subscribe" : {
+        "summary" : "Event: animation started/stopped",
+        "description" : "A message (Boolean) is publish on this topic when an animation started or stopped running\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "boolean"
+          },
+          "name" : "Boolean"
+        }
+      }
+    },
+    "zbos/motion/dance/start" : {
+      "publish" : {
+        "summary" : "Starts dance",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "requestId" : {
+                "type" : "string"
+              },
+              "danceId" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "DanceOptions",
+          "examples" : [ {
+            "payload" : {
+              "requestId" : "string",
+              "danceId" : "string"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/motion/dance/start/random" : {
+      "publish" : {
+        "summary" : "Start random dance",
+        "description" : "Start a random default dance\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/motion/dance/stop" : {
+      "publish" : {
+        "summary" : "Stops dance",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/motion/dance/get" : {
+      "publish" : {
+        "summary" : "Get available dances",
+        "description" : "see <<zbos/motion/dance/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/motion/dance/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get available dances",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string"
+                },
+                "animation" : {
+                  "type" : "string"
+                },
+                "song" : {
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "Array<AvailableDance>",
+          "examples" : [ {
+            "payload" : {
+              "id" : "string",
+              "name" : "string",
+              "animation" : "string",
+              "song" : "string"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/motion/control/head" : {
+      "publish" : {
+        "summary" : "Move the robot head",
+        "description" : "Publish on this topic to move the head of the robot\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "yaw" : {
+                "type" : "number",
+                "description" : "Desired yaw for this part if supported, -100 to 100"
+              },
+              "pitch" : {
+                "type" : "number",
+                "description" : "Desired pitch for this part if supported, -100 to 100"
+              },
+              "angle" : {
+                "type" : "object",
+                "description" : "The direction the part should move in",
+                "properties" : {
+                  "degree" : {
+                    "type" : "number",
+                    "maximum" : 360,
+                    "minimum" : 0,
+                    "description" : "Angle between 0 and 360"
+                  }
+                }
+              },
+              "force" : {
+                "type" : "number",
+                "description" : "How strongly to perform the movement, 0 to 100"
+              },
+              "distance" : {
+                "type" : "number",
+                "description" : "How far the part should move, in meters"
+              },
+              "relative_rotation" : {
+                "type" : "number",
+                "description" : "The direction the part should move in relative to its current rotation where negative values rotate to the left and positive values rotate to the right, -360 to 360"
+              },
+              "partName" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "MobilityRequest",
+          "examples" : [ {
+            "payload" : {
+              "yaw" : 10.0,
+              "pitch" : 0.0,
+              "angle" : {
+                "degree" : 90.0
+              },
+              "force" : 50.0,
+              "distance" : 2.0,
+              "relative_rotation" : 0.0
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/motion/control/movement" : {
+      "publish" : {
+        "summary" : "Drive the robot",
+        "description" : "Publish on this topic to drive the robot\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "yaw" : {
+                "type" : "number",
+                "description" : "Desired yaw for this part if supported, -100 to 100"
+              },
+              "pitch" : {
+                "type" : "number",
+                "description" : "Desired pitch for this part if supported, -100 to 100"
+              },
+              "angle" : {
+                "type" : "object",
+                "description" : "The direction the part should move in",
+                "properties" : {
+                  "degree" : {
+                    "type" : "number",
+                    "maximum" : 360,
+                    "minimum" : 0,
+                    "description" : "Angle between 0 and 360"
+                  }
+                }
+              },
+              "force" : {
+                "type" : "number",
+                "description" : "How strongly to perform the movement, 0 to 100"
+              },
+              "distance" : {
+                "type" : "number",
+                "description" : "How far the part should move, in meters"
+              },
+              "relative_rotation" : {
+                "type" : "number",
+                "description" : "The direction the part should move in relative to its current rotation where negative values rotate to the left and positive values rotate to the right, -360 to 360"
+              },
+              "partName" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "MobilityRequest",
+          "examples" : [ {
+            "payload" : {
+              "yaw" : 10.0,
+              "pitch" : 0.0,
+              "angle" : {
+                "degree" : 90.0
+              },
+              "force" : 50.0,
+              "distance" : 2.0,
+              "relative_rotation" : 0.0
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/motion/control/part/{name}" : {
+      "publish" : {
+        "summary" : "Move a specific part of the robot",
+        "description" : "Publish on this topic to move a specific part of the robot, like an arm or a leg\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "yaw" : {
+                "type" : "number",
+                "description" : "Desired yaw for this part if supported, -100 to 100"
+              },
+              "pitch" : {
+                "type" : "number",
+                "description" : "Desired pitch for this part if supported, -100 to 100"
+              },
+              "angle" : {
+                "type" : "object",
+                "description" : "The direction the part should move in",
+                "properties" : {
+                  "degree" : {
+                    "type" : "number",
+                    "maximum" : 360,
+                    "minimum" : 0,
+                    "description" : "Angle between 0 and 360"
+                  }
+                }
+              },
+              "force" : {
+                "type" : "number",
+                "description" : "How strongly to perform the movement, 0 to 100"
+              },
+              "distance" : {
+                "type" : "number",
+                "description" : "How far the part should move, in meters"
+              },
+              "relative_rotation" : {
+                "type" : "number",
+                "description" : "The direction the part should move in relative to its current rotation where negative values rotate to the left and positive values rotate to the right, -360 to 360"
+              },
+              "partName" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "MobilityRequest",
+          "examples" : [ {
+            "payload" : {
+              "yaw" : 10.0,
+              "pitch" : 0.0,
+              "angle" : {
+                "degree" : 90.0
+              },
+              "force" : 50.0,
+              "distance" : 2.0,
+              "relative_rotation" : 0.0
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "name" : {
+          "description" : "Name of the part which you want to control",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/motion/event" : {
+      "subscribe" : {
+        "summary" : "Event: started/stopped",
+        "description" : "A message (Boolean) is publish on this topic when the robot chassis starts, or stops moving.\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "boolean"
+          },
+          "name" : "Boolean"
+        }
+      }
+    },
+    "zbos/emotion/eyes/run" : {
+      "publish" : {
+        "summary" : "Run animation for the eyes",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "object",
+            "properties" : {
+              "requestId" : {
+                "type" : "string"
+              },
+              "emotionId" : {
+                "type" : "string"
+              }
+            }
+          },
+          "name" : "EmotionOptions",
+          "examples" : [ {
+            "payload" : {
+              "emotionId" : "2"
+            }
+          } ]
+        }
+      }
+    },
+    "zbos/emotion/eyes/get" : {
+      "publish" : {
+        "summary" : "Get list of available emotions for the eyes",
+        "description" : "see <<zbos/emotion/eyes/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/emotion/eyes/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get list of available emotions for the eyes",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string"
+                },
+                "animation" : {
+                  "type" : "string"
+                },
+                "translationkey" : {
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "name" : "Array<AvailableEmotion>",
+          "examples" : [ {
+            "payload" : {
+              "id" : "2",
+              "name" : "Eyeroll"
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "zbos/followme/enable" : {
+      "publish" : {
+        "summary" : "Enable follow me",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/followme/disable" : {
+      "publish" : {
+        "summary" : "Disable follow me",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/followme/event" : {
+      "subscribe" : {
+        "summary" : "response: follow me status",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/gestures/data" : {
+      "publish" : {
+        "summary" : "Gestures data",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/gestures/enable" : {
+      "publish" : {
+        "summary" : "Enable gestures",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/gestures/disable" : {
+      "publish" : {
+        "summary" : "Disable gestures",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/emptyMessage"
+        }
+      }
+    },
+    "zbos/gym/get/all" : {
+      "publish" : {
+        "summary" : "Get all the gym movements that can be used in the composer",
+        "description" : "see <<zbos/gym/get/all/response/{key}>> for response\n",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "$ref" : "#/components/messages/keyMessage"
+        }
+      }
+    },
+    "zbos/gym/get/all/response/{key}" : {
+      "subscribe" : {
+        "summary" : "response: Get all gym movements",
+        "description" : "",
+        "tags" : [ {
+          "name" : "Motion",
+          "description" : "All motion related topics."
+        } ],
+        "message" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "translation" : {
+                  "type" : "string"
+                },
+                "exercises" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "type" : "string"
+                      },
+                      "translation" : {
+                        "type" : "string"
+                      },
+                      "speedIn_min" : {
+                        "type" : "number"
+                      },
+                      "speedIn_max" : {
+                        "type" : "number"
+                      },
+                      "speedOut_min" : {
+                        "type" : "number"
+                      },
+                      "speedOut_max" : {
+                        "type" : "number"
+                      },
+                      "duty_min" : {
+                        "type" : "number"
+                      },
+                      "duty_max" : {
+                        "type" : "number"
+                      },
+                      "period_min" : {
+                        "type" : "number"
+                      },
+                      "period_max" : {
+                        "type" : "number"
+                      },
+                      "cycles_min" : {
+                        "type" : "integer"
+                      },
+                      "cycles_max" : {
+                        "type" : "integer"
+                      },
+                      "profiles" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "object",
+                          "properties" : {
+                            "name" : {
+                              "type" : "string"
+                            },
+                            "code" : {
+                              "type" : "string"
+                            },
+                            "translation" : {
+                              "type" : "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "name" : "Array<GymCategory>",
+          "examples" : [ {
+            "payload" : {
+              "name" : "string",
+              "translation" : "string",
+              "exercises" : [ {
+                "name" : "string",
+                "translation" : "string",
+                "profiles" : [ {
+                  "name" : "string",
+                  "code" : "string",
+                  "translation" : "string"
+                } ],
+                "speedIn_min" : 15.0,
+                "speedIn_max" : 50.0,
+                "speedOut_min" : 25.0,
+                "speedOut_max" : 60.0,
+                "duty_min" : 5.0,
+                "duty_max" : 10.0,
+                "period_min" : 5.0,
+                "period_max" : 10.0,
+                "cycles_min" : 5,
+                "cycles_max" : 10
+              } ]
+            }
+          } ]
+        }
+      },
+      "parameters" : {
+        "key" : {
+          "description" : "Request key to create a unique subscription topic",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "percentage" : {
+        "type" : "integer",
+        "maximum" : 100,
+        "minimum" : 0,
+        "description" : "Percentage value between with range 0 to 100"
+      },
+      "key" : {
+        "type" : "string",
+        "description" : "Required random key"
+      }
+    },
+    "messages" : {
+      "emptyMessage" : {
+        "payload" : {
+          "type" : "object"
+        },
+        "name" : "EmptyMessage",
+        "summary" : "Empty message"
+      },
+      "keyMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "Required random key"
+            }
+          }
+        },
+        "name" : "KeyResult",
+        "summary" : "Random key",
+        "examples" : [ {
+          "payload" : {
+            "key" : "ABCxyz"
+          }
+        } ]
+      },
+      "successMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "success" : {
+              "type" : "boolean"
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "Optional error message"
+            }
+          }
+        },
+        "name" : "SuccessMessage",
+        "summary" : "Success message",
+        "examples" : [ {
+          "payload" : {
+            "success" : true
+          }
+        } ]
+      },
+      "notificationMessage" : {
+        "payload" : {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string"
+                },
+                "translate" : {
+                  "type" : "boolean"
+                },
+                "formatArguments" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "translationCategory" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "name" : "NotificationOptions",
+        "summary" : "Message json",
+        "examples" : [ {
+          "payload" : {
+            "message" : {
+              "message" : "string",
+              "translate" : true,
+              "formatArguments" : [ "string" ]
+            }
+          }
+        } ]
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Speech",
+    "description" : "All speech related topics."
+  }, {
+    "name" : "Motion",
+    "description" : "All motion related topics."
+  }, {
+    "name" : "Audio",
+    "description" : "All audio related topics."
+  }, {
+    "name" : "Status",
+    "description" : "All status related topics."
+  }, {
+    "name" : "System",
+    "description" : "All system related topics."
+  }, {
+    "name" : "Sensors",
+    "description" : "All sensors related topics."
+  }, {
+    "name" : "Leds",
+    "description" : "All leds related topics."
+  }, {
+    "name" : "Composer",
+    "description" : "All composer related topics."
+  }, {
+    "name" : "Kiosk",
+    "description" : "All kiosk related topics."
+  }, {
+    "name" : "Media",
+    "description" : "All media related topics."
+  }, {
+    "name" : "Applications",
+    "description" : "All applications related topics."
+  }, {
+    "name" : "Translations",
+    "description" : "All translations related topics."
+  }, {
+    "name" : "Settings",
+    "description" : "All settings related topics."
+  }, {
+    "name" : "Camera",
+    "description" : "All camera related topics."
+  }, {
+    "name" : "Domotics",
+    "description" : "All domotics related topics."
+  }, {
+    "name" : "Cloud",
+    "description" : "All cloud related topics."
+  }, {
+    "name" : "SLAM",
+    "description" : "All slam related topics."
+  }, {
+    "name" : "Wifi",
+    "description" : "All wifi related topics."
+  }, {
+    "name" : "Connection",
+    "description" : "All connection related topics."
+  }, {
+    "name" : "Survey",
+    "description" : "All survey related topics."
+  }, {
+    "name" : "Motion detection",
+    "description" : "All motion detection related topics."
+  }, {
+    "name" : "Face tracking",
+    "description" : "All face tracking related topics."
+  }, {
+    "name" : "SIP",
+    "description" : "All sip related topics."
+  }, {
+    "name" : "Time",
+    "description" : "All time related topics."
+  }, {
+    "name" : "Variables",
+    "description" : "All variables related topics."
+  }, {
+    "name" : "Diagnostics",
+    "description" : "All diagnostics related topics."
+  } ]
+}

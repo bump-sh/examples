@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: trips/search
+  version: '1.0'
+servers:
+  - url: 'http://api.mycompany.com/v1/trips'
+paths:
+  /search:
+    post:
+      summary: Search for a train trip
+      tags: []
+      responses:
+        '200':
+          description: An array of available trips.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    departure_station:
+                      type: string
+                    arrival_station:
+                      type: string
+                    departure_at:
+                      type: string
+                    arrival_at:
+                      type: string
+                    cents:
+                      type: string
+                    train_code:
+                      type: string
+              examples: {}
+      operationId: post-search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                departure_station:
+                  type: string
+                destination_station:
+                  type: string
+                departure_around:
+                  type: string
+                  format: date-time
+      description: 'Search for an available train trip between 2 stations, around a given departure date & time.'
+components:
+  schemas: {}
