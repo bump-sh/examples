@@ -18,6 +18,24 @@ x-topics:
       > info
       > Adding a colon after your token prevents cURL from asking for a password.
 paths:
+  /diffs:
+    post:
+      summary: Create a diff
+      description: |
+        Create a diff between any two given API definitions.
+        The diff will have a unique URL presenting a visual diff of the result.
+      security: []
+      requestBody:
+        $ref: "#/components/requestBodies/Diff"
+      responses:
+        "201":
+          description: "Diff successfully created"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Diff"
+        "422":
+          $ref: "#/components/responses/InvalidDefinition"
   /versions:
     post:
       summary: Create a new version
@@ -113,7 +131,7 @@ paths:
               schema:
                 allOf:
                   - $ref: "#/components/schemas/Version"
-                  - $ref: "#/components/schemas/Diff"
+                  - $ref: "#/components/schemas/WithDiff"
         "202":
           description: "Documentation version is still being processed. Please try again later"
         "404":
@@ -140,6 +158,12 @@ components:
       type: http
       scheme: basic
   requestBodies:
+    Diff:
+      description: The diff creation request object
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/DiffRequest"
     Preview:
       description: The preview object
       content:
@@ -251,7 +275,7 @@ components:
           type: string
           description: "The public URL of your documentation."
           example: https://bump.sh/doc/my-own-documentation
-    Diff:
+    WithDiff:
       properties:
         diff_summary:
           type: string
@@ -268,6 +292,66 @@ components:
           type: boolean
           description: Identifies if the diff includes breaking changes
           example: false
+    Diff:
+      properties:
+        summary:
+          type: string
+          description: "The comparaison diff summary"
+          example: |
+            Updated: POST /versions
+              Response modified: 201
+                Body attribute added: doc_id
+        markdown:
+          type: string
+          description: "A comparaison diff summary in markdown format"
+          example: |
+            ## Modified (1)
+
+            - `POST /versions`
+              - Response modified: `201`
+                - Body attribute added: `doc_id`
+        public_url:
+          type: string
+          description: "The public URL of your diff"
+          example: https://bump.sh/doc/my-own-documentation/change/2361df99-3467-4c80-a0cc-45c9fe565812
+        breaking:
+          type: boolean
+          description: Identifies if the diff includes breaking changes
+          example: false
+        details:
+          type: array
+          description: "Details of each change as a list of diff items"
+          items:
+            $ref: "#/components/schemas/DiffItem"
+    DiffItem:
+      properties:
+        id:
+          type: string
+          description: "The identifier of the diff change"
+          example: "post-versions"
+        name:
+          type: string
+          description: "The human name of diff change"
+          example: "POST /versions"
+        status:
+          type: string
+          enum:
+            - added
+            - modified
+            - removed
+        type:
+          type: string
+          description: "The object type of the diff change"
+          example: "endpoint"
+        breaking:
+          type: boolean
+          description: Identifies if the item is a breaking change
+          example: false
+        children:
+          type: array
+          description: A list of children item changes
+          items:
+            $ref: "#/components/schemas/DiffItem"
     DocumentationRequest:
       type: object
       required:
@@ -303,5 +387,35 @@ components:
         references:
           type: array
           description: Import external references used by `definition`. It's usually resources not accessible by Bump servers, like local files or internal URLs.
+          items:
+            $ref: "#/components/schemas/Reference"
+    DiffRequest:
+      type: object
+      required:
+        - definition
+        - definition2
+      properties:
+        definition:
+          type: string
+          description: >
+            Serialized definition of the first version. This should be an OpenAPI 2.x, 3.x or AsyncAPI 2.x file
+            serialized as a string, in YAML or JSON.
+          example: |
+            {"openapi": "3.0", "info": { "title": ... }}
+        references:
+          type: array
+          description: Import external references used by `definition`. It's usually resources not accessible by Bump servers, like local files or internal URLs.
+          items:
+            $ref: "#/components/schemas/Reference"
+        definition2:
+          type: string
+          description: >
+            Serialized definition of the second version. This should be an OpenAPI 2.x, 3.x or AsyncAPI 2.x file
+            serialized as a string, in YAML or JSON.
+          example: |
+            {"openapi": "3.0", "info": { "title": ... }}
+        references2:
+          type: array
+          description: Import external references used by `definition2`. It's usually resources not accessible by Bump servers, like local files or internal URLs.
           items:
             $ref: "#/components/schemas/Reference"
