@@ -172,6 +172,10 @@ components:
             required:
               - definition
             properties:
+              specification:
+                type: string
+              size:
+                type: number
               definition:
                 type: string
                 description: >
@@ -202,10 +206,6 @@ components:
               - $ref: "#/components/schemas/VersionRequest"
               - type: object
                 properties:
-                  previous_version_id:
-                    type: string
-                    description: UUID of a previously deployed version
-                    example: 3ef8f52f-9056-4113-840e-2f7183b90e06
                   unpublished:
                     type: boolean
                     description: Whether you want the new version to be unpublished or not. By default a new version will be published to your documentation.
