@@ -1,0 +1,21 @@
+name: Deploy documentation
+
+on:
+  pull_request:
+
+jobs:
+  api-diff:
+    # Run only for PRs targeting the 'master' branch
+    if: ${{ github.base_ref == 'main' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Diff API documentation
+      uses: paulrbr/github-action@use-diff-core-instead-of-cmd
+      with:
+        file: apis/bump.yml
+        command: diff
+      env:
+        DEBUG: "bump-cli:*"
+        BUMP_HOST: "sandbox.bump.sh"
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
