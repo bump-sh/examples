@@ -1,0 +1,307 @@
+openapi: "3.0.2"
+info:
+  title: Bump Api
+  description: >
+    This is the official Bump API documentation. Obviously created with Bump.
+  version: "1.0"
+servers:
+  - url: https://bump.sh/api/v1
+x-topics:
+  - title: Authentication
+    content: |
+      # Api token authentication
+
+      Use the token from your documentation settings as the username of the basic auth, with no password.
+
+      Example: `curl https://bump.sh/api/v1/versions/1 -u DOC_TOKEN:`
+
+      > info
+      > Adding a colon after your token prevents cURL from asking for a password.
+paths:
+  /versions:
+    post:
+      summary: Create a new version
+      description: >
+        Deploy a new version for a given documentation, which will become the current version.
+      requestBody:
+        $ref: "#/components/requestBodies/Version"
+      responses:
+        "201":
+          description: "Documentation version successfully created"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Version"
+        "204":
+          description: "Documentation is unchanged"
+        "422":
+          $ref: "#/components/responses/InvalidDefinition"
+  /validations:
+    post:
+      summary: Validate a documentation definition
+      description: >
+        Validate a definition against its schema (OpenAPI or AsyncAPI) and return errors without
+        creating a new version. This is useful in a CI process, to validate that a changed
+        definition file is valid and won't fail when being deployed on Bump.
+      requestBody:
+        $ref: "#/components/requestBodies/Validate"
+      responses:
+        "200":
+          description: "Success"
+        "422":
+          $ref: "#/components/responses/InvalidDefinition"
+  /previews:
+    post:
+      summary: Create a preview
+      description: >
+        Create a preview for a given documentation file. The preview will have a unique
+        temporary URL, and will be active for 30 minutes.
+      security: []
+      requestBody:
+        $ref: "#/components/requestBodies/Preview"
+      responses:
+        "201":
+          description: "Success"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Preview"
+        "422":
+          $ref: "#/components/responses/InvalidDefinition"
+  /previews/{preview_id}:
+    put:
+      summary: Update an existing preview
+      description: >
+        Update a preview with the given documentation file. The preview will stay active for 30 minutes after the last update.
+      security: []
+      parameters:
+        - in: path
+          name: preview_id
+          schema:
+            type: string
+          required: true
+          description: UUID of an existing preview you wish to update.
+      requestBody:
+        $ref: "#/components/requestBodies/Preview"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Preview"
+        "422":
+          $ref: "#/components/responses/InvalidDefinition"
+  /versions/{version_id}:
+    get:
+      summary: Fetch a full documentation version including diff summary
+      description: >
+        Fetch a full documentation version including diff summary.
+      parameters:
+        - in: path
+          name: version_id
+          schema:
+            type: string
+            description: UUID of an existing documentation version.
+          required: true
+          description: UUID of an existing version from which to fetch a documentation change
+      responses:
+        "200":
+          description: "Success"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Version"
+                  - $ref: "#/components/schemas/Diff"
+        "202":
+          description: "Documentation version is still being processed. Please try again later"
+        "404":
+          description: "Version not found"
+  /ping:
+    get:
+      summary: Check the API status
+      description: Responds a pong if the API is up and running.
+      security: []
+      responses:
+        "200":
+          description: "Success"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Pong"
+        default:
+          description: API is currently down
+security:
+  - "Basic token": []
+components:
+  securitySchemes:
+    "Basic token":
+      type: http
+      scheme: basic
+  requestBodies:
+    Preview:
+      description: The preview object
+      content:
+        "application/json":
+          schema:
+            required:
+              - definition
+            properties:
+              definition:
+                type: string
+                description: >
+                  Serialized definition of the version. This should be an OpenAPI 2.x, 3.x or AsyncAPI 2.x file
+                  serialized as a string, in YAML or JSON.
+                example: |
+                  {asyncapi: "2.0", "info": { "title: ... }}
+              references:
+                type: array
+                description: Import external references used by `definition`. It's usually resources not accessible by Bump servers, like local files or internal URLs.
+                items:
+                  $ref: "#/components/schemas/Reference"
+    Validate:
+      description: The version validation request object
+      content:
+        "application/json":
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/DocumentationRequest"
+              - $ref: "#/components/schemas/VersionRequest"
+    Version:
+      description: The version creation request object
+      content:
+        "application/json":
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/DocumentationRequest"
+              - $ref: "#/components/schemas/VersionRequest"
+              - type: object
+                properties:
+                  previous_version_id:
+                    type: string
+                    description: UUID of a previously deployed version
+                    example: 3ef8f52f-9056-4113-840e-2f7183b90e06
+                  unpublished:
+                    type: boolean
+                    description: Whether you want the new version to be unpublished or not. By default a new version will be published to your documentation.
+                    example: false
+  responses:
+    "InvalidDefinition":
+      description: Definition is not valid.
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Reference:
+      type: object
+      properties:
+        location:
+          type: string
+          description: Location of the external reference as it's called from `definition`, without the relative path (the part after `#/`). Can be an URL of a file system path.
+          example: https://example.com/api/models/pet.yml
+        content:
+          type: string
+          description: Content of the external reference, as a string.
+    Error:
+      properties:
+        message:
+          type: string
+          description: Human readable error message.
+          example: Invalid definition file
+        errors:
+          type: object
+          description: Hash of invalid attributes with their error messages.
+          example:
+            raw_definition:
+              - The property '#/paths//docs/{:id}/validations/post' contains additional properties ["yolo"] outside of the schema when none are allowed
+    Pong:
+      properties:
+        pong:
+          type: string
+          description: Sentence about ping and pong
+          example: And that's how ping-pong ball is bumped
+    Preview:
+      properties:
+        id:
+          type: string
+          description: "Unique id for the preview URL: `https://bump.sh/preview/:id`."
+          example: 3ef8f52f-9056-4113-840e-2f7183b90e06
+        expires_at:
+          type: string
+          format: date-time
+          description: Preview expiration date and time.
+          example: 2010-04-14T17:05:00+01:00
+        public_url:
+          type: string
+          description: "The public URL where the preview will be visible."
+          example: https://bump.sh/preview/3ef8f52f-9056-4113-840e-2f7183b90e06
+    Version:
+      properties:
+        id:
+          type: string
+          description: "Unique id of your version."
+          example: 2361df99-3467-4c80-a0cc-45c9fe565812
+        doc_id:
+          type: string
+          description: "Unique id of your documentation."
+          example: 3ef8f52f-9056-4113-840e-2f7183b90e06
+        doc_public_url:
+          type: string
+          description: "The public URL of your documentation."
+          example: https://bump.sh/doc/my-own-documentation
+    Diff:
+      properties:
+        diff_summary:
+          type: string
+          description: "The comparaison diff summary"
+          example: |
+            Updated: POST /versions
+              Response modified: 201
+                Body attribute added: doc_id
+        diff_public_url:
+          type: string
+          description: "The public URL of your diff"
+          example: https://bump.sh/doc/my-own-documentation/change/2361df99-3467-4c80-a0cc-45c9fe565812
+        diff_breaking:
+          type: boolean
+          description: Identifies if the diff includes breaking changes
+          example: false
+    DocumentationRequest:
+      type: object
+      required:
+        - documentation
+      properties:
+        documentation:
+          type: string
+          description: UUID or slug of the documentation.
+          example: "0776d85d-e097-47c1-8c60-cb1190d11945"
+        hub:
+          type: string
+          description: UUID or slug of the hub if the documentation is part of a hub.
+          example: "my_hub_slug"
+        documentation_name:
+          type: string
+          description: Name of the documentation to create. Used only if `auto_create_documentation` is set.
+        auto_create_documentation:
+          type: boolean
+          default: false
+          description: Create the documentation if it does not exist yet. Must be used with a `hub` and a `documentation`.
+    VersionRequest:
+      type: object
+      required:
+        - definition
+      properties:
+        definition:
+          type: string
+          description: >
+            Serialized definition of the version. This should be an OpenAPI 2.x, 3.x or AsyncAPI 2.x file
+            serialized as a string, in YAML or JSON.
+          example: |
+            {"openapi": "3.0", "info": { "title": ... }}
+        references:
+          type: array
+          description: Import external references used by `definition`. It's usually resources not accessible by Bump servers, like local files or internal URLs.
+          items:
+            $ref: "#/components/schemas/Reference"
