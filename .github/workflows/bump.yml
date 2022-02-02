@@ -20,5 +20,6 @@ jobs:
           AMADEUS_BUMP_TOKEN: ${{ secrets.AMADEUS_BUMP_TOKEN }}
           EXAMPLES_BUMP_TOKEN: ${{ secrets.EXAMPLES_BUMP_TOKEN }}
           MY_TRAIN_COMPANY_BUMP_TOKEN: ${{ secrets.MY_TRAIN_COMPANY_BUMP_TOKEN }}
+          SCALEWAY_DEVELOPERS_BUMP_TOKEN: ${{ secrets.SCALEWAY_DEVELOPERS_BUMP_TOKEN }}
           ZBOS_MQTT_BUMP_TOKEN: ${{ secrets.ZBOS_MQTT_BUMP_TOKEN }}
           BUMP_HOST: ${{ secrets.BUMP_HOST }}
