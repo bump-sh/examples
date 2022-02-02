@@ -2,7 +2,7 @@
   "openapi" : "3.0.0",
   "info" : {
     "description" : "Twitter API v2 available endpoints",
-    "version" : "2.30",
+    "version" : "2.36",
     "title" : "Twitter API v2",
     "termsOfService" : "https://developer.twitter.com/en/developer-terms/agreement-and-policy.html",
     "contact" : {
@@ -18,7 +18,8 @@
     "description" : "Twitter API",
     "url" : "https://api.twitter.com"
   } ],
-  "tags" : [ {
+  "tags" : [
+    {
     "name" : "Compliance",
     "description" : "Endpoints related to keeping Twitter data in your systems compliant",
     "externalDocs" : {
@@ -65,8 +66,11 @@
     "/2/users" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "tags" : [ "Users" ],
         "summary" : "User lookup by IDs",
@@ -115,8 +119,11 @@
     "/2/users/{id}" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "tags" : [ "Users" ],
         "summary" : "User lookup by ID",
@@ -158,8 +165,11 @@
     "/2/users/by" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "tags" : [ "Users" ],
         "summary" : "User lookup by usernames",
@@ -205,11 +215,49 @@
         }
       }
     },
+    "/2/users/me" : {
+      "get" : {
+        "security" : [ {
+          "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
+        } ],
+        "tags" : [ "Users" ],
+        "summary" : "User lookup me",
+        "description" : "This endpoint returns information about the requesting user.",
+        "operationId" : "findMyUser",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/UserExpansionsParameter"
+        }, {
+          "$ref" : "#/components/parameters/TweetFieldsParameter"
+        }, {
+          "$ref" : "#/components/parameters/UserFieldsParameter"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The request was successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SingleUserLookupResponse"
+                }
+              }
+            }
+          },
+          "default" : {
+            "$ref" : "#/components/responses/HttpErrorResponse"
+          }
+        }
+      }
+    },
     "/2/users/by/username/{username}" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "tags" : [ "Users" ],
         "summary" : "User lookup by username",
@@ -256,6 +304,8 @@
         "operationId" : "usersIdBlock",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read", "block.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -305,6 +355,8 @@
         "operationId" : "usersIdBlocking",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read", "block.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -361,6 +413,8 @@
         "operationId" : "usersIdUnblock",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read", "block.write" ]
         } ],
         "parameters" : [ {
           "name" : "source_user_id",
@@ -404,6 +458,8 @@
         "operationId" : "usersIdUnmute",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read", "mute.write" ]
         } ],
         "parameters" : [ {
           "name" : "source_user_id",
@@ -447,6 +503,8 @@
         "operationId" : "usersIdMute",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read", "mute.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -496,6 +554,8 @@
         "operationId" : "usersIdMuting",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read", "mute.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -544,8 +604,11 @@
         "description" : "Returns a list of users that follow the provided user ID",
         "operationId" : "usersIdFollowers",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "follows.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -597,8 +660,11 @@
     "/2/users/{id}/following" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "follows.read" ]
         } ],
         "tags" : [ "Users" ],
         "summary" : "Following by User ID",
@@ -657,6 +723,8 @@
         "operationId" : "usersIdFollow",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "follows.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -708,6 +776,8 @@
         "operationId" : "usersIdUnfollow",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "follows.write" ]
         } ],
         "parameters" : [ {
           "name" : "source_user_id",
@@ -750,8 +820,11 @@
         "description" : "Returns a user's followed Lists.",
         "operationId" : "userFollowedLists",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -805,6 +878,8 @@
         "operationId" : "listUserFollow",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -849,6 +924,8 @@
         "operationId" : "listUserUnfollow",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -891,8 +968,11 @@
         "description" : "Get a User's List Memberships.",
         "operationId" : "getUserListMemberships",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -947,8 +1027,11 @@
         "description" : "Get a User's Owned Lists.",
         "operationId" : "listUserOwnedLists",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -1004,6 +1087,8 @@
         "operationId" : "listUserPinnedLists",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -1043,6 +1128,8 @@
         "operationId" : "listUserPin",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -1087,6 +1174,8 @@
         "operationId" : "listUserUnpin",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -1125,8 +1214,11 @@
     "/2/tweets" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "tags" : [ "Tweets" ],
         "summary" : "Tweet lookup by Tweet IDs",
@@ -1179,6 +1271,8 @@
       "post" : {
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "tweet.write" ]
         } ],
         "tags" : [ "Tweets" ],
         "summary" : "Creation of a Tweet",
@@ -1246,7 +1340,10 @@
                     "description" : "Poll options for a Tweet with a poll. This is mutually exclusive from Media and Quote Tweet Id.",
                     "properties" : {
                       "options" : {
-                        "$ref" : "#/components/schemas/PollOption"
+                        "type" : "array",
+                        "items" : {
+                          "$ref" : "#/components/schemas/PollOptionLabel"
+                        }
                       },
                       "duration_minutes" : {
                         "$ref" : "#/components/schemas/DurationMinutes"
@@ -1293,8 +1390,11 @@
     "/2/tweets/{id}" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "tags" : [ "Tweets" ],
         "summary" : "Tweet lookup by Tweet ID",
@@ -1340,6 +1440,8 @@
       "delete" : {
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "tweet.write" ]
         } ],
         "tags" : [ "Tweets" ],
         "summary" : "Tweet delete by Tweet ID",
@@ -1379,6 +1481,8 @@
         "operationId" : "hideReplyById",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "tweet.moderate.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -1433,8 +1537,11 @@
     "/2/tweets/search/recent" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "tags" : [ "Tweets" ],
         "summary" : "Recent search",
@@ -1499,12 +1606,33 @@
           }
         }, {
           "in" : "query",
+          "name" : "sort_order",
+          "description" : "This order in which to return results.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "recency", "relevancy" ],
+            "x-version" : "[2.36,]"
+          }
+        }, {
+          "in" : "query",
           "name" : "next_token",
           "description" : "This parameter is used to get the next 'page' of results. The value used with the parameter is pulled directly from the response provided by the API, and should not be modified.",
           "required" : false,
           "schema" : {
             "type" : "string",
             "minLength" : 1
+          }
+        }, {
+          "in" : "query",
+          "name" : "pagination_token",
+          "description" : "This parameter is used to get the next 'page' of results. The value used with the parameter is pulled directly from the response provided by the API, and should not be modified.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "minLength" : 1,
+            "x-renames-parameter" : "next_token",
+            "x-version" : "[2.36,]"
           }
         }, {
           "$ref" : "#/components/parameters/TweetExpansionsParameter"
@@ -1604,12 +1732,33 @@
           }
         }, {
           "in" : "query",
+          "name" : "sort_order",
+          "description" : "This order in which to return results.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "recency", "relevancy" ],
+            "x-version" : "[2.36,]"
+          }
+        }, {
+          "in" : "query",
           "name" : "next_token",
           "description" : "This parameter is used to get the next 'page' of results. The value used with the parameter is pulled directly from the response provided by the API, and should not be modified.",
           "required" : false,
           "schema" : {
             "type" : "string",
             "minLength" : 1
+          }
+        }, {
+          "in" : "query",
+          "name" : "pagination_token",
+          "description" : "This parameter is used to get the next 'page' of results. The value used with the parameter is pulled directly from the response provided by the API, and should not be modified.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "minLength" : 1,
+            "x-renames-parameter" : "next_token",
+            "x-version" : "[2.36,]"
           }
         }, {
           "$ref" : "#/components/parameters/TweetExpansionsParameter"
@@ -1866,8 +2015,11 @@
       "get" : {
         "tags" : [ "Tweets" ],
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "summary" : "User Tweets timeline by User ID",
         "description" : "Returns a list of Tweets authored by the provided User ID",
@@ -1928,8 +2080,11 @@
       "get" : {
         "tags" : [ "Tweets" ],
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "summary" : "User mention timeline by User ID",
         "description" : "Returns Tweet objects that mention username associated to the provided User ID",
@@ -1992,6 +2147,8 @@
         "operationId" : "usersIdLike",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "like.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2036,6 +2193,8 @@
         "operationId" : "usersIdUnlike",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "like.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2078,8 +2237,11 @@
         "description" : "Returns a list of Tweets liked by the provided User ID",
         "operationId" : "usersIdLikedTweets",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "like.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2169,8 +2331,11 @@
         "description" : "Returns a list of users that have liked the provided Tweet ID",
         "operationId" : "tweetsIdLikingUsers",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "like.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2180,6 +2345,10 @@
           "schema" : {
             "$ref" : "#/components/schemas/TweetID"
           }
+        }, {
+          "$ref" : "#/components/parameters/DefaultMaxResultsRequestParameter"
+        }, {
+          "$ref" : "#/components/parameters/PaginationTokenRequestParameter"
         } ],
         "responses" : {
           "200" : {
@@ -2205,8 +2374,11 @@
         "description" : "Returns a list of users that have retweeted the provided Tweet ID",
         "operationId" : "tweetsIdRetweetingUsers",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "tweet.read", "users.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2216,6 +2388,10 @@
           "schema" : {
             "$ref" : "#/components/schemas/TweetID"
           }
+        }, {
+          "$ref" : "#/components/parameters/DefaultMaxResultsRequestParameter"
+        }, {
+          "$ref" : "#/components/parameters/PaginationTokenRequestParameter"
         } ],
         "responses" : {
           "200" : {
@@ -2242,6 +2418,8 @@
         "operationId" : "usersIdRetweets",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "tweet.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2286,6 +2464,8 @@
         "operationId" : "usersIdUnretweets",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "tweet.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2324,8 +2504,7 @@
     "/2/tweets/counts/recent" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
-          "UserToken" : [ ]
+          "BearerToken" : [ ]
         } ],
         "tags" : [ "Tweets" ],
         "summary" : "Recent search counts",
@@ -2387,6 +2566,17 @@
           }
         }, {
           "in" : "query",
+          "name" : "pagination_token",
+          "description" : "This parameter is used to get the next 'page' of results. The value used with the parameter is pulled directly from the response provided by the API, and should not be modified.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "minLength" : 1,
+            "x-renames-parameter" : "next_token",
+            "x-version" : "[2.36,]"
+          }
+        }, {
+          "in" : "query",
           "name" : "granularity",
           "description" : "The granularity for the search counts results.",
           "required" : false,
@@ -2414,8 +2604,7 @@
     "/2/tweets/counts/all" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
-          "UserToken" : [ ]
+          "BearerToken" : [ ]
         } ],
         "tags" : [ "Tweets" ],
         "summary" : "Full archive search counts",
@@ -2474,6 +2663,17 @@
           "schema" : {
             "type" : "string",
             "minLength" : 1
+          }
+        }, {
+          "in" : "query",
+          "name" : "pagination_token",
+          "description" : "This parameter is used to get the next 'page' of results. The value used with the parameter is pulled directly from the response provided by the API, and should not be modified.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "minLength" : 1,
+            "x-renames-parameter" : "next_token",
+            "x-version" : "[2.36,]"
           }
         }, {
           "in" : "query",
@@ -2639,6 +2839,8 @@
         "operationId" : "listIdCreate",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write", "list.read" ]
         } ],
         "parameters" : [ ],
         "requestBody" : {
@@ -2675,6 +2877,8 @@
         "operationId" : "listIdDelete",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2708,6 +2912,8 @@
         "operationId" : "listIdUpdate",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2749,8 +2955,11 @@
         "description" : "Returns a List",
         "operationId" : "listIdGet",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2791,8 +3000,11 @@
         "description" : "Returns a list of users that follow a List by the provided List ID",
         "operationId" : "listGetFollowers",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2848,6 +3060,8 @@
         "operationId" : "listAddMember",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2889,8 +3103,11 @@
         "description" : "Returns a list of users that are members of a List by the provided List ID",
         "operationId" : "listGetMembers",
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.read" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2946,6 +3163,8 @@
         "operationId" : "listRemoveMember",
         "security" : [ {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.write" ]
         } ],
         "parameters" : [ {
           "name" : "id",
@@ -2985,8 +3204,11 @@
       "get" : {
         "tags" : [ "Tweets" ],
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "list.read" ]
         } ],
         "summary" : "List Tweets timeline by List ID",
         "description" : "Returns a list of Tweets associated with the provided List ID",
@@ -3085,8 +3307,9 @@
     "/2/spaces/{id}" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
-          "UserToken" : [ ]
+          "BearerToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "space.read" ]
         } ],
         "tags" : [ "Spaces" ],
         "summary" : "Space lookup by Space ID",
@@ -3125,8 +3348,9 @@
     "/2/spaces" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
-          "UserToken" : [ ]
+          "BearerToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "space.read" ]
         } ],
         "tags" : [ "Spaces" ],
         "summary" : "Space lookup up Space IDs",
@@ -3169,8 +3393,9 @@
     "/2/spaces/by/creator_ids" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
-          "UserToken" : [ ]
+          "BearerToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "space.read" ]
         } ],
         "tags" : [ "Spaces" ],
         "summary" : "Space lookup by their creators",
@@ -3213,8 +3438,9 @@
     "/2/spaces/search" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
-          "UserToken" : [ ]
+          "BearerToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "space.read" ]
         } ],
         "tags" : [ "Spaces" ],
         "summary" : "Search for Spaces",
@@ -3249,12 +3475,7 @@
           "description" : "The number of results to return. The maximum for this value is 100.",
           "required" : false,
           "schema" : {
-            "description" : "The number of results to return",
-            "example" : 25,
-            "minimum" : 1,
-            "maximum" : 100,
-            "type" : "integer",
-            "format" : "int32"
+            "$ref" : "#/components/schemas/MaxResults"
           }
         }, {
           "$ref" : "#/components/parameters/SpaceFieldsParameter"
@@ -3278,11 +3499,62 @@
         }
       }
     },
+    "/2/spaces/{id}/tweets" : {
+      "get" : {
+        "security" : [ {
+          "BearerToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "space.read" ]
+        } ],
+        "tags" : [ "Spaces", "Tweets" ],
+        "summary" : "Retrieve tweets from a Space",
+        "description" : "Retrieves tweets shared in the specified space",
+        "operationId" : "spaceTweets",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "max_results",
+          "description" : "The number of tweets to fetch from the provided space. If not provided, the value will default to the maximum of 100",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/components/schemas/MaxResults"
+          }
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "description" : "The space id from which tweets will be retrieved",
+          "required" : true,
+          "example" : "1YqKDqWqdPLsV",
+          "schema" : {
+            "$ref" : "#/components/schemas/SpaceID"
+          }
+        }, {
+          "$ref" : "#/components/parameters/TweetFieldsParameter"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The request was successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MultiTweetLookupResponse"
+                }
+              }
+            }
+          },
+          "default" : {
+            "$ref" : "#/components/responses/HttpErrorResponse"
+          }
+        }
+      }
+    },
     "/2/spaces/{id}/buyers" : {
       "get" : {
         "security" : [ {
-          "BearerToken" : [ ],
+          "BearerToken" : [ ]
+        }, {
           "UserToken" : [ ]
+        }, {
+          "OAuth2UserToken" : [ "users.read", "tweet.read", "space.read" ]
         } ],
         "tags" : [ "Spaces", "Tweets" ],
         "summary" : "Retrieve the list of users who purchased a ticket to the given space",
@@ -3327,6 +3599,33 @@
       "UserToken" : {
         "type" : "http",
         "scheme" : "OAuth"
+      },
+      "OAuth2UserToken" : {
+        "type" : "oauth2",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://api.twitter.com/2/oauth2/authorize",
+            "tokenUrl" : "https://api.twitter.com/2/oauth2/token",
+            "scopes" : {
+              "tweet.read" : "Allows the app to view any Tweets the authenticated user can see, including Tweets from protected accounts.",
+              "tweet.write" : "Allows the app to tweet and retweet for the authenticated user.",
+              "users.read" : "Allows the app to view any account the authenticated user can see, including protected accounts.",
+              "list.write" : "Allows the app to create and manage lists for the authenticated user.",
+              "list.read" : "Allows the app to view any lists the authenticated user has created and lists they are a member of, including private lists.",
+              "like.read" : "Allows the app to read Tweets that the authenticated user has liked.",
+              "like.write" : "Allows the app to like and un-likes Tweets for the authenticated user.",
+              "mute.read" : "Allows the app to read the users the authenticated user has muted.",
+              "mute.write" : "Allows the app to mute and unmute users for the authenticated user.",
+              "block.read" : "Allows the app to read the users the authenticated user has blocked.",
+              "block.write" : "Allows the app to block and unblock users for the authenticated user.",
+              "tweet.moderate.write" : "Allows the app to hide and unhide replies to the authenticated user's Tweets.",
+              "follows.read" : "Allows the app to read the users who follow the authenticated user and users that they follow.",
+              "follows.write" : "Allows the app to follow and unfollow users for the authenticated user.",
+              "space.read" : "Allows the app to read the Spaces the authenticated user can see.",
+              "offline.access" : "Allows the app to request a refresh token."
+            }
+          }
+        }
       }
     },
     "schemas" : {
@@ -4214,14 +4513,19 @@
             "description" : "Position of this choice in the poll."
           },
           "label" : {
-            "type" : "string",
-            "description" : "The text of a poll choice."
+            "$ref" : "#/components/schemas/PollOptionLabel"
           },
           "votes" : {
             "type" : "integer",
             "description" : "Number of users who voted for this choice."
           }
         }
+      },
+      "PollOptionLabel" : {
+        "type" : "string",
+        "description" : "The text of a poll choice.",
+        "minLength" : 1,
+        "maxLength" : 25
       },
       "DurationMinutes" : {
         "type" : "integer",
@@ -4563,8 +4867,20 @@
           }
         }
       },
-      "CommonMediaFields" : {
+      "Media" : {
+        "discriminator" : {
+          "propertyName" : "type",
+          "mapping" : {
+            "photo" : "#/components/schemas/Photo",
+            "video" : "#/components/schemas/Video",
+            "animated_gif" : "#/components/schemas/AnimatedGif"
+          }
+        },
+        "required" : [ "type" ],
         "properties" : {
+          "type" : {
+            "type" : "string"
+          },
           "media_key" : {
             "$ref" : "#/components/schemas/MediaKey"
           },
@@ -4573,30 +4889,6 @@
           },
           "width" : {
             "$ref" : "#/components/schemas/MediaWidth"
-          }
-        }
-      },
-      "Media" : {
-        "type" : "object",
-        "oneOf" : [ {
-          "$ref" : "#/components/schemas/Photo"
-        }, {
-          "$ref" : "#/components/schemas/Video"
-        }, {
-          "$ref" : "#/components/schemas/AnimatedGif"
-        } ],
-        "properties" : {
-          "type" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "type" ],
-        "discriminator" : {
-          "propertyName" : "type",
-          "mapping" : {
-            "photo" : "#/components/schemas/Photo",
-            "video" : "#/components/schemas/Video",
-            "animated_gif" : "#/components/schemas/AnimatedGif"
           }
         }
       },
@@ -4609,14 +4901,10 @@
       "Photo" : {
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/CommonMediaFields"
+          "$ref" : "#/components/schemas/Media"
         }, {
           "type" : "object",
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "photo" ]
-            },
             "url" : {
               "type" : "string",
               "format" : "uri"
@@ -4630,14 +4918,10 @@
       "Video" : {
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/CommonMediaFields"
+          "$ref" : "#/components/schemas/Media"
         }, {
           "type" : "object",
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "video" ]
-            },
             "preview_image_url" : {
               "type" : "string",
               "format" : "uri"
@@ -4765,14 +5049,10 @@
       "AnimatedGif" : {
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/CommonMediaFields"
+          "$ref" : "#/components/schemas/Media"
         }, {
           "type" : "object",
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "animated_gif" ]
-            },
             "preview_image_url" : {
               "type" : "string",
               "format" : "uri"
@@ -4837,30 +5117,14 @@
         "description" : "A two-letter ISO 3166-1 alpha-2 country code",
         "example" : "US"
       },
-      "ProblemFields" : {
-        "type" : "object",
-        "required" : [ "title", "detail" ],
-        "properties" : {
-          "title" : {
-            "type" : "string"
-          },
-          "detail" : {
-            "type" : "string"
-          }
-        }
-      },
       "GenericProblem" : {
         "description" : "A generic problem with no additional information beyond that provided by the HTTP status code.",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "type" : "object",
           "required" : [ "status" ],
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "about:blank" ]
-            },
             "status" : {
               "type" : "integer"
             }
@@ -4870,14 +5134,10 @@
       "InvalidRequestProblem" : {
         "description" : "A problem that indicates this request is invalid.",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "type" : "object",
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/invalid-request" ]
-            },
             "errors" : {
               "type" : "array",
               "items" : {
@@ -4904,14 +5164,10 @@
       "ResourceNotFoundProblem" : {
         "description" : "A problem that indicates that a given Tweet, User, etc. does not exist.",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "required" : [ "parameter", "value", "resource_id", "resource_type" ],
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/resource-not-found" ]
-            },
             "parameter" : {
               "type" : "string",
               "minLength" : 1
@@ -4933,15 +5189,11 @@
         "description" : "A problem that indicates you are not allowed to see a particular Tweet, User, etc.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "type" : "object",
           "required" : [ "value", "resource_id", "resource_type", "section", "parameter" ],
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/not-authorized-for-resource" ]
-            },
             "value" : {
               "type" : "string"
             },
@@ -4965,14 +5217,10 @@
       "ResourceUnavailableProblem" : {
         "description" : "A problem that indicates a particular Tweet, User, etc. is not available to you.",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "required" : [ "parameter", "resource_id", "resource_type" ],
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/resource-unavailable" ]
-            },
             "parameter" : {
               "type" : "string",
               "minLength" : 1
@@ -4991,15 +5239,11 @@
         "description" : "A problem that indicates that you are not allowed to see a particular field on a Tweet, User, etc.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "type" : "object",
           "required" : [ "resource_type", "field", "section" ],
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/not-authorized-for-field" ]
-            },
             "section" : {
               "type" : "string",
               "enum" : [ "data", "includes" ]
@@ -5018,14 +5262,10 @@
         "description" : "A problem that indicates your client is forbidden from making this request.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "type" : "object",
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/client-forbidden" ]
-            },
             "reason" : {
               "type" : "string",
               "enum" : [ "official-client-forbidden", "client-not-enrolled" ]
@@ -5041,15 +5281,11 @@
         "description" : "A problem that indicates that the resource requested violates the precepts of this API.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "type" : "object",
           "required" : [ "resource_id", "resource_type", "section" ],
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/disallowed-resource" ]
-            },
             "resource_id" : {
               "type" : "string"
             },
@@ -5068,29 +5304,17 @@
         "description" : "A problem that indicates that the authentication used is not supported.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/unsupported-authentication" ]
-            }
-          }
+          "$ref" : "#/components/schemas/Problem"
         } ]
       },
       "UsageCapExceededProblem" : {
         "description" : "A problem that indicates that a usage cap has been exceeded.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "type" : "object",
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/usage-capped" ]
-            },
             "period" : {
               "type" : "string",
               "enum" : [ "Daily", "Monthly" ]
@@ -5106,13 +5330,9 @@
         "description" : "A problem that indicates something is wrong with the connection",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/streaming-connection" ]
-            },
             "connection_issue" : {
               "type" : "string",
               "enum" : [ "TooManyConnections", "ProvisioningSubscription", "RuleConfigurationIssue", "RulesInvalidIssue" ]
@@ -5124,27 +5344,16 @@
         "description" : "Your client has gone away.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
-        }, {
-          "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/client-disconnected" ]
-            }
-          }
+          "$ref" : "#/components/schemas/Problem"
         } ]
       },
       "OperationalDisconnectProblem" : {
         "description" : "You have been disconnected for operational reasons.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/operational-disconnect" ]
-            },
             "disconnect_type" : {
               "type" : "string",
               "enum" : [ "OperationalDisconnect", "UpstreamOperationalDisconnect", "ForceDisconnect", "UpstreamUncleanDisconnect", "SlowReader", "InternalError", "ClientApplicationStateDegraded", "InvalidRules" ]
@@ -5156,40 +5365,28 @@
         "description" : "You have exceeded the maximum number of rules.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
-        }, {
-          "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/rule-cap" ]
-            }
-          }
+          "$ref" : "#/components/schemas/Problem"
         } ]
       },
       "InvalidRuleProblem" : {
         "description" : "The rule you have submitted is invalid.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
-        }, {
-          "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/invalid-rules" ]
-            }
-          }
+          "$ref" : "#/components/schemas/Problem"
         } ]
       },
       "DuplicateRuleProblem" : {
         "description" : "The rule you have submitted is a duplicate.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
+          "$ref" : "#/components/schemas/Problem"
         }, {
           "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/duplicate-rules" ]
+            "value" : {
+              "type" : "string"
+            },
+            "id" : {
+              "type" : "string"
             }
           }
         } ]
@@ -5198,75 +5395,18 @@
         "description" : "You cannot create a new job if one is already in progress.",
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
-        }, {
-          "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/conflict" ]
-            }
-          }
+          "$ref" : "#/components/schemas/Problem"
         } ]
       },
       "NonCompliantRulesProblem" : {
         "description" : "A problem that indicates the user's rule set is not compliant.",
         "allOf" : [ {
-          "$ref" : "#/components/schemas/ProblemFields"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "type" : {
-              "type" : "string",
-              "enum" : [ "https://api.twitter.com/2/problems/noncompliant-rules" ]
-            }
-          }
+          "$ref" : "#/components/schemas/Problem"
         } ]
       },
       "Problem" : {
         "description" : "An HTTP Problem Details object, as defined in IETF RFC 7807 (https://tools.ietf.org/html/rfc7807).",
-        "oneOf" : [ {
-          "$ref" : "#/components/schemas/GenericProblem"
-        }, {
-          "$ref" : "#/components/schemas/InvalidRequestProblem"
-        }, {
-          "$ref" : "#/components/schemas/ClientForbiddenProblem"
-        }, {
-          "$ref" : "#/components/schemas/ResourceNotFoundProblem"
-        }, {
-          "$ref" : "#/components/schemas/ResourceUnavailableProblem"
-        }, {
-          "$ref" : "#/components/schemas/ResourceUnauthorizedProblem"
-        }, {
-          "$ref" : "#/components/schemas/FieldUnauthorizedProblem"
-        }, {
-          "$ref" : "#/components/schemas/DisallowedResourceProblem"
-        }, {
-          "$ref" : "#/components/schemas/UnsupportedAuthenticationProblem"
-        }, {
-          "$ref" : "#/components/schemas/UsageCapExceededProblem"
-        }, {
-          "$ref" : "#/components/schemas/ConnectionExceptionProblem"
-        }, {
-          "$ref" : "#/components/schemas/ClientDisconnectedProblem"
-        }, {
-          "$ref" : "#/components/schemas/OperationalDisconnectProblem"
-        }, {
-          "$ref" : "#/components/schemas/RulesCapProblem"
-        }, {
-          "$ref" : "#/components/schemas/InvalidRuleProblem"
-        }, {
-          "$ref" : "#/components/schemas/DuplicateRuleProblem"
-        }, {
-          "$ref" : "#/components/schemas/ConflictProblem"
-        }, {
-          "$ref" : "#/components/schemas/NonCompliantRulesProblem"
-        } ],
-        "properties" : {
-          "type" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "type" ],
+        "type" : "object",
         "discriminator" : {
           "propertyName" : "type",
           "mapping" : {
@@ -5289,7 +5429,28 @@
             "https://api.twitter.com/2/problems/conflict" : "#/components/schemas/ConflictProblem",
             "https://api.twitter.com/2/problems/noncompliant-rules" : "#/components/schemas/NonCompliantRulesProblem"
           }
+        },
+        "required" : [ "type", "title" ],
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "detail" : {
+            "type" : "string"
+          }
         }
+      },
+      "ProblemOrError" : {
+        "type" : "object",
+        "description" : "Represents the response in case of throwing an exception. Mainly for the openapi-generator",
+        "oneOf" : [ {
+          "$ref" : "#/components/schemas/Error"
+        }, {
+          "$ref" : "#/components/schemas/Problem"
+        } ]
       },
       "TweetSearchResponse" : {
         "type" : "object",
@@ -5538,7 +5699,7 @@
       "AddRulesResponse" : {
         "type" : "object",
         "description" : "A response from adding user-specified stream filtering rules.",
-        "required" : [ "data", "meta" ],
+        "required" : [ "meta" ],
         "properties" : {
           "data" : {
             "type" : "array",
@@ -5549,6 +5710,12 @@
           },
           "meta" : {
             "$ref" : "#/components/schemas/RulesResponseMetadata"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Problem"
+            }
           }
         }
       },
@@ -5585,6 +5752,12 @@
         "properties" : {
           "meta" : {
             "$ref" : "#/components/schemas/RulesResponseMetadata"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Problem"
+            }
           }
         }
       },
@@ -6242,6 +6415,12 @@
               }
             },
             "type" : "array"
+          },
+          "subscriber_count" : {
+            "description" : "The number of people who have either purchased a ticket or set a reminder for this space.",
+            "example" : "10",
+            "format" : "int32",
+            "type" : "integer"
           }
         }
       },
@@ -6284,6 +6463,14 @@
             "minItems" : 1
           }
         }
+      },
+      "MaxResults" : {
+        "description" : "The number of results to return",
+        "example" : 25,
+        "minimum" : 1,
+        "maximum" : 100,
+        "type" : "integer",
+        "format" : "int32"
       }
     },
     "responses" : {
@@ -6559,6 +6746,19 @@
           "format" : "int32",
           "minimum" : 5,
           "maximum" : 100
+        }
+      },
+      "DefaultMaxResultsRequestParameter" : {
+        "name" : "max_results",
+        "in" : "query",
+        "description" : "The maximum number of results",
+        "required" : false,
+        "schema" : {
+          "type" : "integer",
+          "format" : "int32",
+          "minimum" : 1,
+          "maximum" : 100,
+          "default" : 100
         }
       },
       "StartTimeRequestParameter" : {
