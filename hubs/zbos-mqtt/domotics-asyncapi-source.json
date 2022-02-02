@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Domotics",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -47,16 +47,8 @@
                   "description" : "brand of the domotics system, eg: homeassistant, creadomotics, ..."
                 },
                 "state" : {
-                  "type" : "object",
+                  "type" : "string",
                   "description" : "state of the domotics system",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
                   "enum" : [ "initializing", "connecting", "connected", "not_connected" ]
                 },
                 "name" : {
@@ -109,16 +101,8 @@
                   "description" : "brand of the domotics system, eg: homeassistant, creadomotics, ..."
                 },
                 "state" : {
-                  "type" : "object",
+                  "type" : "string",
                   "description" : "state of the domotics system",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
                   "enum" : [ "initializing", "connecting", "connected", "not_connected" ]
                 },
                 "name" : {

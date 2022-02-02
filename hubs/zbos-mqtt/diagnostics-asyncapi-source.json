@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Diagnostics",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -41,16 +41,8 @@
                 "description" : "Name of the part"
               },
               "partType" : {
-                "type" : "object",
+                "type" : "string",
                 "description" : "Type of the part",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
                 "enum" : [ "MOTOR", "MOTOR_CONTROLLER", "SERVO", "SERVO_CONTROLLER", "CPU", "MEMORY", "LIDAR", "POWER_BOARD", "BATTERY" ]
               },
               "info" : {
@@ -98,16 +90,8 @@
                   "description" : "Name of the part"
                 },
                 "partType" : {
-                  "type" : "object",
+                  "type" : "string",
                   "description" : "Type of the part",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
                   "enum" : [ "MOTOR", "MOTOR_CONTROLLER", "SERVO", "SERVO_CONTROLLER", "CPU", "MEMORY", "LIDAR", "POWER_BOARD", "BATTERY" ]
                 },
                 "info" : {
@@ -175,16 +159,8 @@
                 "description" : "Name of the part"
               },
               "partType" : {
-                "type" : "object",
+                "type" : "string",
                 "description" : "Type of the part",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
                 "enum" : [ "MOTOR", "MOTOR_CONTROLLER", "SERVO", "SERVO_CONTROLLER", "CPU", "MEMORY", "LIDAR", "POWER_BOARD", "BATTERY" ]
               },
               "info" : {
@@ -232,16 +208,8 @@
                   "description" : "Name of the part"
                 },
                 "partType" : {
-                  "type" : "object",
+                  "type" : "string",
                   "description" : "Type of the part",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
                   "enum" : [ "MOTOR", "MOTOR_CONTROLLER", "SERVO", "SERVO_CONTROLLER", "CPU", "MEMORY", "LIDAR", "POWER_BOARD", "BATTERY" ]
                 },
                 "info" : {

@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "System",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -48,15 +48,7 @@
                 "type" : "object"
               },
               "alarmType" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "DEFAULT", "VERKLIZAN", "SENSOR" ]
               },
               "callTimeout" : {
@@ -158,15 +150,7 @@
                 "type" : "string"
               },
               "alarmServiceProvider" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "verklizan", "sensor" ]
               },
               "metadata" : {
@@ -302,15 +286,7 @@
                 "type" : "boolean"
               },
               "error" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "MALFORMED_REQUEST", "MISSING_CONFIG_PROPERTY", "TYPE_NOT_FOUND" ]
               }
             }
@@ -1115,15 +1091,7 @@
                       "type" : "object",
                       "properties" : {
                         "type" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "USB_1", "USB_1_1", "USB_2", "USB_3", "USB_3_1", "USB_3_2", "USB_4" ]
                         }
                       }
@@ -1146,18 +1114,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1175,18 +1132,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1204,18 +1150,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1233,18 +1168,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1262,18 +1186,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1291,18 +1204,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1320,18 +1222,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1349,18 +1240,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1378,18 +1258,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1407,18 +1276,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1436,18 +1294,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1465,18 +1312,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1494,18 +1330,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1523,18 +1348,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1552,18 +1366,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1581,18 +1384,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1610,18 +1402,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1639,18 +1420,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1668,18 +1438,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1697,18 +1456,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1726,18 +1474,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1755,18 +1492,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1784,18 +1510,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1813,18 +1528,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1842,18 +1546,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1871,18 +1564,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1905,18 +1587,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1934,18 +1605,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1963,18 +1623,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -1992,18 +1641,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -2021,18 +1659,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -2050,18 +1677,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -2079,18 +1695,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -2108,18 +1713,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -2137,18 +1731,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -2950,15 +2533,7 @@
                 "type" : "number"
               },
               "status" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "valid", "expired", "missing", "factory" ]
               },
               "valid_from" : {
@@ -3009,15 +2584,7 @@
                 "type" : "number"
               },
               "status" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "valid", "expired", "missing", "factory" ]
               },
               "valid_from" : {
@@ -3158,15 +2725,7 @@
                 "type" : "boolean"
               },
               "error" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "FILE_NOT_EXIST", "NOT_PERMITTED", "FAILED" ]
               }
             }

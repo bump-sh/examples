@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "SLAM",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -127,15 +127,7 @@
                   "type" : "string"
                 },
                 "type" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "TOUCHSENSOR", "TOUCHSENSOR_GROUP" ]
                 },
                 "translationkey" : {
@@ -173,15 +165,7 @@
                   "type" : "string"
                 },
                 "type" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "TOUCHSENSOR", "TOUCHSENSOR_GROUP" ]
                 },
                 "translationkey" : {
@@ -596,15 +580,7 @@
                       "type" : "string"
                     },
                     "type" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                     },
                     "coordinate" : {
@@ -651,15 +627,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -679,15 +647,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -2155,15 +2115,7 @@
                       "type" : "string"
                     },
                     "type" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                     },
                     "coordinate" : {
@@ -2210,15 +2162,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -2238,15 +2182,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -2385,15 +2321,7 @@
                         "type" : "string"
                       },
                       "type" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                       },
                       "coordinate" : {
@@ -2440,15 +2368,7 @@
                         "type" : "object",
                         "properties" : {
                           "actionType" : {
-                            "type" : "object",
-                            "properties" : {
-                              "name" : {
-                                "type" : "string"
-                              },
-                              "ordinal" : {
-                                "type" : "integer"
-                              }
-                            },
+                            "type" : "string",
                             "enum" : [ "MQTT", "API" ]
                           },
                           "radius" : {
@@ -2468,15 +2388,7 @@
                         "type" : "object",
                         "properties" : {
                           "actionType" : {
-                            "type" : "object",
-                            "properties" : {
-                              "name" : {
-                                "type" : "string"
-                              },
-                              "ordinal" : {
-                                "type" : "integer"
-                              }
-                            },
+                            "type" : "string",
                             "enum" : [ "MQTT", "API" ]
                           },
                           "radius" : {
@@ -2597,15 +2509,7 @@
                       "type" : "string"
                     },
                     "type" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                     },
                     "coordinate" : {
@@ -2652,15 +2556,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -2680,15 +2576,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -2775,15 +2663,7 @@
                     "type" : "string"
                   },
                   "type" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                   },
                   "coordinate" : {
@@ -2830,15 +2710,7 @@
                     "type" : "object",
                     "properties" : {
                       "actionType" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "MQTT", "API" ]
                       },
                       "radius" : {
@@ -2858,15 +2730,7 @@
                     "type" : "object",
                     "properties" : {
                       "actionType" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "MQTT", "API" ]
                       },
                       "radius" : {
@@ -2928,15 +2792,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
               },
               "coordinate" : {
@@ -2983,15 +2839,7 @@
                 "type" : "object",
                 "properties" : {
                   "actionType" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "MQTT", "API" ]
                   },
                   "radius" : {
@@ -3011,15 +2859,7 @@
                 "type" : "object",
                 "properties" : {
                   "actionType" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "MQTT", "API" ]
                   },
                   "radius" : {
@@ -3078,15 +2918,7 @@
                     "type" : "string"
                   },
                   "type" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                   },
                   "coordinate" : {
@@ -3133,15 +2965,7 @@
                     "type" : "object",
                     "properties" : {
                       "actionType" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "MQTT", "API" ]
                       },
                       "radius" : {
@@ -3161,15 +2985,7 @@
                     "type" : "object",
                     "properties" : {
                       "actionType" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "MQTT", "API" ]
                       },
                       "radius" : {

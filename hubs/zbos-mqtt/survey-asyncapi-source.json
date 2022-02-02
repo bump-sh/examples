@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Survey",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -30,15 +30,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "meta" : {
@@ -100,15 +92,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -147,15 +131,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -171,28 +147,12 @@
                     "type" : "string"
                   },
                   "type" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "SLIDER", "TEXT", "MULTIPLE_CHOICE" ]
                   },
                   "option_type" : {
-                    "type" : "object",
+                    "type" : "string",
                     "description" : "Only relevant for multiple choice questions",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
                     "enum" : [ "HORIZONTAL", "VERTICAL" ]
                   },
                   "multi_select" : {
@@ -215,15 +175,7 @@
                           "type" : "string"
                         },
                         "text_position" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "TOP", "BOTTOM" ]
                         }
                       }
@@ -317,15 +269,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -341,28 +285,12 @@
                     "type" : "string"
                   },
                   "type" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "SLIDER", "TEXT", "MULTIPLE_CHOICE" ]
                   },
                   "option_type" : {
-                    "type" : "object",
+                    "type" : "string",
                     "description" : "Only relevant for multiple choice questions",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
                     "enum" : [ "HORIZONTAL", "VERTICAL" ]
                   },
                   "multi_select" : {
@@ -385,15 +313,7 @@
                           "type" : "string"
                         },
                         "text_position" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "TOP", "BOTTOM" ]
                         }
                       }
@@ -503,15 +423,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -550,15 +462,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -649,15 +553,7 @@
                   "type" : "string"
                 },
                 "type" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "SURVEY", "QUIZ" ]
                 },
                 "meta" : {
@@ -736,15 +632,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -789,15 +677,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "meta" : {
@@ -866,15 +746,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "meta" : {

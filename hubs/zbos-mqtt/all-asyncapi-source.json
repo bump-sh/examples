@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "ZBOS MQTT API",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -156,48 +156,18 @@
                       "description" : "Maximum value, only usable for number fields"
                     },
                     "direction" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "asc", "desc" ]
                     },
                     "operator" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
-                      "properties" : {
-                        "alternateNames" : {
-                          "type" : "array",
-                          "items" : {
-                            "type" : "string"
-                          }
-                        },
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "and", "or", "not" ]
                     },
                     "match_type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
                     },
                     "filters" : {
@@ -289,16 +259,8 @@
                         "description" : "Use name for a static name, or name_key for a translatable name"
                       },
                       "type" : {
-                        "type" : "object",
+                        "type" : "string",
                         "description" : "List of available actions:\nopen: Opens an application handled by the RAILopen_control: Opens an application handled by the control\nsettings: Opens the settings, handled by the control\ndatasource: Edit the datasource, handled by the control\nother: Should be handled by the app itself",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
                         "enum" : [ "open", "open_control", "settings", "datasources", "other" ]
                       },
                       "data" : {
@@ -432,16 +394,8 @@
                       "description" : "Use name for a static name, or name_key for a translatable name"
                     },
                     "type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "List of available actions:\nopen: Opens an application handled by the RAILopen_control: Opens an application handled by the control\nsettings: Opens the settings, handled by the control\ndatasource: Edit the datasource, handled by the control\nother: Should be handled by the app itself",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "open", "open_control", "settings", "datasources", "other" ]
                     },
                     "data" : {
@@ -608,16 +562,8 @@
                 "description" : "Use name for a static name, or name_key for a translatable name"
               },
               "type" : {
-                "type" : "object",
+                "type" : "string",
                 "description" : "List of available actions:\nopen: Opens an application handled by the RAILopen_control: Opens an application handled by the control\nsettings: Opens the settings, handled by the control\ndatasource: Edit the datasource, handled by the control\nother: Should be handled by the app itself",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
                 "enum" : [ "open", "open_control", "settings", "datasources", "other" ]
               },
               "data" : {
@@ -759,16 +705,8 @@
                           "description" : "Use name for a static name, or name_key for a translatable name"
                         },
                         "type" : {
-                          "type" : "object",
+                          "type" : "string",
                           "description" : "List of available actions:\nopen: Opens an application handled by the RAILopen_control: Opens an application handled by the control\nsettings: Opens the settings, handled by the control\ndatasource: Edit the datasource, handled by the control\nother: Should be handled by the app itself",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
                           "enum" : [ "open", "open_control", "settings", "datasources", "other" ]
                         },
                         "data" : {
@@ -1393,15 +1331,7 @@
             "type" : "object",
             "properties" : {
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "OFFER", "PRANSWER", "ANSWER" ]
               },
               "sdp" : {
@@ -2394,15 +2324,7 @@
                         "type" : "boolean"
                       },
                       "powerManagement" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "DEFAULT", "AWARE", "DISABLED" ]
                       }
                     }
@@ -2420,15 +2342,7 @@
                 "type" : "boolean"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
               }
             }
@@ -2482,15 +2396,7 @@
                       "type" : "string"
                     },
                     "type" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
                     },
                     "isDefault" : {
@@ -2634,15 +2540,7 @@
                   "type" : "string"
                 },
                 "type" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
                 },
                 "isDefault" : {
@@ -2934,16 +2832,8 @@
                 "type" : "string"
               },
               "state" : {
-                "type" : "object",
+                "type" : "string",
                 "description" : "Default, playing or paused",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
                 "enum" : [ "DEFAULT", "PLAYING", "PAUSED" ]
               },
               "activeBlocks" : {
@@ -2979,15 +2869,7 @@
                         "type" : "boolean"
                       },
                       "powerManagement" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "DEFAULT", "AWARE", "DISABLED" ]
                       }
                     }
@@ -3243,15 +3125,7 @@
                       "type" : "string"
                     },
                     "encryption" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                     },
                     "ip4" : {
@@ -3287,15 +3161,7 @@
                       "type" : "string"
                     },
                     "connectionStatus" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "CONNECTING", "CONNECTED", "DISCONNECTED" ]
                     },
                     "hasInternet" : {
@@ -3368,15 +3234,7 @@
                       "type" : "string"
                     },
                     "encryption" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                     },
                     "hasConnection" : {
@@ -3563,15 +3421,7 @@
                       "type" : "string"
                     },
                     "encryption" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                     },
                     "ip4" : {
@@ -3607,15 +3457,7 @@
                       "type" : "string"
                     },
                     "connectionStatus" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "CONNECTING", "CONNECTED", "DISCONNECTED" ]
                     },
                     "hasInternet" : {
@@ -3688,15 +3530,7 @@
                       "type" : "string"
                     },
                     "encryption" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                     },
                     "hasConnection" : {
@@ -3885,15 +3719,7 @@
                   "type" : "string"
                 },
                 "encryption" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                 },
                 "signal" : {
@@ -3964,15 +3790,7 @@
                 "type" : "string"
               },
               "encryption" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
               },
               "password" : {
@@ -4161,15 +3979,7 @@
                   "type" : "string"
                 },
                 "encryption" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                 },
                 "password" : {
@@ -4748,16 +4558,8 @@
                 "description" : "Name of the part"
               },
               "partType" : {
-                "type" : "object",
+                "type" : "string",
                 "description" : "Type of the part",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
                 "enum" : [ "MOTOR", "MOTOR_CONTROLLER", "SERVO", "SERVO_CONTROLLER", "CPU", "MEMORY", "LIDAR", "POWER_BOARD", "BATTERY" ]
               },
               "info" : {
@@ -4805,16 +4607,8 @@
                   "description" : "Name of the part"
                 },
                 "partType" : {
-                  "type" : "object",
+                  "type" : "string",
                   "description" : "Type of the part",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
                   "enum" : [ "MOTOR", "MOTOR_CONTROLLER", "SERVO", "SERVO_CONTROLLER", "CPU", "MEMORY", "LIDAR", "POWER_BOARD", "BATTERY" ]
                 },
                 "info" : {
@@ -4882,16 +4676,8 @@
                 "description" : "Name of the part"
               },
               "partType" : {
-                "type" : "object",
+                "type" : "string",
                 "description" : "Type of the part",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
                 "enum" : [ "MOTOR", "MOTOR_CONTROLLER", "SERVO", "SERVO_CONTROLLER", "CPU", "MEMORY", "LIDAR", "POWER_BOARD", "BATTERY" ]
               },
               "info" : {
@@ -4939,16 +4725,8 @@
                   "description" : "Name of the part"
                 },
                 "partType" : {
-                  "type" : "object",
+                  "type" : "string",
                   "description" : "Type of the part",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
                   "enum" : [ "MOTOR", "MOTOR_CONTROLLER", "SERVO", "SERVO_CONTROLLER", "CPU", "MEMORY", "LIDAR", "POWER_BOARD", "BATTERY" ]
                 },
                 "info" : {
@@ -5022,16 +4800,8 @@
                   "description" : "brand of the domotics system, eg: homeassistant, creadomotics, ..."
                 },
                 "state" : {
-                  "type" : "object",
+                  "type" : "string",
                   "description" : "state of the domotics system",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
                   "enum" : [ "initializing", "connecting", "connected", "not_connected" ]
                 },
                 "name" : {
@@ -5084,16 +4854,8 @@
                   "description" : "brand of the domotics system, eg: homeassistant, creadomotics, ..."
                 },
                 "state" : {
-                  "type" : "object",
+                  "type" : "string",
                   "description" : "state of the domotics system",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
                   "enum" : [ "initializing", "connecting", "connected", "not_connected" ]
                 },
                 "name" : {
@@ -6251,22 +6013,8 @@
                 "description" : "Optional, the global options will be used if no value is given",
                 "properties" : {
                   "mode" : {
-                    "type" : "object",
+                    "type" : "string",
                     "description" : "How closely the person must match",
-                    "properties" : {
-                      "euclideanThreshold" : {
-                        "type" : "number"
-                      },
-                      "cosineThreshold" : {
-                        "type" : "number"
-                      },
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
                     "enum" : [ "LOOSE", "NORMAL", "STRICT" ]
                   },
                   "tries" : {
@@ -8046,15 +7794,7 @@
             "type" : "object",
             "properties" : {
               "part" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "CHEST", "MOUTH", "EYES", "HEAD", "SPEECH" ]
               },
               "color" : {
@@ -8153,48 +7893,18 @@
                       "description" : "Maximum value, only usable for number fields"
                     },
                     "direction" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "asc", "desc" ]
                     },
                     "operator" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
-                      "properties" : {
-                        "alternateNames" : {
-                          "type" : "array",
-                          "items" : {
-                            "type" : "string"
-                          }
-                        },
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "and", "or", "not" ]
                     },
                     "match_type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
                     },
                     "filters" : {
@@ -8236,48 +7946,18 @@
                       "description" : "Maximum value, only usable for number fields"
                     },
                     "direction" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "asc", "desc" ]
                     },
                     "operator" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
-                      "properties" : {
-                        "alternateNames" : {
-                          "type" : "array",
-                          "items" : {
-                            "type" : "string"
-                          }
-                        },
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "and", "or", "not" ]
                     },
                     "match_type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
                     },
                     "filters" : {
@@ -8621,16 +8301,8 @@
                   "type" : "object",
                   "properties" : {
                     "type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Mandatory. The type of alarm",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "ItemOmission", "ItemCommission", "ServiceOmission", "ServiceCommission", "TransientServiceOmission", "TransientServiceCommission", "EarlyServiceOmission", "LateServiceCommission", "EarlyServiceStart", "LateServiceStart", "BoundedOmissionInterval", "UndetectableValueError", "BelowRange", "AboveRange", "BoundedValueChange", "StuckValue", "OutOfBounds", "OutOfOrder", "OutOfCalibration", "EarlyDelivery", "LateDelivery", "HighRate", "LowRate", "RateJitter", "EarlyService", "DelayedService", "SymmetricReplicationError", "AsymmetricApproximateValue", "AsymmetricExactValue", "AsymmetricItemOmission", "AsymmetricServiceOmission", "AsymmetricTiming", "ReadWriteRace", "WriteWriteRace", "Deadlock", "Starvation", "AuthorizationError", "AuthenticationError" ]
                     },
                     "severity" : {
@@ -8711,48 +8383,18 @@
                       "description" : "Maximum value, only usable for number fields"
                     },
                     "direction" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "asc", "desc" ]
                     },
                     "operator" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
-                      "properties" : {
-                        "alternateNames" : {
-                          "type" : "array",
-                          "items" : {
-                            "type" : "string"
-                          }
-                        },
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "and", "or", "not" ]
                     },
                     "match_type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
                     },
                     "filters" : {
@@ -8794,48 +8436,18 @@
                       "description" : "Maximum value, only usable for number fields"
                     },
                     "direction" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "asc", "desc" ]
                     },
                     "operator" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
-                      "properties" : {
-                        "alternateNames" : {
-                          "type" : "array",
-                          "items" : {
-                            "type" : "string"
-                          }
-                        },
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "and", "or", "not" ]
                     },
                     "match_type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
                     },
                     "filters" : {
@@ -8939,16 +8551,8 @@
                     "type" : "object",
                     "properties" : {
                       "type" : {
-                        "type" : "object",
+                        "type" : "string",
                         "description" : "Mandatory. The type of alarm",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
                         "enum" : [ "ItemOmission", "ItemCommission", "ServiceOmission", "ServiceCommission", "TransientServiceOmission", "TransientServiceCommission", "EarlyServiceOmission", "LateServiceCommission", "EarlyServiceStart", "LateServiceStart", "BoundedOmissionInterval", "UndetectableValueError", "BelowRange", "AboveRange", "BoundedValueChange", "StuckValue", "OutOfBounds", "OutOfOrder", "OutOfCalibration", "EarlyDelivery", "LateDelivery", "HighRate", "LowRate", "RateJitter", "EarlyService", "DelayedService", "SymmetricReplicationError", "AsymmetricApproximateValue", "AsymmetricExactValue", "AsymmetricItemOmission", "AsymmetricServiceOmission", "AsymmetricTiming", "ReadWriteRace", "WriteWriteRace", "Deadlock", "Starvation", "AuthorizationError", "AuthenticationError" ]
                       },
                       "severity" : {
@@ -9028,33 +8632,11 @@
                         "type" : "boolean"
                       },
                       "storage_type" : {
-                        "type" : "object",
-                        "properties" : {
-                          "labelKey" : {
-                            "type" : "string"
-                          },
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "disk", "memory" ]
                       },
                       "persistence_type" : {
-                        "type" : "object",
-                        "properties" : {
-                          "labelKey" : {
-                            "type" : "string"
-                          },
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "hours", "days", "weeks", "months", "items" ]
                       },
                       "persistence_value" : {
@@ -9182,16 +8764,8 @@
                       "type" : "object",
                       "properties" : {
                         "type" : {
-                          "type" : "object",
+                          "type" : "string",
                           "description" : "Mandatory. The type of alarm",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
                           "enum" : [ "ItemOmission", "ItemCommission", "ServiceOmission", "ServiceCommission", "TransientServiceOmission", "TransientServiceCommission", "EarlyServiceOmission", "LateServiceCommission", "EarlyServiceStart", "LateServiceStart", "BoundedOmissionInterval", "UndetectableValueError", "BelowRange", "AboveRange", "BoundedValueChange", "StuckValue", "OutOfBounds", "OutOfOrder", "OutOfCalibration", "EarlyDelivery", "LateDelivery", "HighRate", "LowRate", "RateJitter", "EarlyService", "DelayedService", "SymmetricReplicationError", "AsymmetricApproximateValue", "AsymmetricExactValue", "AsymmetricItemOmission", "AsymmetricServiceOmission", "AsymmetricTiming", "ReadWriteRace", "WriteWriteRace", "Deadlock", "Starvation", "AuthorizationError", "AuthenticationError" ]
                         },
                         "severity" : {
@@ -9296,16 +8870,8 @@
                   "type" : "object",
                   "properties" : {
                     "type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Mandatory. The type of alarm",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "ItemOmission", "ItemCommission", "ServiceOmission", "ServiceCommission", "TransientServiceOmission", "TransientServiceCommission", "EarlyServiceOmission", "LateServiceCommission", "EarlyServiceStart", "LateServiceStart", "BoundedOmissionInterval", "UndetectableValueError", "BelowRange", "AboveRange", "BoundedValueChange", "StuckValue", "OutOfBounds", "OutOfOrder", "OutOfCalibration", "EarlyDelivery", "LateDelivery", "HighRate", "LowRate", "RateJitter", "EarlyService", "DelayedService", "SymmetricReplicationError", "AsymmetricApproximateValue", "AsymmetricExactValue", "AsymmetricItemOmission", "AsymmetricServiceOmission", "AsymmetricTiming", "ReadWriteRace", "WriteWriteRace", "Deadlock", "Starvation", "AuthorizationError", "AuthenticationError" ]
                     },
                     "severity" : {
@@ -10342,15 +9908,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "TOUCHSENSOR", "TOUCHSENSOR_GROUP" ]
               },
               "translationkey" : {
@@ -11381,15 +10939,7 @@
                   "type" : "string"
                 },
                 "type" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "TOUCHSENSOR", "TOUCHSENSOR_GROUP" ]
                 },
                 "translationkey" : {
@@ -11427,15 +10977,7 @@
                   "type" : "string"
                 },
                 "type" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "TOUCHSENSOR", "TOUCHSENSOR_GROUP" ]
                 },
                 "translationkey" : {
@@ -11850,15 +11392,7 @@
                       "type" : "string"
                     },
                     "type" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                     },
                     "coordinate" : {
@@ -11905,15 +11439,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -11933,15 +11459,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -13409,15 +12927,7 @@
                       "type" : "string"
                     },
                     "type" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                     },
                     "coordinate" : {
@@ -13464,15 +12974,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -13492,15 +12994,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -13639,15 +13133,7 @@
                         "type" : "string"
                       },
                       "type" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                       },
                       "coordinate" : {
@@ -13694,15 +13180,7 @@
                         "type" : "object",
                         "properties" : {
                           "actionType" : {
-                            "type" : "object",
-                            "properties" : {
-                              "name" : {
-                                "type" : "string"
-                              },
-                              "ordinal" : {
-                                "type" : "integer"
-                              }
-                            },
+                            "type" : "string",
                             "enum" : [ "MQTT", "API" ]
                           },
                           "radius" : {
@@ -13722,15 +13200,7 @@
                         "type" : "object",
                         "properties" : {
                           "actionType" : {
-                            "type" : "object",
-                            "properties" : {
-                              "name" : {
-                                "type" : "string"
-                              },
-                              "ordinal" : {
-                                "type" : "integer"
-                              }
-                            },
+                            "type" : "string",
                             "enum" : [ "MQTT", "API" ]
                           },
                           "radius" : {
@@ -13851,15 +13321,7 @@
                       "type" : "string"
                     },
                     "type" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                     },
                     "coordinate" : {
@@ -13906,15 +13368,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -13934,15 +13388,7 @@
                       "type" : "object",
                       "properties" : {
                         "actionType" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "MQTT", "API" ]
                         },
                         "radius" : {
@@ -14029,15 +13475,7 @@
                     "type" : "string"
                   },
                   "type" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                   },
                   "coordinate" : {
@@ -14084,15 +13522,7 @@
                     "type" : "object",
                     "properties" : {
                       "actionType" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "MQTT", "API" ]
                       },
                       "radius" : {
@@ -14112,15 +13542,7 @@
                     "type" : "object",
                     "properties" : {
                       "actionType" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "MQTT", "API" ]
                       },
                       "radius" : {
@@ -14182,15 +13604,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
               },
               "coordinate" : {
@@ -14237,15 +13651,7 @@
                 "type" : "object",
                 "properties" : {
                   "actionType" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "MQTT", "API" ]
                   },
                   "radius" : {
@@ -14265,15 +13671,7 @@
                 "type" : "object",
                 "properties" : {
                   "actionType" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "MQTT", "API" ]
                   },
                   "radius" : {
@@ -14332,15 +13730,7 @@
                     "type" : "string"
                   },
                   "type" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "DEFAULT", "CHARGING_STATION", "INTERACTIVE" ]
                   },
                   "coordinate" : {
@@ -14387,15 +13777,7 @@
                     "type" : "object",
                     "properties" : {
                       "actionType" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "MQTT", "API" ]
                       },
                       "radius" : {
@@ -14415,15 +13797,7 @@
                     "type" : "object",
                     "properties" : {
                       "actionType" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "MQTT", "API" ]
                       },
                       "radius" : {
@@ -16063,15 +15437,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "meta" : {
@@ -16133,15 +15499,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -16180,15 +15538,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -16204,28 +15554,12 @@
                     "type" : "string"
                   },
                   "type" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "SLIDER", "TEXT", "MULTIPLE_CHOICE" ]
                   },
                   "option_type" : {
-                    "type" : "object",
+                    "type" : "string",
                     "description" : "Only relevant for multiple choice questions",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
                     "enum" : [ "HORIZONTAL", "VERTICAL" ]
                   },
                   "multi_select" : {
@@ -16248,15 +15582,7 @@
                           "type" : "string"
                         },
                         "text_position" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "TOP", "BOTTOM" ]
                         }
                       }
@@ -16350,15 +15676,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -16374,28 +15692,12 @@
                     "type" : "string"
                   },
                   "type" : {
-                    "type" : "object",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
+                    "type" : "string",
                     "enum" : [ "SLIDER", "TEXT", "MULTIPLE_CHOICE" ]
                   },
                   "option_type" : {
-                    "type" : "object",
+                    "type" : "string",
                     "description" : "Only relevant for multiple choice questions",
-                    "properties" : {
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
                     "enum" : [ "HORIZONTAL", "VERTICAL" ]
                   },
                   "multi_select" : {
@@ -16418,15 +15720,7 @@
                           "type" : "string"
                         },
                         "text_position" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "TOP", "BOTTOM" ]
                         }
                       }
@@ -16536,15 +15830,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -16583,15 +15869,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -16682,15 +15960,7 @@
                   "type" : "string"
                 },
                 "type" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "SURVEY", "QUIZ" ]
                 },
                 "meta" : {
@@ -16769,15 +16039,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "language" : {
@@ -16822,15 +16084,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "meta" : {
@@ -16899,15 +16153,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SURVEY", "QUIZ" ]
               },
               "meta" : {
@@ -16994,15 +16240,7 @@
                 "type" : "object"
               },
               "alarmType" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "DEFAULT", "VERKLIZAN", "SENSOR" ]
               },
               "callTimeout" : {
@@ -17104,15 +16342,7 @@
                 "type" : "string"
               },
               "alarmServiceProvider" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "verklizan", "sensor" ]
               },
               "metadata" : {
@@ -17248,15 +16478,7 @@
                 "type" : "boolean"
               },
               "error" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "MALFORMED_REQUEST", "MISSING_CONFIG_PROPERTY", "TYPE_NOT_FOUND" ]
               }
             }
@@ -18061,15 +17283,7 @@
                       "type" : "object",
                       "properties" : {
                         "type" : {
-                          "type" : "object",
-                          "properties" : {
-                            "name" : {
-                              "type" : "string"
-                            },
-                            "ordinal" : {
-                              "type" : "integer"
-                            }
-                          },
+                          "type" : "string",
                           "enum" : [ "USB_1", "USB_1_1", "USB_2", "USB_3", "USB_3_1", "USB_3_2", "USB_4" ]
                         }
                       }
@@ -18092,18 +17306,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18121,18 +17324,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18150,18 +17342,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18179,18 +17360,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18208,18 +17378,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18237,18 +17396,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18266,18 +17414,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18295,18 +17432,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18324,18 +17450,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18353,18 +17468,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18382,18 +17486,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18411,18 +17504,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18440,18 +17522,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18469,18 +17540,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18498,18 +17558,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18527,18 +17576,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18556,18 +17594,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18585,18 +17612,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18614,18 +17630,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18643,18 +17648,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18672,18 +17666,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18701,18 +17684,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18730,18 +17702,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18759,18 +17720,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18788,18 +17738,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18817,18 +17756,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18851,18 +17779,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18880,18 +17797,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18909,18 +17815,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18938,18 +17833,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18967,18 +17851,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -18996,18 +17869,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -19025,18 +17887,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -19054,18 +17905,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -19083,18 +17923,7 @@
                           "enabled_sources" : {
                             "type" : "array",
                             "items" : {
-                              "type" : "object",
-                              "properties" : {
-                                "topicName" : {
-                                  "type" : "string"
-                                },
-                                "name" : {
-                                  "type" : "string"
-                                },
-                                "ordinal" : {
-                                  "type" : "integer"
-                                }
-                              },
+                              "type" : "string",
                               "enum" : [ "scheduler", "composer" ]
                             }
                           },
@@ -19896,15 +18725,7 @@
                 "type" : "number"
               },
               "status" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "valid", "expired", "missing", "factory" ]
               },
               "valid_from" : {
@@ -19955,15 +18776,7 @@
                 "type" : "number"
               },
               "status" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "valid", "expired", "missing", "factory" ]
               },
               "valid_from" : {
@@ -20104,15 +18917,7 @@
                 "type" : "boolean"
               },
               "error" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "FILE_NOT_EXIST", "NOT_PERMITTED", "FAILED" ]
               }
             }
