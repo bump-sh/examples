@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Sensors",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -40,15 +40,7 @@
                 "type" : "string"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "TOUCHSENSOR", "TOUCHSENSOR_GROUP" ]
               },
               "translationkey" : {

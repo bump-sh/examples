@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Camera",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -159,15 +159,7 @@
             "type" : "object",
             "properties" : {
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "OFFER", "PRANSWER", "ANSWER" ]
               },
               "sdp" : {

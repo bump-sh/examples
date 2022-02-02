@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Status",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"

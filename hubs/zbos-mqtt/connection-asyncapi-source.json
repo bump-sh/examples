@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Connection",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -45,15 +45,7 @@
                       "type" : "string"
                     },
                     "encryption" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                     },
                     "ip4" : {
@@ -89,15 +81,7 @@
                       "type" : "string"
                     },
                     "connectionStatus" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "CONNECTING", "CONNECTED", "DISCONNECTED" ]
                     },
                     "hasInternet" : {
@@ -170,15 +154,7 @@
                       "type" : "string"
                     },
                     "encryption" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                     },
                     "hasConnection" : {
@@ -365,15 +341,7 @@
                       "type" : "string"
                     },
                     "encryption" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                     },
                     "ip4" : {
@@ -409,15 +377,7 @@
                       "type" : "string"
                     },
                     "connectionStatus" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "CONNECTING", "CONNECTED", "DISCONNECTED" ]
                     },
                     "hasInternet" : {
@@ -490,15 +450,7 @@
                       "type" : "string"
                     },
                     "encryption" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                     },
                     "hasConnection" : {
@@ -687,15 +639,7 @@
                   "type" : "string"
                 },
                 "encryption" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                 },
                 "signal" : {
@@ -766,15 +710,7 @@
                 "type" : "string"
               },
               "encryption" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
               },
               "password" : {
@@ -963,15 +899,7 @@
                   "type" : "string"
                 },
                 "encryption" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "UNSECURE", "SHARE", "WEP", "WPA", "WPA_PSK", "WPA_OR_WPA2", "WPA_OR_WPA2_PSK", "WPA2", "WPA2_PSK", "WPA2_EAP", "WAI_CERT", "WAI_PSK" ]
                 },
                 "password" : {

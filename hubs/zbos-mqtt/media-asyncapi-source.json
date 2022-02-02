@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Media",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -80,48 +80,18 @@
                       "description" : "Maximum value, only usable for number fields"
                     },
                     "direction" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "asc", "desc" ]
                     },
                     "operator" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
-                      "properties" : {
-                        "alternateNames" : {
-                          "type" : "array",
-                          "items" : {
-                            "type" : "string"
-                          }
-                        },
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "and", "or", "not" ]
                     },
                     "match_type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
                     },
                     "filters" : {
@@ -163,48 +133,18 @@
                       "description" : "Maximum value, only usable for number fields"
                     },
                     "direction" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Direction to sort on.\nCan be 'asc' or 'desc'.\nThe default direction is 'asc'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "asc", "desc" ]
                     },
                     "operator" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Operator for either the child filters, or this filter object itself.\nCan be 'and', 'or' or 'not'.\nDefault is 'and'.\nThe root operator is always 'and'",
-                      "properties" : {
-                        "alternateNames" : {
-                          "type" : "array",
-                          "items" : {
-                            "type" : "string"
-                          }
-                        },
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "and", "or", "not" ]
                     },
                     "match_type" : {
-                      "type" : "object",
+                      "type" : "string",
                       "description" : "Match type for string values.\nCan be 'exact', 'contains', 'starts_with', 'ends_with'.\nThe default match_type is 'contains'",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
                       "enum" : [ "exact", "contains", "starts_with", "ends_with" ]
                     },
                     "filters" : {

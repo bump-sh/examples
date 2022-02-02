@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Composer",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -284,15 +284,7 @@
                         "type" : "boolean"
                       },
                       "powerManagement" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "DEFAULT", "AWARE", "DISABLED" ]
                       }
                     }
@@ -310,15 +302,7 @@
                 "type" : "boolean"
               },
               "type" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
+                "type" : "string",
                 "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
               }
             }
@@ -372,15 +356,7 @@
                       "type" : "string"
                     },
                     "type" : {
-                      "type" : "object",
-                      "properties" : {
-                        "name" : {
-                          "type" : "string"
-                        },
-                        "ordinal" : {
-                          "type" : "integer"
-                        }
-                      },
+                      "type" : "string",
                       "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
                     },
                     "isDefault" : {
@@ -524,15 +500,7 @@
                   "type" : "string"
                 },
                 "type" : {
-                  "type" : "object",
-                  "properties" : {
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "ordinal" : {
-                      "type" : "integer"
-                    }
-                  },
+                  "type" : "string",
                   "enum" : [ "SIMPLE_COMPOSITION", "ADVANCED_COMPOSITION" ]
                 },
                 "isDefault" : {
@@ -824,16 +792,8 @@
                 "type" : "string"
               },
               "state" : {
-                "type" : "object",
+                "type" : "string",
                 "description" : "Default, playing or paused",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "ordinal" : {
-                    "type" : "integer"
-                  }
-                },
                 "enum" : [ "DEFAULT", "PLAYING", "PAUSED" ]
               },
               "activeBlocks" : {
@@ -869,15 +829,7 @@
                         "type" : "boolean"
                       },
                       "powerManagement" : {
-                        "type" : "object",
-                        "properties" : {
-                          "name" : {
-                            "type" : "string"
-                          },
-                          "ordinal" : {
-                            "type" : "integer"
-                          }
-                        },
+                        "type" : "string",
                         "enum" : [ "DEFAULT", "AWARE", "DISABLED" ]
                       }
                     }

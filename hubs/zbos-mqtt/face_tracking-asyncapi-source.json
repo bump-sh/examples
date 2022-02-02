@@ -4,7 +4,7 @@
   "defaultContentType" : "application/json",
   "info" : {
     "title" : "Face tracking",
-    "version" : "2.7.0",
+    "version" : "2.7.1",
     "description" : "API for communication with ZBOS by Zora Robotics.",
     "contact" : {
       "email" : "info@zorarobotics.be"
@@ -163,22 +163,8 @@
                 "description" : "Optional, the global options will be used if no value is given",
                 "properties" : {
                   "mode" : {
-                    "type" : "object",
+                    "type" : "string",
                     "description" : "How closely the person must match",
-                    "properties" : {
-                      "euclideanThreshold" : {
-                        "type" : "number"
-                      },
-                      "cosineThreshold" : {
-                        "type" : "number"
-                      },
-                      "name" : {
-                        "type" : "string"
-                      },
-                      "ordinal" : {
-                        "type" : "integer"
-                      }
-                    },
                     "enum" : [ "LOOSE", "NORMAL", "STRICT" ]
                   },
                   "tries" : {
