@@ -2844,9 +2844,19 @@ paths:
                   description: Name of the placement group
                   nullable: true
                 policy_mode:
-                  $ref: '#/components/schemas/scaleway.instance.v1.PlacementGroup.PolicyMode'
+                  type: string
+                  description: The operating mode of the placement group
+                  enum:
+                  - optional
+                  - enforced
+                  default: optional
                 policy_type:
-                  $ref: '#/components/schemas/scaleway.instance.v1.PlacementGroup.PolicyType'
+                  type: string
+                  description: The policy type of the placement group
+                  enum:
+                  - max_availability
+                  - low_latency
+                  default: max_availability
               x-properties-order:
               - name
               - policy_mode
