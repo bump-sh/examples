@@ -1,0 +1,4453 @@
+openapi: 3.0.0
+info:
+  title: Load balancer API
+  description: |
+    # Introduction
+
+    Load Balancer is a highly available, fully managed type of instances which allows to scale your applications and ensure their availability. It provides a special public IP address which is always reachable: even if we experience a hardware failure, we will reroute this address to a backup instance, which is pre-configured in advance. You can use this address for your frontends, and the incoming sessions will be balanced between your backend servers.
+
+    You can add as many servers to your backends as your needs require. This allows to scale your applications on demand, for example increase the capacity of a web-site for high-usage periods and decrease it when your customers are on vacation.
+
+    Load Balancer can monitor the availability of your backend servers, detect that one of them is unavailable and balances the load between the rest of the servers thus making your applications always available to users.
+
+    ## Technical Limitations
+
+    - Your Load Balancer external highly available IP address can only be IPv4. You can, however, use IPv6 between Load Balancer and backend servers.
+
+    # Main Load Balancer Components
+
+    <div style="text-align:center; margin:20px;"><img src="https://loadbalancer-doc.s3.nl-ams.scw.cloud/load_balancer_components.png" alt="Scaleway Load Balancer Diagram" width="70%"/></div>
+
+    ## Frontends
+
+    Each Load Balancer is configured with one or several frontends. Each frontend listens to a configured port and has one or many backends, associated with it, to witch it forwards the flows.
+
+    ## High Availability
+
+    ### Master and Backup Load Balancers
+
+    Each Load Balancer is implemented with two instances: master and backup, which provide active/passive high availability. These instances are synchronously preconfigured, so if the master fails, the backup is always ready to handle the traffic. There is no stateful connection synchronization between master and backup, so all long-living sessions must be reestablished in case of a switchover.
+
+    Master and backup are running on different hardware clusters to ensure that they don't share physical resources and minimize the risk of a simultaneous failure.
+
+    ### Highly Available IP address
+
+    IP address, which the frontend listens to, is a bit more than just a simple IP address. It is a special highly available address, which is, by default, routed to the master Load Balancer instance. Should the master instances experience a failure, this address is automatically rerouted to the backup one. This action is taken automatically by the Load Balancer control subsystems, so it is transparent to the user.
+
+    Highly available IP is automatically created by default, when a Load Balancer is created. It can also be conserved when an LB is deleted and reused later. See [CreateLb](http://lb.preview.scaleway.com/#operation/CreateLb "CreateLb API call documentation") and [DeleteLb](http://lb.preview.scaleway.com/#operation/DeleteLb "DeleteLb API call documentation") API calls documentation for more details on how to do this.
+
+    Only one highly available IP per Load Balancer is currently supported. By this time it can only be IPv4, IPv6 support will come later.
+
+    ## Backends
+
+    Backend is a list of servers between which the flows of a given frontend are balanced. In addition to that backend has multiple parameters like session timeouts, protocol type, associated health-checks etc.
+
+    ## Health Checks
+
+    Backend servers can fail. One of the main features of the Load Balancer is to monitor their availability and, in case of a failure, redirect new flows between the active servers in the pool. Health check objects are used to detect backend servers failures. Each health check is an availability test specification, which defines how you determine that a backend server is "Up" or "Down". It can be a given number of missing ICMP echo replies or an unsuccessful HTTP request of a given URL.
+
+    For the full list of supported health check types see [UpdateHealthCheck](#operation/UpdateHealthCheck)
+
+    # Quick Start Guide
+
+    Below you will find a step-by-step guide on how to create and delete your Load Balancer, add frontends and backends, and configure health checks using the API and the Command Line Interface (CLI).
+
+    ## Using the Load Balancer API
+
+    ### Step 0: Prerequisites
+
+    In order to set up your environment, you can follow [the quickstart steps](https://developers.scaleway.com/en/quickstart/).
+    For this tutorial, it can be interesting to have `jq` in your terminal.
+
+    For a reminder, the Scaleway Load Balancer is a zoned product.
+
+    You can also find your project ID in [the Scaleway web console](https://console.scaleway.com/project/settings).
+
+    ### Step 1: Create Load Balancer
+
+    Customize the name, description, tags and set your project ID
+
+    ```bash
+    curl -X POST "https://api.scaleway.com/lb/v1/zones/$ZONE/lbs" -H "accept: application/json" -H "X-Auth-Token: $TOKEN" -H "Content-Type: application/json" \
+    -d "{\"description\":\"YOUR DESCRIPTION\",\"name\":\"TEST\",\"project_id\":\"$PROJECT_ID\",\"tags\":[\"test\", \"step by step\"]}" | jq .
+    ```
+
+    Copy the `id` field of the response to use at the next steps. For the sake of simplicity we will save the ID to a variable, which we will use in the following examples:
+
+    ```bash
+    export LB_ID="<your load balancer id>"
+    ```
+
+    To destroy a Load Balancer use the following call:
+
+    ```bash
+    curl -s -H "X-Auth-Token: $TOKEN" -X DELETE "https://api.scaleway.com/lb/v1/zones/$ZONE/lbs/$LB_ID" -H "Content-Type: application/json" -d "{\"release_ip\": false}"
+    ```
+
+    ### Step 2: Retrieve Load Balancer Details
+
+    It normally takes less than a second to provision a load balancer, but you always can check the status with the following call.
+
+    ```bash
+    curl -s "https://api.scaleway.com/lb/v1/zones/$ZONE/lbs/$LB_ID" -H "accept: application/json" -H "X-Auth-Token: $TOKEN" -H "Content-Type: application/json" | jq .
+    ```
+
+    In the reply, you will find:
+
+    - `instances`: details of your load balancer cluster status. If both instances have the `ready` status, it means that the cluster if fully operational and highly available. If one of the instances fail, your traffic will be switched to the other.
+    - `ip_address`: This is the public highly available IP address. Use this address as the front-end of your highly available services.
+
+    ### Step 3: Create Backend
+
+    In order to create a backend you need to customize the following parameters:
+
+    - `forward_port` &mdash; load balancer with forward user sessions to this port. For example, you can use port 8080 on a backend, while your front-end port is 80.
+    - `forward_port_algorithm` &mdash; string value, specifying of the following options:
+      - `"roundrobin"` &mdash; new sessions are balanced equally between the backend servers;
+      - `"leastconn"` &mdash; will take into account the number of active sessions, established to each of the servers, and will forward new ones to the server, which has the least.
+      - `"first"` &mdash; the first server with available slots will be chosen
+    - `server_ip` : A list of IPv4 or IPv6 address of your servers to.
+
+    Other backend parameters are documented here:
+    [CreateBackend](#operation/CreateBackend)
+
+    ```bash
+    curl -s -X POST "https://api.scaleway.com/lb/v1/zones/$ZONE/lbs/$LB_ID/backends" -H "accept: application/json" -H "X-Auth-Token: $TOKEN" -H "Content-Type: application/json" \
+    -d "{\"forward_port\":80,\"forward_port_algorithm\":\"roundrobin\",\"forward_protocol\":\"tcp\",\"health_check\":{\"check_delay\":2000,\"check_max_retries\":3,\"check_timeout\":1000,\"port\":80,\"tcp_config\":{}},\"name\":\"main backend\",\"send_proxy_v2\":false,\"server_ip\":[\"<REPLACE-BY-IP-OF-YOUR-SERVER1>\", \"<REPLACE-BY-IP-OF-YOUR-SERVER2>\"]}" | jq .
+    ```
+
+    Save the `id` field of the reply.
+
+    ```bash
+    export $BACKEND_ID="<ID of your backend>"
+    ```
+
+    If you want to delete a backend, this is how it can be done.
+
+    ```bash
+    curl -H "X-Auth-Token: $TOKEN" -X DELETE "https://api.scaleway.com/lb/v1/zones/$ZONE/lbs/$LB_ID/backends/$BACKEND_ID"
+    ```
+
+    ### Step 4: Create Frontend
+
+    Creating a frontend is straight-forward. You need to know the IDs of a load balancer and an existing frontend, then specify the `inbound_port`, on which the frontend will listen for incoming connections. You can also customize the protocol and client timeout. For more details on these options see the [CreateFrontend call documentation.](#operation/CreateFrontend)
+
+    Main fields:
+
+    - `backend_id` &mdash; link your frontend to the backend where the traffic will be redirected
+    - `inbound_port` &mdash; accept connections from this port
+
+    ```bash
+    curl -X POST "https://api.scaleway.com/lb/v1/zones/$ZONE/lbs/$LB_ID/frontends" -H "accept: application/json" -H "X-Auth-Token: $TOKEN" -H "Content-Type: application/json" \
+    -d "{\"backend_id\":\"$BACKEND_ID\",\"inbound_port\":80,\"name\":\"main frontend\",\"timeout_client\":5000}" | jq .
+    ```
+
+    Save the `id` field of the reply.
+
+    ```bash
+    export $FRONTEND_ID="<ID of your frontend>"
+    ```
+
+    You can delete a frontend using the following API call
+
+    ```bash
+    curl -H "X-Auth-Token: $TOKEN" -X DELETE "https://api.scaleway.com/lb/v1/zones/$ZONE/lbs/$LB_ID/frontends/$FRONTEND_ID"
+    ```
+
+    ## Using the Scaleway Command Line Interface
+
+    ### Step 0: Prerequisites
+
+    In order to set up your Scaleway CLI, you can follow [the tutorial](https://www.scaleway.com/en/docs/manage-cloud-servers-with-scaleway-cli/) .
+
+    Once you have set it up, you are good to go.
+
+    ### Step 1: Create Load Balancer
+
+    In this step, you can customize the properties of the Load Balancer you are creating (name, type, description, zone, etc.)
+    You can find your project ID in [the Scaleway web console](https://console.scaleway.com/project/settings).
+
+    ```bash
+    scw lb lb create name=test-cli type=LB-S
+    ```
+
+    It is important to keep track of your Load Balancer ID for further steps.
+
+    ### Step 2: Retrieve Load Balancer Details
+
+    As it takes up time to set up a Load Balancer, you will see your Load Balancer in a Pending status upon creation.
+
+    If you would like to retrieve your Load Balancer specifications, you can by using the CLI:
+
+    ```bash
+    scw lb lb get <lb-id>
+    ```
+
+    If you would like to delete the Load Balancer:
+
+    ```bash
+    scw lb lb delete <lb-id>
+    ```
+
+    ### Step 3: Create Backend
+
+    In order to create a backend you need to customize the following parameters:
+
+    - `forward-port` &mdash; load balancer with forward user sessions to this port. For example, you can use port 8080 on a backend, while your front-end port is 80.
+    - `forward-port-algorithm` &mdash; string value, specifying of the following options:
+      - `"roundrobin"` &mdash; new sessions are balanced equally between the backend servers;
+      - `"leastconn"` &mdash; will take into account the number of active sessions, established to each of the servers, and will forward new ones to the server, which has the least.
+      - `"first"` &mdash; the first server with available slots will be chosen
+    - `server_ip` : A list of IPv4 or IPv6 address of your servers.
+
+    Other backend parameters are documented here:
+    [CreateBackend](#operation/CreateBackend)
+
+    You can create a new backend with the command:
+
+    ```bash
+    scw lb backend create forward-protocol=tcp forward-port=80 lb-id=<lb-id>> forward-port-algorithm=roundrobin health-check.check-delay=2000 health-check.check-max-retries=3 health-check.check-timeout=1000 health-check.port=80
+    ```
+
+    If you would like to delete the backend:
+
+    ```bash
+    scw lb backend delete <backend-id>
+    ```
+
+    ### Step 4: Create Frontend
+
+    You can create a frontend for your Load Balancer linked to the backend that you just created:
+
+    ```bash
+    scw lb frontend create backend-id=<backend-id> lb-id=<lb-id> inbound-port=80
+    ```
+
+    If you want to, you can delete your frontend with the command:
+
+    ```bash
+    scw lb frontend delete <frontend-id>
+    ```
+
+    # Zone
+
+    Choose in which Availability Zone you want to deploy your Load Balancer
+
+    | Name      | API ID                |
+    | --------- | --------------------- |
+    | Paris     | `fr-par-1` `fr-par-2` |
+    | Amsterdam | `nl-ams-1`            |
+    | Warsaw    | `pl-waw-1`            |
+  version: v1
+servers:
+- url: https://api.scaleway.com
+tags:
+- name: load balancer
+  description: Main load balancer object.
+- name: Frontends
+  description: Load balancer frontend objects.
+- name: Backends
+  description: Load balancer backend objects.
+- name: Route
+- name: Ips
+  description: Highly available IP address object.
+- name: Stats
+  description: Load balancer statistics.
+- name: Acls
+  description: Load balancer ACL
+- name: Certificate
+  description: Generate (import soon) an SSL certificate for your domain names and
+    update or create a frontend to use it.
+- name: Alert subscribers
+- name: Private Network
+components:
+  schemas:
+    google.protobuf.Int32Value:
+      type: number
+      nullable: true
+    google.protobuf.StringValue:
+      type: string
+      nullable: true
+    google.protobuf.Timestamp:
+      type: string
+      format: date-time
+    scaleway.lb.v1.Acl:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of your ACL ressource
+        name:
+          type: string
+          description: Name of you ACL ressource
+        match:
+          type: object
+          description: The ACL match rule. At least `ip_subnet` or `http_filter` and
+            `http_filter_value` are required
+          properties:
+            ip_subnet:
+              type: array
+              description: A list of IPs or CIDR v4/v6 addresses of the client of
+                the session to match
+              items:
+                $ref: '#/components/schemas/google.protobuf.StringValue'
+            http_filter:
+              type: string
+              description: |
+                The HTTP filter to match. This filter is supported only if your backend supports HTTP forwarding.
+                It extracts the request's URL path, which starts at the first slash and ends before the question mark (without the host part).
+              enum:
+              - acl_http_filter_none
+              - path_begin
+              - path_end
+              - regex
+              - http_header_match
+              default: acl_http_filter_none
+            http_filter_value:
+              type: array
+              description: A list of possible values to match for the given HTTP filter
+              items:
+                $ref: '#/components/schemas/google.protobuf.StringValue'
+            http_filter_option:
+              type: string
+              description: A exra parameter. You can use this field with http_header_match
+                acl type to set the header name to filter
+              nullable: true
+            invert:
+              type: boolean
+              description: If set to `true`, the ACL matching condition will be of
+                type "UNLESS"
+          x-properties-order:
+          - ip_subnet
+          - http_filter
+          - http_filter_value
+          - http_filter_option
+          - invert
+        action:
+          type: object
+          description: Action to undertake when an ACL filter matches
+          properties:
+            type:
+              type: string
+              description: The action type
+              enum:
+              - allow
+              - deny
+              default: allow
+          x-properties-order:
+          - type
+        frontend:
+          type: object
+          description: See the Frontend object description
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            inbound_port:
+              type: number
+            backend:
+              $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+            lb:
+              $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+            timeout_client:
+              type: number
+              description: (in milliseconds)
+            certificate:
+              deprecated: true
+              $ref: '#/components/schemas/scaleway.lb.v1.Certificate'
+            certificate_ids:
+              type: array
+              items:
+                type: string
+            created_at:
+              $ref: '#/components/schemas/google.protobuf.Timestamp'
+            updated_at:
+              $ref: '#/components/schemas/google.protobuf.Timestamp'
+          x-properties-order:
+          - id
+          - name
+          - inbound_port
+          - backend
+          - lb
+          - timeout_client
+          - certificate
+          - certificate_ids
+          - created_at
+          - updated_at
+        index:
+          type: number
+          description: Order between your Acls (ascending order, 0 is first acl executed)
+        created_at:
+          type: string
+          description: Date at which the ACL was created
+          format: date-time
+        updated_at:
+          type: string
+          description: Date at which the ACL was last updated
+          format: date-time
+      x-properties-order:
+      - id
+      - name
+      - match
+      - action
+      - frontend
+      - index
+      - created_at
+      - updated_at
+    scaleway.lb.v1.Backend:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        forward_protocol:
+          $ref: '#/components/schemas/scaleway.lb.v1.Protocol'
+        forward_port:
+          type: number
+        forward_port_algorithm:
+          $ref: '#/components/schemas/scaleway.lb.v1.ForwardPortAlgorithm'
+        sticky_sessions:
+          $ref: '#/components/schemas/scaleway.lb.v1.StickySessionsType'
+        sticky_sessions_cookie_name:
+          type: string
+        health_check:
+          $ref: '#/components/schemas/scaleway.lb.v1.HealthCheck'
+        pool:
+          type: array
+          items:
+            type: string
+        lb:
+          $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+        send_proxy_v2:
+          type: boolean
+          deprecated: true
+        timeout_server:
+          type: number
+          description: (in milliseconds)
+        timeout_connect:
+          type: number
+          description: (in milliseconds)
+        timeout_tunnel:
+          type: number
+          description: (in milliseconds)
+        on_marked_down_action:
+          $ref: '#/components/schemas/scaleway.lb.v1.OnMarkedDownAction'
+        proxy_protocol:
+          $ref: '#/components/schemas/scaleway.lb.v1.ProxyProtocol'
+        created_at:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        failover_host:
+          $ref: '#/components/schemas/google.protobuf.StringValue'
+      x-properties-order:
+      - id
+      - name
+      - forward_protocol
+      - forward_port
+      - forward_port_algorithm
+      - sticky_sessions
+      - sticky_sessions_cookie_name
+      - health_check
+      - pool
+      - lb
+      - send_proxy_v2
+      - timeout_server
+      - timeout_connect
+      - timeout_tunnel
+      - on_marked_down_action
+      - proxy_protocol
+      - created_at
+      - updated_at
+      - failover_host
+    scaleway.lb.v1.BackendServerStats:
+      type: object
+      properties:
+        instance_id:
+          type: string
+          description: ID of your loadbalancer cluster server
+        backend_id:
+          type: string
+          description: ID of your Backend
+        ip:
+          type: string
+          description: IPv4 or IPv6 address of the server backend
+        server_state:
+          type: string
+          description: Server operational state (stopped/starting/running/stopping)
+          enum:
+          - stopped
+          - starting
+          - running
+          - stopping
+          default: stopped
+        server_state_changed_at:
+          type: string
+          description: Time since last operational change
+          format: date-time
+        last_health_check_status:
+          type: string
+          description: Last health check status (unknown/neutral/failed/passed/condpass)
+          enum:
+          - unknown
+          - neutral
+          - failed
+          - passed
+          - condpass
+          default: unknown
+      x-properties-order:
+      - instance_id
+      - backend_id
+      - ip
+      - server_state
+      - server_state_changed_at
+      - last_health_check_status
+    scaleway.lb.v1.Certificate:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of certificate (Let's encrypt or custom)
+          enum:
+          - letsencryt
+          - custom
+          default: letsencryt
+        id:
+          type: string
+          description: Certificate ID
+        common_name:
+          type: string
+          description: Main domain name of certificate
+        subject_alternative_name:
+          type: array
+          description: Alternative domain names
+          items:
+            type: string
+        fingerprint:
+          type: string
+          description: Identifier (SHA-1) of the certificate
+        not_valid_before:
+          type: string
+          description: Validity bounds
+          format: date-time
+        not_valid_after:
+          type: string
+          description: Validity bounds
+          format: date-time
+        status:
+          type: string
+          description: Status of certificate
+          enum:
+          - pending
+          - ready
+          - error
+          default: pending
+        lb:
+          type: object
+          description: Load balancer object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
+            status:
+              $ref: '#/components/schemas/scaleway.lb.v1.Lb.Status'
+            instances:
+              type: array
+              items:
+                $ref: '#/components/schemas/scaleway.lb.v1.Instance'
+            organization_id:
+              type: string
+            ip:
+              type: array
+              items:
+                $ref: '#/components/schemas/scaleway.lb.v1.Ip'
+            tags:
+              type: array
+              items:
+                type: string
+            frontend_count:
+              type: number
+            backend_count:
+              type: number
+            type:
+              type: string
+            subscriber:
+              $ref: '#/components/schemas/scaleway.lb.v1.Subscriber'
+            ssl_compatibility_level:
+              $ref: '#/components/schemas/scaleway.lb.v1.SSLCompatibilityLevel'
+            project_id:
+              type: string
+            created_at:
+              $ref: '#/components/schemas/google.protobuf.Timestamp'
+            updated_at:
+              $ref: '#/components/schemas/google.protobuf.Timestamp'
+            private_network_count:
+              type: number
+            route_count:
+              type: number
+            region:
+              type: string
+              deprecated: true
+            zone:
+              type: string
+          x-properties-order:
+          - id
+          - name
+          - description
+          - status
+          - instances
+          - organization_id
+          - ip
+          - tags
+          - frontend_count
+          - backend_count
+          - type
+          - subscriber
+          - ssl_compatibility_level
+          - project_id
+          - created_at
+          - updated_at
+          - private_network_count
+          - route_count
+          - region
+          - zone
+        name:
+          type: string
+          description: Certificate name
+        created_at:
+          type: string
+          description: Date at which the certificate was created
+          format: date-time
+        updated_at:
+          type: string
+          description: Date at which the certificate was last updated
+          format: date-time
+      x-properties-order:
+      - type
+      - id
+      - common_name
+      - subject_alternative_name
+      - fingerprint
+      - not_valid_before
+      - not_valid_after
+      - status
+      - lb
+      - name
+      - created_at
+      - updated_at
+    scaleway.lb.v1.ForwardPortAlgorithm:
+      type: string
+      enum:
+      - roundrobin
+      - leastconn
+      - first
+      default: roundrobin
+    scaleway.lb.v1.Frontend:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        inbound_port:
+          type: number
+        backend:
+          $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+        lb:
+          $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+        timeout_client:
+          type: number
+          description: (in milliseconds)
+        certificate:
+          deprecated: true
+          $ref: '#/components/schemas/scaleway.lb.v1.Certificate'
+        certificate_ids:
+          type: array
+          items:
+            type: string
+        created_at:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      x-properties-order:
+      - id
+      - name
+      - inbound_port
+      - backend
+      - lb
+      - timeout_client
+      - certificate
+      - certificate_ids
+      - created_at
+      - updated_at
+    scaleway.lb.v1.HealthCheck:
+      type: object
+      properties:
+        mysql_config:
+          type: object
+          description: The check requires MySQL >=3.22, for older versions, use TCP
+            check
+          properties:
+            user:
+              type: string
+          x-properties-order:
+          - user
+          x-one-of: config
+        ldap_config:
+          type: object
+          description: The response is analyzed to find an LDAPv3 response message
+          x-one-of: config
+        redis_config:
+          type: object
+          description: The response is analyzed to find the +PONG response message
+          x-one-of: config
+        check_max_retries:
+          type: number
+        tcp_config:
+          type: object
+          x-one-of: config
+        pgsql_config:
+          type: object
+          properties:
+            user:
+              type: string
+          x-properties-order:
+          - user
+          x-one-of: config
+        http_config:
+          type: object
+          properties:
+            uri:
+              type: string
+            method:
+              type: string
+            code:
+              $ref: '#/components/schemas/google.protobuf.Int32Value'
+          x-properties-order:
+          - uri
+          - method
+          - code
+          x-one-of: config
+        https_config:
+          type: object
+          properties:
+            uri:
+              type: string
+            method:
+              type: string
+            code:
+              $ref: '#/components/schemas/google.protobuf.Int32Value'
+          x-properties-order:
+          - uri
+          - method
+          - code
+          x-one-of: config
+        port:
+          type: number
+        check_timeout:
+          type: number
+          description: (in milliseconds)
+        check_delay:
+          type: number
+          description: (in milliseconds)
+        check_send_proxy:
+          type: boolean
+          description: It defines whether the healthcheck should be done considering
+            the proxy protocol
+      x-properties-order:
+      - mysql_config
+      - ldap_config
+      - redis_config
+      - check_max_retries
+      - tcp_config
+      - pgsql_config
+      - http_config
+      - https_config
+      - port
+      - check_timeout
+      - check_delay
+      - check_send_proxy
+    scaleway.lb.v1.Instance:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/scaleway.lb.v1.Instance.Status'
+        ip_address:
+          type: string
+        created_at:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        region:
+          type: string
+          deprecated: true
+        zone:
+          type: string
+      x-properties-order:
+      - id
+      - status
+      - ip_address
+      - created_at
+      - updated_at
+      - region
+      - zone
+    scaleway.lb.v1.Instance.Status:
+      type: string
+      enum:
+      - unknown
+      - ready
+      - pending
+      - stopped
+      - error
+      - locked
+      - migrating
+      default: unknown
+    scaleway.lb.v1.Ip:
+      type: object
+      properties:
+        id:
+          type: string
+        ip_address:
+          type: string
+        organization_id:
+          type: string
+        lb_id:
+          $ref: '#/components/schemas/google.protobuf.StringValue'
+        reverse:
+          type: string
+        project_id:
+          type: string
+        region:
+          type: string
+          deprecated: true
+        zone:
+          type: string
+      x-properties-order:
+      - id
+      - ip_address
+      - organization_id
+      - lb_id
+      - reverse
+      - project_id
+      - region
+      - zone
+    scaleway.lb.v1.Lb:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/scaleway.lb.v1.Lb.Status'
+        instances:
+          type: array
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Instance'
+        organization_id:
+          type: string
+        ip:
+          type: array
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Ip'
+        tags:
+          type: array
+          items:
+            type: string
+        frontend_count:
+          type: number
+        backend_count:
+          type: number
+        type:
+          type: string
+        subscriber:
+          $ref: '#/components/schemas/scaleway.lb.v1.Subscriber'
+        ssl_compatibility_level:
+          $ref: '#/components/schemas/scaleway.lb.v1.SSLCompatibilityLevel'
+        project_id:
+          type: string
+        created_at:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        private_network_count:
+          type: number
+        route_count:
+          type: number
+        region:
+          type: string
+          deprecated: true
+        zone:
+          type: string
+      x-properties-order:
+      - id
+      - name
+      - description
+      - status
+      - instances
+      - organization_id
+      - ip
+      - tags
+      - frontend_count
+      - backend_count
+      - type
+      - subscriber
+      - ssl_compatibility_level
+      - project_id
+      - created_at
+      - updated_at
+      - private_network_count
+      - route_count
+      - region
+      - zone
+    scaleway.lb.v1.Lb.Status:
+      type: string
+      enum:
+      - unknown
+      - ready
+      - pending
+      - stopped
+      - error
+      - locked
+      - migrating
+      - to_create
+      - creating
+      - to_delete
+      - deleting
+      default: unknown
+    scaleway.lb.v1.LbStats:
+      type: object
+      properties:
+        backend_servers_stats:
+          type: array
+          description: List stats object of your loadbalancer
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.BackendServerStats'
+      x-properties-order:
+      - backend_servers_stats
+    scaleway.lb.v1.LbType:
+      type: object
+      properties:
+        name:
+          type: string
+        stock_status:
+          $ref: '#/components/schemas/scaleway.lb.v1.LbType.Stock'
+        description:
+          type: string
+        region:
+          type: string
+          deprecated: true
+        zone:
+          type: string
+      x-properties-order:
+      - name
+      - stock_status
+      - description
+      - region
+      - zone
+    scaleway.lb.v1.LbType.Stock:
+      type: string
+      enum:
+      - unknown
+      - low_stock
+      - out_of_stock
+      - available
+      default: unknown
+    scaleway.lb.v1.ListAclResponse:
+      type: object
+      properties:
+        acls:
+          type: array
+          description: List of Acl object (see Acl object description)
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Acl'
+        total_count:
+          type: number
+          description: The total number of items
+      x-properties-order:
+      - acls
+      - total_count
+    scaleway.lb.v1.ListBackendStatsResponse:
+      type: object
+      properties:
+        backend_servers_stats:
+          type: array
+          description: List backend stats object of your loadbalancer
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.BackendServerStats'
+        total_count:
+          type: number
+          description: The total number of items
+      x-properties-order:
+      - backend_servers_stats
+      - total_count
+    scaleway.lb.v1.ListBackendsResponse:
+      type: object
+      properties:
+        backends:
+          type: array
+          description: List Backend objects of a load balancer
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+        total_count:
+          type: number
+          description: Total count, wihtout pagination
+      x-properties-order:
+      - backends
+      - total_count
+    scaleway.lb.v1.ListCertificatesResponse:
+      type: object
+      properties:
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Certificate'
+        total_count:
+          type: number
+      x-properties-order:
+      - certificates
+      - total_count
+    scaleway.lb.v1.ListFrontendsResponse:
+      type: object
+      properties:
+        frontends:
+          type: array
+          description: List frontends object of your loadbalancer
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Frontend'
+        total_count:
+          type: number
+          description: Total count, wihtout pagination
+      x-properties-order:
+      - frontends
+      - total_count
+    scaleway.lb.v1.ListIpsResponse:
+      type: object
+      properties:
+        ips:
+          type: array
+          description: List IP address object
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Ip'
+        total_count:
+          type: number
+          description: Total count, wihtout pagination
+      x-properties-order:
+      - ips
+      - total_count
+    scaleway.lb.v1.ListLbPrivateNetworksResponse:
+      type: object
+      properties:
+        private_network:
+          type: array
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.PrivateNetwork'
+        total_count:
+          type: number
+      x-properties-order:
+      - private_network
+      - total_count
+    scaleway.lb.v1.ListLbTypesResponse:
+      type: object
+      properties:
+        lb_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.LbType'
+        total_count:
+          type: number
+      x-properties-order:
+      - lb_types
+      - total_count
+    scaleway.lb.v1.ListLbsRequest.OrderBy:
+      type: string
+      enum:
+      - created_at_asc
+      - created_at_desc
+      - name_asc
+      - name_desc
+      default: created_at_asc
+    scaleway.lb.v1.ListLbsResponse:
+      type: object
+      properties:
+        lbs:
+          type: array
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+        total_count:
+          type: number
+      x-properties-order:
+      - lbs
+      - total_count
+    scaleway.lb.v1.ListPrivateNetworksRequest.OrderBy:
+      type: string
+      enum:
+      - created_at_asc
+      - created_at_desc
+      default: created_at_asc
+    scaleway.lb.v1.ListRoutesRequest.OrderBy:
+      type: string
+      enum:
+      - created_at_asc
+      - created_at_desc
+      default: created_at_asc
+    scaleway.lb.v1.ListRoutesResponse:
+      type: object
+      properties:
+        routes:
+          type: array
+          description: List of Routes object
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Route'
+        total_count:
+          type: number
+          description: The total number of items
+      x-properties-order:
+      - routes
+      - total_count
+    scaleway.lb.v1.ListSubscriberResponse:
+      type: object
+      properties:
+        subscribers:
+          type: array
+          description: List of Subscribers object
+          items:
+            $ref: '#/components/schemas/scaleway.lb.v1.Subscriber'
+        total_count:
+          type: number
+          description: The total number of items
+      x-properties-order:
+      - subscribers
+      - total_count
+    scaleway.lb.v1.OnMarkedDownAction:
+      type: string
+      enum:
+      - on_marked_down_action_none
+      - shutdown_sessions
+      default: on_marked_down_action_none
+    scaleway.lb.v1.PrivateNetwork:
+      type: object
+      properties:
+        lb:
+          type: object
+          description: LoadBalancer object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
+            status:
+              $ref: '#/components/schemas/scaleway.lb.v1.Lb.Status'
+            instances:
+              type: array
+              items:
+                $ref: '#/components/schemas/scaleway.lb.v1.Instance'
+            organization_id:
+              type: string
+            ip:
+              type: array
+              items:
+                $ref: '#/components/schemas/scaleway.lb.v1.Ip'
+            tags:
+              type: array
+              items:
+                type: string
+            frontend_count:
+              type: number
+            backend_count:
+              type: number
+            type:
+              type: string
+            subscriber:
+              $ref: '#/components/schemas/scaleway.lb.v1.Subscriber'
+            ssl_compatibility_level:
+              $ref: '#/components/schemas/scaleway.lb.v1.SSLCompatibilityLevel'
+            project_id:
+              type: string
+            created_at:
+              $ref: '#/components/schemas/google.protobuf.Timestamp'
+            updated_at:
+              $ref: '#/components/schemas/google.protobuf.Timestamp'
+            private_network_count:
+              type: number
+            route_count:
+              type: number
+            region:
+              type: string
+              deprecated: true
+            zone:
+              type: string
+          x-properties-order:
+          - id
+          - name
+          - description
+          - status
+          - instances
+          - organization_id
+          - ip
+          - tags
+          - frontend_count
+          - backend_count
+          - type
+          - subscriber
+          - ssl_compatibility_level
+          - project_id
+          - created_at
+          - updated_at
+          - private_network_count
+          - route_count
+          - region
+          - zone
+        static_config:
+          type: object
+          description: Local ip address of load balancer instance
+          properties:
+            ip_address:
+              type: array
+              items:
+                type: string
+          x-properties-order:
+          - ip_address
+          x-one-of: Config
+        dhcp_config:
+          type: object
+          description: Value set to true if load balancer instance use a DHCP
+          x-one-of: Config
+        private_network_id:
+          type: string
+          description: Instance private network id
+        status:
+          type: string
+          description: Status (running, to create...) of private network connection
+          enum:
+          - unknown
+          - ready
+          - pending
+          - error
+          default: unknown
+        created_at:
+          type: string
+          description: Date at which the PN was created
+          format: date-time
+        updated_at:
+          type: string
+          description: Date at which the PN was last updated
+          format: date-time
+      x-properties-order:
+      - lb
+      - static_config
+      - dhcp_config
+      - private_network_id
+      - status
+      - created_at
+      - updated_at
+    scaleway.lb.v1.Protocol:
+      type: string
+      enum:
+      - tcp
+      - http
+      default: tcp
+    scaleway.lb.v1.ProxyProtocol:
+      type: string
+      enum:
+      - proxy_protocol_unknown
+      - proxy_protocol_none
+      - proxy_protocol_v1
+      - proxy_protocol_v2
+      - proxy_protocol_v2_ssl
+      - proxy_protocol_v2_ssl_cn
+      default: proxy_protocol_unknown
+    scaleway.lb.v1.Route:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of match ressource
+        frontend_id:
+          type: string
+          description: Id of frontend
+        backend_id:
+          type: string
+          description: Id of backend
+        match:
+          type: object
+          description: Value to match a redirection
+          properties:
+            sni:
+              type: string
+              description: Server Name Indication TLS extension (SNI) field from an
+                incoming connection made via an SSL/TLS transport layer
+              nullable: true
+          x-properties-order:
+          - sni
+        created_at:
+          type: string
+          description: Date at which the route was created
+          format: date-time
+        updated_at:
+          type: string
+          description: Date at which the route was last updated
+          format: date-time
+      x-properties-order:
+      - id
+      - frontend_id
+      - backend_id
+      - match
+      - created_at
+      - updated_at
+    scaleway.lb.v1.SSLCompatibilityLevel:
+      type: string
+      enum:
+      - ssl_compatibility_level_unknown
+      - ssl_compatibility_level_intermediate
+      - ssl_compatibility_level_modern
+      - ssl_compatibility_level_old
+      default: ssl_compatibility_level_unknown
+    scaleway.lb.v1.StickySessionsType:
+      type: string
+      enum:
+      - none
+      - cookie
+      - table
+      default: none
+    scaleway.lb.v1.Subscriber:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Subscriber ID
+        name:
+          type: string
+          description: Subscriber name
+        email_config:
+          type: object
+          description: Email address of subscriber
+          properties:
+            email:
+              type: string
+              description: Email who receive alert
+          required:
+          - email
+          x-properties-order:
+          - email
+          x-one-of: config
+        webhook_config:
+          type: object
+          description: WebHook URI of subscriber
+          properties:
+            uri:
+              type: string
+              description: URI who receive POST request
+          required:
+          - uri
+          x-properties-order:
+          - uri
+          x-one-of: config
+      x-properties-order:
+      - id
+      - name
+      - email_config
+      - webhook_config
+  securitySchemes:
+    scaleway:
+      in: header
+      name: X-Auth-Token
+      type: apiKey
+paths:
+  /lb/v1/regions/{region}/acls/{acl_id}:
+    get:
+      tags:
+      - Acls
+      operationId: GetAcl
+      summary: Get an ACL
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: acl_id
+        description: ID of your ACL ressource
+        required: true
+        schema:
+          type: string
+          description: ID of your ACL ressource
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Acl'
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - Acls
+      operationId: UpdateAcl
+      summary: Update an ACL
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: acl_id
+        description: ID of your ACL ressource
+        required: true
+        schema:
+          type: string
+          description: ID of your ACL ressource
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Acl'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of your ACL ressource
+                action:
+                  type: object
+                  description: Action to undertake when an ACL filter matches
+                  properties:
+                    type:
+                      type: string
+                      description: The action type
+                      enum:
+                      - allow
+                      - deny
+                      default: allow
+                  x-properties-order:
+                  - type
+                match:
+                  type: object
+                  description: The ACL match rule. At least `ip_subnet` or `http_filter`
+                    and `http_filter_value` are required
+                  properties:
+                    ip_subnet:
+                      type: array
+                      description: A list of IPs or CIDR v4/v6 addresses of the client
+                        of the session to match
+                      items:
+                        $ref: '#/components/schemas/google.protobuf.StringValue'
+                    http_filter:
+                      type: string
+                      description: |
+                        The HTTP filter to match. This filter is supported only if your backend supports HTTP forwarding.
+                        It extracts the request's URL path, which starts at the first slash and ends before the question mark (without the host part).
+                      enum:
+                      - acl_http_filter_none
+                      - path_begin
+                      - path_end
+                      - regex
+                      - http_header_match
+                      default: acl_http_filter_none
+                    http_filter_value:
+                      type: array
+                      description: A list of possible values to match for the given
+                        HTTP filter
+                      items:
+                        $ref: '#/components/schemas/google.protobuf.StringValue'
+                    http_filter_option:
+                      type: string
+                      description: A exra parameter. You can use this field with http_header_match
+                        acl type to set the header name to filter
+                      nullable: true
+                    invert:
+                      type: boolean
+                      description: If set to `true`, the ACL matching condition will
+                        be of type "UNLESS"
+                  x-properties-order:
+                  - ip_subnet
+                  - http_filter
+                  - http_filter_value
+                  - http_filter_option
+                  - invert
+                index:
+                  type: number
+                  description: Order between your Acls (ascending order, 0 is first
+                    acl executed)
+              required:
+              - name
+              - action
+              - match
+              - index
+              x-properties-order:
+              - name
+              - action
+              - match
+              - index
+      security:
+      - scaleway: []
+    delete:
+      tags:
+      - Acls
+      operationId: DeleteAcl
+      summary: Delete an ACL
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: acl_id
+        description: ID of your ACL ressource
+        required: true
+        schema:
+          type: string
+          description: ID of your ACL ressource
+      responses:
+        "204":
+          description: ""
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/backends/{backend_id}:
+    get:
+      tags:
+      - Backends
+      operationId: GetBackend
+      summary: Get a backend in a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: backend_id
+        description: Backend ID
+        required: true
+        schema:
+          type: string
+          description: Backend ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - Backends
+      operationId: UpdateBackend
+      summary: Update a backend in a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: backend_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                forward_protocol:
+                  $ref: '#/components/schemas/scaleway.lb.v1.Protocol'
+                forward_port:
+                  type: number
+                forward_port_algorithm:
+                  $ref: '#/components/schemas/scaleway.lb.v1.ForwardPortAlgorithm'
+                sticky_sessions:
+                  $ref: '#/components/schemas/scaleway.lb.v1.StickySessionsType'
+                sticky_sessions_cookie_name:
+                  type: string
+                send_proxy_v2:
+                  type: boolean
+                  deprecated: true
+                timeout_server:
+                  type: number
+                  description: (in milliseconds)
+                timeout_connect:
+                  type: number
+                  description: (in milliseconds)
+                timeout_tunnel:
+                  type: number
+                  description: (in milliseconds)
+                on_marked_down_action:
+                  $ref: '#/components/schemas/scaleway.lb.v1.OnMarkedDownAction'
+                proxy_protocol:
+                  $ref: '#/components/schemas/scaleway.lb.v1.ProxyProtocol'
+                failover_host:
+                  $ref: '#/components/schemas/google.protobuf.StringValue'
+              x-properties-order:
+              - name
+              - forward_protocol
+              - forward_port
+              - forward_port_algorithm
+              - sticky_sessions
+              - sticky_sessions_cookie_name
+              - send_proxy_v2
+              - timeout_server
+              - timeout_connect
+              - timeout_tunnel
+              - on_marked_down_action
+              - proxy_protocol
+              - failover_host
+      security:
+      - scaleway: []
+    delete:
+      tags:
+      - Backends
+      operationId: DeleteBackend
+      summary: Delete a backend in a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: backend_id
+        description: ID of the backend to delete
+        required: true
+        schema:
+          type: string
+          description: ID of the backend to delete
+      responses:
+        "204":
+          description: ""
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/backends/{backend_id}/healthcheck:
+    put:
+      tags:
+      - Backends
+      operationId: UpdateHealthCheck
+      summary: Update an healthcheck for a given backend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: backend_id
+        description: Backend ID
+        required: true
+        schema:
+          type: string
+          description: Backend ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.HealthCheck'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                port:
+                  type: number
+                  description: Specify the port used to health check
+                check_delay:
+                  type: number
+                  description: Time between two consecutive health checks (in milliseconds)
+                check_timeout:
+                  type: number
+                  description: Additional check timeout, after the connection has
+                    been already established (in milliseconds)
+                check_max_retries:
+                  type: number
+                  description: Number of consecutive unsuccessful health checks, after
+                    wich the server will be considered dead
+                mysql_config:
+                  type: object
+                  description: The check requires MySQL >=3.22, for older version,
+                    please use TCP check
+                  properties:
+                    user:
+                      type: string
+                  x-properties-order:
+                  - user
+                  x-one-of: Config
+                ldap_config:
+                  type: object
+                  description: The response is analyzed to find an LDAPv3 response
+                    message
+                  x-one-of: Config
+                redis_config:
+                  type: object
+                  description: The response is analyzed to find the +PONG response
+                    message
+                  x-one-of: Config
+                pgsql_config:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                  x-properties-order:
+                  - user
+                  x-one-of: Config
+                tcp_config:
+                  type: object
+                  x-one-of: Config
+                http_config:
+                  type: object
+                  properties:
+                    uri:
+                      type: string
+                    method:
+                      type: string
+                    code:
+                      $ref: '#/components/schemas/google.protobuf.Int32Value'
+                  x-properties-order:
+                  - uri
+                  - method
+                  - code
+                  x-one-of: Config
+                https_config:
+                  type: object
+                  properties:
+                    uri:
+                      type: string
+                    method:
+                      type: string
+                    code:
+                      $ref: '#/components/schemas/google.protobuf.Int32Value'
+                  x-properties-order:
+                  - uri
+                  - method
+                  - code
+                  x-one-of: Config
+                check_send_proxy:
+                  type: boolean
+                  description: It defines whether the healthcheck should be done considering
+                    the proxy protocol
+              required:
+              - port
+              - check_delay
+              - check_timeout
+              - check_max_retries
+              x-properties-order:
+              - port
+              - check_delay
+              - check_timeout
+              - check_max_retries
+              - mysql_config
+              - ldap_config
+              - redis_config
+              - pgsql_config
+              - tcp_config
+              - http_config
+              - https_config
+              - check_send_proxy
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/backends/{backend_id}/servers:
+    post:
+      tags:
+      - Backends
+      operationId: AddBackendServers
+      summary: Add a set of servers in a given backend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: backend_id
+        description: Backend ID
+        required: true
+        schema:
+          type: string
+          description: Backend ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                server_ip:
+                  type: array
+                  description: Set all IPs to add on your backend
+                  items:
+                    type: string
+              required:
+              - server_ip
+              x-properties-order:
+              - server_ip
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - Backends
+      operationId: SetBackendServers
+      summary: Define all servers in a given backend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: backend_id
+        description: Backend ID
+        required: true
+        schema:
+          type: string
+          description: Backend ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                server_ip:
+                  type: array
+                  description: Set all IPs to add on your backend and remove all other
+                  items:
+                    type: string
+              required:
+              - server_ip
+              x-properties-order:
+              - server_ip
+      security:
+      - scaleway: []
+    delete:
+      tags:
+      - Backends
+      operationId: RemoveBackendServers
+      summary: Remove a set of servers for a given backend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: backend_id
+        description: Backend ID
+        required: true
+        schema:
+          type: string
+          description: Backend ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                server_ip:
+                  type: array
+                  description: Set all IPs to remove of your backend
+                  items:
+                    type: string
+              required:
+              - server_ip
+              x-properties-order:
+              - server_ip
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/certificates/{certificate_id}:
+    get:
+      tags:
+      - Certificate
+      operationId: GetCertificate
+      summary: Get a TLS certificate
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: certificate_id
+        description: Certificate ID
+        required: true
+        schema:
+          type: string
+          description: Certificate ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Certificate'
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - Certificate
+      operationId: UpdateCertificate
+      summary: Update a TLS certificate
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: certificate_id
+        description: Certificate ID
+        required: true
+        schema:
+          type: string
+          description: Certificate ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Certificate'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Certificate name
+              required:
+              - name
+              x-properties-order:
+              - name
+      security:
+      - scaleway: []
+    delete:
+      tags:
+      - Certificate
+      operationId: DeleteCertificate
+      summary: Delete a TLS certificate
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: certificate_id
+        description: Certificate ID
+        required: true
+        schema:
+          type: string
+          description: Certificate ID
+      responses:
+        "204":
+          description: ""
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/frontends/{frontend_id}:
+    get:
+      tags:
+      - Frontends
+      operationId: GetFrontend
+      summary: Get a frontend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: frontend_id
+        description: Frontend ID
+        required: true
+        schema:
+          type: string
+          description: Frontend ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Frontend'
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - Frontends
+      operationId: UpdateFrontend
+      summary: Update a frontend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: frontend_id
+        description: Frontend ID
+        required: true
+        schema:
+          type: string
+          description: Frontend ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Frontend'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Resource name
+                inbound_port:
+                  type: number
+                  description: TCP port to listen on the front side
+                backend_id:
+                  type: string
+                  description: Backend ID
+                timeout_client:
+                  type: number
+                  description: Client session maximum inactivity time (in milliseconds)
+                certificate_id:
+                  type: string
+                  description: Certificate ID, deprecated in favor of `certificate_ids`
+                    array!
+                  deprecated: true
+                  nullable: true
+                certificate_ids:
+                  type: array
+                  description: List of certificate IDs to bind on the frontend
+                  nullable: true
+                  items:
+                    type: string
+              required:
+              - name
+              - inbound_port
+              - backend_id
+              x-properties-order:
+              - name
+              - inbound_port
+              - backend_id
+              - timeout_client
+              - certificate_id
+              - certificate_ids
+      security:
+      - scaleway: []
+    delete:
+      tags:
+      - Frontends
+      operationId: DeleteFrontend
+      summary: Delete a frontend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: frontend_id
+        description: Frontend ID to delete
+        required: true
+        schema:
+          type: string
+          description: Frontend ID to delete
+      responses:
+        "204":
+          description: ""
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/frontends/{frontend_id}/acls:
+    get:
+      tags:
+      - Acls
+      operationId: ListAcls
+      summary: List ACL for a given frontend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: frontend_id
+        description: ID of your frontend
+        required: true
+        schema:
+          type: string
+          description: ID of your frontend
+      - in: query
+        name: order_by
+        description: You can order the response by created_at asc/desc or name asc/desc
+        schema:
+          type: string
+          description: You can order the response by created_at asc/desc or name asc/desc
+          enum:
+          - created_at_asc
+          - created_at_desc
+          - name_asc
+          - name_desc
+          default: created_at_asc
+      - in: query
+        name: page
+        description: Page number
+        required: true
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: page_size
+        description: The number of items to return
+        schema:
+          type: number
+          description: The number of items to return
+          default: 20
+      - in: query
+        name: name
+        description: Filter acl per name
+        schema:
+          type: string
+          description: Filter acl per name
+          nullable: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListAclResponse'
+      security:
+      - scaleway: []
+    post:
+      tags:
+      - Acls
+      operationId: CreateAcl
+      summary: Create an ACL for a given frontend
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: frontend_id
+        description: ID of your frontend
+        required: true
+        schema:
+          type: string
+          description: ID of your frontend
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Acl'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of your ACL ressource
+                action:
+                  type: object
+                  description: Action to undertake when an ACL filter matches
+                  properties:
+                    type:
+                      type: string
+                      description: The action type
+                      enum:
+                      - allow
+                      - deny
+                      default: allow
+                  x-properties-order:
+                  - type
+                match:
+                  type: object
+                  description: |
+                    The ACL match rule. You can have one of those three cases:
+
+                      - `ip_subnet` is defined
+                      - `http_filter` and `http_filter_value` are defined
+                      - `ip_subnet`, `http_filter` and `http_filter_value` are defined
+                  properties:
+                    ip_subnet:
+                      type: array
+                      description: A list of IPs or CIDR v4/v6 addresses of the client
+                        of the session to match
+                      items:
+                        $ref: '#/components/schemas/google.protobuf.StringValue'
+                    http_filter:
+                      type: string
+                      description: |
+                        The HTTP filter to match. This filter is supported only if your backend supports HTTP forwarding.
+                        It extracts the request's URL path, which starts at the first slash and ends before the question mark (without the host part).
+                      enum:
+                      - acl_http_filter_none
+                      - path_begin
+                      - path_end
+                      - regex
+                      - http_header_match
+                      default: acl_http_filter_none
+                    http_filter_value:
+                      type: array
+                      description: A list of possible values to match for the given
+                        HTTP filter
+                      items:
+                        $ref: '#/components/schemas/google.protobuf.StringValue'
+                    http_filter_option:
+                      type: string
+                      description: A exra parameter. You can use this field with http_header_match
+                        acl type to set the header name to filter
+                      nullable: true
+                    invert:
+                      type: boolean
+                      description: If set to `true`, the ACL matching condition will
+                        be of type "UNLESS"
+                  x-properties-order:
+                  - ip_subnet
+                  - http_filter
+                  - http_filter_value
+                  - http_filter_option
+                  - invert
+                index:
+                  type: number
+                  description: Order between your Acls (ascending order, 0 is first
+                    acl executed)
+              required:
+              - name
+              - action
+              - match
+              - index
+              x-properties-order:
+              - name
+              - action
+              - match
+              - index
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/ips:
+    get:
+      tags:
+      - Ips
+      operationId: ListIPs
+      summary: List IPs
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: query
+        name: page
+        description: Page number
+        required: true
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: page_size
+        description: The number of items to return
+        schema:
+          type: number
+          description: The number of items to return
+          default: 20
+      - in: query
+        name: ip_address
+        description: Use this to search by IP address
+        schema:
+          type: string
+          description: Use this to search by IP address
+          nullable: true
+      - in: query
+        name: organization_id
+        description: Filter IPs by organization id
+        schema:
+          type: string
+          description: Filter IPs by organization id
+          nullable: true
+      - in: query
+        name: project_id
+        description: Filter IPs by project ID
+        schema:
+          type: string
+          description: Filter IPs by project ID
+          nullable: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListIpsResponse'
+      security:
+      - scaleway: []
+    post:
+      tags:
+      - Ips
+      operationId: CreateIp
+      summary: Create an IP
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Ip'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_id:
+                  type: string
+                  description: Owner of resources
+                  deprecated: true
+                  x-one-of: ProjectIdentifier
+                project_id:
+                  type: string
+                  description: Assign the resource to a project ID
+                  x-one-of: ProjectIdentifier
+                reverse:
+                  type: string
+                  description: Reverse domain name
+                  nullable: true
+              x-properties-order:
+              - organization_id
+              - project_id
+              - reverse
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/ips/{ip_id}:
+    get:
+      tags:
+      - Ips
+      operationId: GetIp
+      summary: Get an IP
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: ip_id
+        description: IP address ID
+        required: true
+        schema:
+          type: string
+          description: IP address ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Ip'
+      security:
+      - scaleway: []
+    patch:
+      tags:
+      - Ips
+      operationId: UpdateIp
+      summary: Update an IP
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: ip_id
+        description: IP address ID
+        required: true
+        schema:
+          type: string
+          description: IP address ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Ip'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reverse:
+                  type: string
+                  description: Reverse DNS
+                  nullable: true
+              x-properties-order:
+              - reverse
+      security:
+      - scaleway: []
+    delete:
+      tags:
+      - Ips
+      operationId: ReleaseIp
+      summary: Delete an IP
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: ip_id
+        description: IP address ID
+        required: true
+        schema:
+          type: string
+          description: IP address ID
+      responses:
+        "204":
+          description: ""
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lb-types:
+    get:
+      tags:
+      - load balancer
+      operationId: ListLbTypes
+      summary: List all load balancer offer type
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: query
+        name: page
+        description: Page number
+        required: true
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: page_size
+        description: The number of items to return
+        schema:
+          type: number
+          description: The number of items to return
+          default: 20
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListLbTypesResponse'
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lb/{lb_id}/subscribe:
+    post:
+      tags:
+      - Alert subscribers
+      operationId: SubscribeToLb
+      summary: Subscribe a subscriber to a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriber_id:
+                  type: string
+                  description: Subscriber ID
+              required:
+              - subscriber_id
+              x-properties-order:
+              - subscriber_id
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lb/{lb_id}/unsubscribe:
+    delete:
+      tags:
+      - Alert subscribers
+      operationId: UnsubscribeFromLb
+      summary: Unsubscribe a subscriber from a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lb/subscriber/{subscriber_id}:
+    delete:
+      tags:
+      - Alert subscribers
+      operationId: DeleteSubscriber
+      summary: Delete a subscriber
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: subscriber_id
+        description: Subscriber ID
+        required: true
+        schema:
+          type: string
+          description: Subscriber ID
+      responses:
+        "204":
+          description: ""
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs:
+    get:
+      tags:
+      - load balancer
+      operationId: ListLbs
+      summary: List load balancers
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: query
+        name: name
+        description: Use this to search by name
+        schema:
+          type: string
+          description: Use this to search by name
+          nullable: true
+      - in: query
+        name: order_by
+        schema:
+          $ref: '#/components/schemas/scaleway.lb.v1.ListLbsRequest.OrderBy'
+      - in: query
+        name: page_size
+        description: Page size
+        schema:
+          type: number
+          description: Page size
+          default: 20
+      - in: query
+        name: page
+        description: Page number
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: organization_id
+        description: Filter LBs by organization ID
+        schema:
+          type: string
+          description: Filter LBs by organization ID
+          nullable: true
+      - in: query
+        name: project_id
+        description: Filter LBs by project ID
+        schema:
+          type: string
+          description: Filter LBs by project ID
+          nullable: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListLbsResponse'
+      security:
+      - scaleway: []
+    post:
+      tags:
+      - load balancer
+      operationId: CreateLb
+      summary: Create a load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_id:
+                  type: string
+                  description: Owner of resources
+                  deprecated: true
+                  x-one-of: ProjectIdentifier
+                project_id:
+                  type: string
+                  description: Assign the resource to a project ID
+                  x-one-of: ProjectIdentifier
+                name:
+                  type: string
+                  description: Resource names
+                description:
+                  type: string
+                  description: Resource description
+                ip_id:
+                  type: string
+                  description: Just like for compute instances, when you destroy a
+                    load balancer, you can keep its highly available IP address and
+                    reuse it for another load balancer later
+                  nullable: true
+                tags:
+                  type: array
+                  description: List of keyword
+                  items:
+                    type: string
+                type:
+                  type: string
+                  description: Load balancer offer type
+                ssl_compatibility_level:
+                  type: string
+                  description: |
+                    Enforces minimal SSL version (in SSL/TLS offloading context).
+                    - `intermediate` General-purpose servers with a variety of clients, recommended for almost all systems (Supports Firefox 27, Android 4.4.2, Chrome 31, Edge, IE 11 on Windows 7, Java 8u31, OpenSSL 1.0.1, Opera 20, and Safari 9).
+                    - `modern` Services with clients that support TLS 1.3 and don't need backward compatibility (Firefox 63, Android 10.0, Chrome 70, Edge 75, Java 11, OpenSSL 1.1.1, Opera 57, and Safari 12.1).
+                    - `old` Compatible with a number of very old clients, and should be used only as a last resort (Firefox 1, Android 2.3, Chrome 1, Edge 12, IE8 on Windows XP, Java 6, OpenSSL 0.9.8, Opera 5, and Safari 1).
+                  enum:
+                  - ssl_compatibility_level_unknown
+                  - ssl_compatibility_level_intermediate
+                  - ssl_compatibility_level_modern
+                  - ssl_compatibility_level_old
+                  default: ssl_compatibility_level_unknown
+              required:
+              - name
+              x-properties-order:
+              - organization_id
+              - project_id
+              - name
+              - description
+              - ip_id
+              - tags
+              - type
+              - ssl_compatibility_level
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}:
+    get:
+      tags:
+      - load balancer
+      operationId: GetLb
+      summary: Get a load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - load balancer
+      operationId: UpdateLb
+      summary: Update a load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Resource name
+                description:
+                  type: string
+                  description: Resource description
+                tags:
+                  type: array
+                  description: List of keywords
+                  items:
+                    type: string
+                ssl_compatibility_level:
+                  type: string
+                  description: |
+                    Enforces minimal SSL version (in SSL/TLS offloading context).
+                    - `intermediate` General-purpose servers with a variety of clients, recommended for almost all systems (Supports Firefox 27, Android 4.4.2, Chrome 31, Edge, IE 11 on Windows 7, Java 8u31, OpenSSL 1.0.1, Opera 20, and Safari 9).
+                    - `modern` Services with clients that support TLS 1.3 and don't need backward compatibility (Firefox 63, Android 10.0, Chrome 70, Edge 75, Java 11, OpenSSL 1.1.1, Opera 57, and Safari 12.1).
+                    - `old` Compatible with a number of very old clients, and should be used only as a last resort (Firefox 1, Android 2.3, Chrome 1, Edge 12, IE8 on Windows XP, Java 6, OpenSSL 0.9.8, Opera 5, and Safari 1).
+                  enum:
+                  - ssl_compatibility_level_unknown
+                  - ssl_compatibility_level_intermediate
+                  - ssl_compatibility_level_modern
+                  - ssl_compatibility_level_old
+                  default: ssl_compatibility_level_unknown
+              required:
+              - name
+              - description
+              x-properties-order:
+              - name
+              - description
+              - tags
+              - ssl_compatibility_level
+      security:
+      - scaleway: []
+    delete:
+      tags:
+      - load balancer
+      operationId: DeleteLb
+      summary: Delete a load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      - in: query
+        name: release_ip
+        description: Set true if you don't want to keep this IP address
+        schema:
+          type: boolean
+          description: Set true if you don't want to keep this IP address
+      responses:
+        "204":
+          description: ""
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/backend-stats:
+    get:
+      operationId: ListBackendStats
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      - in: query
+        name: page
+        description: Page number
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: page_size
+        description: The number of items to return
+        schema:
+          type: number
+          description: The number of items to return
+          default: 20
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListBackendStatsResponse'
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/backends:
+    get:
+      tags:
+      - Backends
+      operationId: ListBackends
+      summary: List backends in a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      - in: query
+        name: name
+        description: Use this to search by name
+        schema:
+          type: string
+          description: Use this to search by name
+          nullable: true
+      - in: query
+        name: order_by
+        description: Choose order of response
+        schema:
+          type: string
+          description: Choose order of response
+          enum:
+          - created_at_asc
+          - created_at_desc
+          - name_asc
+          - name_desc
+          default: created_at_asc
+      - in: query
+        name: page
+        description: Page number
+        required: true
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: page_size
+        description: The number of items to returns
+        schema:
+          type: number
+          description: The number of items to returns
+          default: 20
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListBackendsResponse'
+      security:
+      - scaleway: []
+    post:
+      tags:
+      - Backends
+      operationId: CreateBackend
+      summary: Create a backend in a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Backend'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Resource name
+                forward_protocol:
+                  type: string
+                  description: Backend protocol. TCP or HTTP
+                  enum:
+                  - tcp
+                  - http
+                  default: tcp
+                forward_port:
+                  type: number
+                  description: User sessions will be forwarded to this port of backend
+                    servers
+                forward_port_algorithm:
+                  type: string
+                  description: Load balancing algorithm
+                  enum:
+                  - roundrobin
+                  - leastconn
+                  - first
+                  default: roundrobin
+                sticky_sessions:
+                  type: string
+                  description: Enables cookie-based session persistence
+                  enum:
+                  - none
+                  - cookie
+                  - table
+                  default: none
+                sticky_sessions_cookie_name:
+                  type: string
+                  description: Cookie name for for sticky sessions
+                health_check:
+                  type: object
+                  description: See the Healthcheck object description
+                  properties:
+                    mysql_config:
+                      type: object
+                      description: The check requires MySQL >=3.22, for older versions,
+                        use TCP check
+                      properties:
+                        user:
+                          type: string
+                      x-properties-order:
+                      - user
+                      x-one-of: config
+                    ldap_config:
+                      type: object
+                      description: The response is analyzed to find an LDAPv3 response
+                        message
+                      x-one-of: config
+                    redis_config:
+                      type: object
+                      description: The response is analyzed to find the +PONG response
+                        message
+                      x-one-of: config
+                    check_max_retries:
+                      type: number
+                    tcp_config:
+                      type: object
+                      x-one-of: config
+                    pgsql_config:
+                      type: object
+                      properties:
+                        user:
+                          type: string
+                      x-properties-order:
+                      - user
+                      x-one-of: config
+                    http_config:
+                      type: object
+                      properties:
+                        uri:
+                          type: string
+                        method:
+                          type: string
+                        code:
+                          $ref: '#/components/schemas/google.protobuf.Int32Value'
+                      x-properties-order:
+                      - uri
+                      - method
+                      - code
+                      x-one-of: config
+                    https_config:
+                      type: object
+                      properties:
+                        uri:
+                          type: string
+                        method:
+                          type: string
+                        code:
+                          $ref: '#/components/schemas/google.protobuf.Int32Value'
+                      x-properties-order:
+                      - uri
+                      - method
+                      - code
+                      x-one-of: config
+                    port:
+                      type: number
+                    check_timeout:
+                      type: number
+                      description: (in milliseconds)
+                    check_delay:
+                      type: number
+                      description: (in milliseconds)
+                    check_send_proxy:
+                      type: boolean
+                      description: It defines whether the healthcheck should be done
+                        considering the proxy protocol
+                  x-properties-order:
+                  - mysql_config
+                  - ldap_config
+                  - redis_config
+                  - check_max_retries
+                  - tcp_config
+                  - pgsql_config
+                  - http_config
+                  - https_config
+                  - port
+                  - check_timeout
+                  - check_delay
+                  - check_send_proxy
+                server_ip:
+                  type: array
+                  description: Backend server IP addresses list (IPv4 or IPv6)
+                  items:
+                    type: string
+                send_proxy_v2:
+                  type: boolean
+                  description: Deprecated in favor of proxy_protocol field !
+                  deprecated: true
+                timeout_server:
+                  type: number
+                  description: Maximum server connection inactivity time (in milliseconds)
+                timeout_connect:
+                  type: number
+                  description: Maximum initical server connection establishment time
+                    (in milliseconds)
+                timeout_tunnel:
+                  type: number
+                  description: Maximum tunnel inactivity time (in milliseconds)
+                on_marked_down_action:
+                  type: string
+                  description: Modify what occurs when a backend server is marked
+                    down
+                  enum:
+                  - on_marked_down_action_none
+                  - shutdown_sessions
+                  default: on_marked_down_action_none
+                proxy_protocol:
+                  type: string
+                  description: |
+                    The PROXY protocol informs the other end about the incoming connection, so that it can know the client's address or the public address it accessed to, whatever the upper layer protocol.
+
+                    * `proxy_protocol_none` Disable proxy protocol.
+                    * `proxy_protocol_v1` Version one (text format).
+                    * `proxy_protocol_v2` Version two (binary format).
+                    * `proxy_protocol_v2_ssl` Version two with SSL connection.
+                    * `proxy_protocol_v2_ssl_cn` Version two with SSL connection and common name information.
+                  enum:
+                  - proxy_protocol_unknown
+                  - proxy_protocol_none
+                  - proxy_protocol_v1
+                  - proxy_protocol_v2
+                  - proxy_protocol_v2_ssl
+                  - proxy_protocol_v2_ssl_cn
+                  default: proxy_protocol_unknown
+                failover_host:
+                  type: string
+                  description: |
+                    Only the host part of the Scaleway S3 bucket website is expected e.g. `failover-website.s3-website.fr-par.scw.cloud` if your bucket website URL is `https://failover-website.s3-website.fr-par.scw.cloud/`.
+                  nullable: true
+              required:
+              - name
+              - forward_protocol
+              - forward_port
+              - forward_port_algorithm
+              - sticky_sessions
+              - health_check
+              - server_ip
+              x-properties-order:
+              - name
+              - forward_protocol
+              - forward_port
+              - forward_port_algorithm
+              - sticky_sessions
+              - sticky_sessions_cookie_name
+              - health_check
+              - server_ip
+              - send_proxy_v2
+              - timeout_server
+              - timeout_connect
+              - timeout_tunnel
+              - on_marked_down_action
+              - proxy_protocol
+              - failover_host
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/certificates:
+    get:
+      tags:
+      - Certificate
+      operationId: ListCertificates
+      summary: List all TLS certificates on a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      - in: query
+        name: order_by
+        description: You can order the response by created_at asc/desc or name asc/desc
+        schema:
+          type: string
+          description: You can order the response by created_at asc/desc or name asc/desc
+          enum:
+          - created_at_asc
+          - created_at_desc
+          - name_asc
+          - name_desc
+          default: created_at_asc
+      - in: query
+        name: page
+        description: Page number
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: page_size
+        description: The number of items to return
+        schema:
+          type: number
+          description: The number of items to return
+          default: 20
+      - in: query
+        name: name
+        description: Use this to search by name
+        schema:
+          type: string
+          description: Use this to search by name
+          nullable: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListCertificatesResponse'
+      security:
+      - scaleway: []
+    post:
+      tags:
+      - Certificate
+      operationId: CreateCertificate
+      summary: Create a TLS certificate
+      description: Generate a new TLS certificate using Let's Encrypt or import your
+        certificate.
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Certificate'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Certificate name
+                letsencrypt:
+                  type: object
+                  description: Let's Encrypt type
+                  properties:
+                    common_name:
+                      type: string
+                      description: Main domain name of certificate (make sure this
+                        domain exists and resolves to your load balancer HA IP)
+                    subject_alternative_name:
+                      type: array
+                      description: Alternative domain names (make sure all domain
+                        names exists and resolves to your load balancer HA IP)
+                      items:
+                        type: string
+                  required:
+                  - common_name
+                  x-properties-order:
+                  - common_name
+                  - subject_alternative_name
+                  x-one-of: type
+                custom_certificate:
+                  type: object
+                  description: Custom import certificate
+                  properties:
+                    certificate_chain:
+                      type: string
+                      description: The full PEM-formatted include an entire certificate
+                        chain including public key, private key, and optionally certificate
+                        authorities.
+                  required:
+                  - certificate_chain
+                  x-properties-order:
+                  - certificate_chain
+                  x-one-of: type
+              required:
+              - name
+              - letsencrypt
+              - custom_certificate
+              x-properties-order:
+              - name
+              - letsencrypt
+              - custom_certificate
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/frontends:
+    get:
+      tags:
+      - Frontends
+      operationId: ListFrontends
+      summary: List frontends in a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      - in: query
+        name: name
+        description: Use this to search by name
+        schema:
+          type: string
+          description: Use this to search by name
+          nullable: true
+      - in: query
+        name: order_by
+        description: Response order
+        schema:
+          type: string
+          description: Response order
+          enum:
+          - created_at_asc
+          - created_at_desc
+          - name_asc
+          - name_desc
+          default: created_at_asc
+      - in: query
+        name: page
+        description: Page number
+        required: true
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: page_size
+        description: The number of items to returns
+        schema:
+          type: number
+          description: The number of items to returns
+          default: 20
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListFrontendsResponse'
+      security:
+      - scaleway: []
+    post:
+      tags:
+      - Frontends
+      operationId: CreateFrontend
+      summary: Create a frontend in a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Frontend'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Resource name
+                inbound_port:
+                  type: number
+                  description: TCP port to listen on the front side
+                backend_id:
+                  type: string
+                  description: Backend ID
+                timeout_client:
+                  type: number
+                  description: Set the maximum inactivity time on the client side
+                    (in milliseconds)
+                certificate_id:
+                  type: string
+                  description: Certificate ID, deprecated in favor of certificate_ids
+                    array !
+                  deprecated: true
+                  nullable: true
+                certificate_ids:
+                  type: array
+                  description: List of certificate IDs to bind on the frontend
+                  nullable: true
+                  items:
+                    type: string
+              required:
+              - name
+              - inbound_port
+              - backend_id
+              x-properties-order:
+              - name
+              - inbound_port
+              - backend_id
+              - timeout_client
+              - certificate_id
+              - certificate_ids
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/migrate:
+    post:
+      tags:
+      - load balancer
+      operationId: MigrateLb
+      summary: Migrate a load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Lb'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: Load balancer type (check /lb-types to list all type)
+              required:
+              - type
+              x-properties-order:
+              - type
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/private-networks:
+    get:
+      tags:
+      - Private Network
+      operationId: ListLbPrivateNetworks
+      summary: List attached private network of load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: order_by
+        schema:
+          $ref: '#/components/schemas/scaleway.lb.v1.ListPrivateNetworksRequest.OrderBy'
+      - in: query
+        name: page_size
+        description: Page size
+        schema:
+          type: number
+          description: Page size
+          default: 20
+      - in: query
+        name: page
+        description: Page number
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListLbPrivateNetworksResponse'
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/private-networks/{private_network_id}/attach:
+    post:
+      tags:
+      - Private Network
+      operationId: AttachPrivateNetwork
+      summary: Add load balancer on instance private network
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      - in: path
+        name: private_network_id
+        description: Set your instance private network id
+        required: true
+        schema:
+          type: string
+          description: Set your instance private network id
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.PrivateNetwork'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                static_config:
+                  type: object
+                  description: Define two local ip address of your choice for each
+                    load balancer instance
+                  properties:
+                    ip_address:
+                      type: array
+                      items:
+                        type: string
+                  x-properties-order:
+                  - ip_address
+                  x-one-of: config
+                dhcp_config:
+                  type: object
+                  description: Set to true if you want to let DHCP assign IP addresses
+                  x-one-of: config
+              x-properties-order:
+              - static_config
+              - dhcp_config
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/private-networks/{private_network_id}/detach:
+    post:
+      tags:
+      - Private Network
+      operationId: DetachPrivateNetwork
+      summary: Remove load balancer of private network
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      - in: path
+        name: private_network_id
+        description: Set your instance private network id
+        required: true
+        schema:
+          type: string
+          description: Set your instance private network id
+      responses:
+        "204":
+          description: ""
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/lbs/{lb_id}/stats:
+    get:
+      tags:
+      - Stats
+      operationId: GetLbStats
+      summary: Get usage statistics of a given load balancer
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: lb_id
+        description: Load balancer ID
+        required: true
+        schema:
+          type: string
+          description: Load balancer ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.LbStats'
+      security:
+      - scaleway: []
+      deprecated: true
+  /lb/v1/regions/{region}/routes:
+    get:
+      tags:
+      - Route
+      operationId: ListRoutes
+      summary: List all backend redirections
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: query
+        name: order_by
+        schema:
+          $ref: '#/components/schemas/scaleway.lb.v1.ListRoutesRequest.OrderBy'
+      - in: query
+        name: page_size
+        description: Page size
+        schema:
+          type: number
+          description: Page size
+          default: 20
+      - in: query
+        name: page
+        description: Page number
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: frontend_id
+        schema:
+          $ref: '#/components/schemas/google.protobuf.StringValue'
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListRoutesResponse'
+      security:
+      - scaleway: []
+    post:
+      tags:
+      - Route
+      operationId: CreateRoute
+      summary: Create a backend redirection
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Route'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                frontend_id:
+                  type: string
+                  description: Origin of redirection
+                backend_id:
+                  type: string
+                  description: Destination of destination
+                match:
+                  type: object
+                  description: Value to match a redirection
+                  properties:
+                    sni:
+                      type: string
+                      description: Server Name Indication TLS extension (SNI) field
+                        from an incoming connection made via an SSL/TLS transport
+                        layer
+                      nullable: true
+                  x-properties-order:
+                  - sni
+              x-properties-order:
+              - frontend_id
+              - backend_id
+              - match
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/routes/{route_id}:
+    get:
+      tags:
+      - Route
+      operationId: GetRoute
+      summary: Get single backend redirection
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: route_id
+        description: Id of route to get
+        required: true
+        schema:
+          type: string
+          description: Id of route to get
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Route'
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - Route
+      operationId: UpdateRoute
+      summary: Edit a backend redirection
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: route_id
+        description: Route id to update
+        required: true
+        schema:
+          type: string
+          description: Route id to update
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Route'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                backend_id:
+                  type: string
+                  description: Backend id of redirection
+                match:
+                  type: object
+                  description: Value to match a redirection
+                  properties:
+                    sni:
+                      type: string
+                      description: Server Name Indication TLS extension (SNI) field
+                        from an incoming connection made via an SSL/TLS transport
+                        layer
+                      nullable: true
+                  x-properties-order:
+                  - sni
+              x-properties-order:
+              - backend_id
+              - match
+      security:
+      - scaleway: []
+    delete:
+      tags:
+      - Route
+      operationId: DeleteRoute
+      summary: Delete a backend redirection
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: route_id
+        description: Route id to delete
+        required: true
+        schema:
+          type: string
+          description: Route id to delete
+      responses:
+        "204":
+          description: ""
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/subscribers:
+    get:
+      tags:
+      - Alert subscribers
+      operationId: ListSubscriber
+      summary: List all subscriber
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: query
+        name: order_by
+        description: You can order the response by created_at asc/desc or name asc/desc
+        schema:
+          type: string
+          description: You can order the response by created_at asc/desc or name asc/desc
+          enum:
+          - created_at_asc
+          - created_at_desc
+          - name_asc
+          - name_desc
+          default: created_at_asc
+      - in: query
+        name: page
+        description: Page number
+        required: true
+        schema:
+          type: number
+          description: Page number
+          default: 1
+      - in: query
+        name: page_size
+        description: The number of items to return
+        schema:
+          type: number
+          description: The number of items to return
+          default: 20
+      - in: query
+        name: name
+        description: Use this to search by name
+        required: true
+        schema:
+          type: string
+          description: Use this to search by name
+          nullable: true
+      - in: query
+        name: organization_id
+        description: Filter Subscribers by organization ID
+        schema:
+          type: string
+          description: Filter Subscribers by organization ID
+          nullable: true
+      - in: query
+        name: project_id
+        description: Filter Subscribers by project ID
+        schema:
+          type: string
+          description: Filter Subscribers by project ID
+          nullable: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.ListSubscriberResponse'
+      security:
+      - scaleway: []
+    post:
+      tags:
+      - Alert subscribers
+      operationId: CreateSubscriber
+      summary: Create a subscriber, webhook or email
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Subscriber'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Subscriber name
+                email_config:
+                  type: object
+                  description: Email address configuration
+                  properties:
+                    email:
+                      type: string
+                      description: Email who receive alert
+                  required:
+                  - email
+                  x-properties-order:
+                  - email
+                  x-one-of: config
+                webhook_config:
+                  type: object
+                  description: WebHook URI configuration
+                  properties:
+                    uri:
+                      type: string
+                      description: URI who receive POST request
+                  required:
+                  - uri
+                  x-properties-order:
+                  - uri
+                  x-one-of: config
+                organization_id:
+                  type: string
+                  description: Owner of resources
+                  deprecated: true
+                  x-one-of: ProjectIdentifier
+                project_id:
+                  type: string
+                  description: Assign the resource to a project ID
+                  x-one-of: ProjectIdentifier
+              required:
+              - name
+              - project_id
+              x-properties-order:
+              - name
+              - email_config
+              - webhook_config
+              - organization_id
+              - project_id
+      security:
+      - scaleway: []
+  /lb/v1/regions/{region}/subscribers/{subscriber_id}:
+    get:
+      tags:
+      - Alert subscribers
+      operationId: GetSubscriber
+      summary: Get a subscriber
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: subscriber_id
+        description: Subscriber ID
+        required: true
+        schema:
+          type: string
+          description: Subscriber ID
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Subscriber'
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - Alert subscribers
+      operationId: UpdateSubscriber
+      summary: Update a subscriber
+      parameters:
+      - in: path
+        name: region
+        description: The region you want to target
+        required: true
+        schema:
+          type: string
+          description: The region you want to target
+          enum:
+          - fr-par
+          - nl-ams
+          - pl-waw
+      - in: path
+        name: subscriber_id
+        description: Assign the resource to a project IDs
+        required: true
+        schema:
+          type: string
+          description: Assign the resource to a project IDs
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.lb.v1.Subscriber'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Subscriber name
+                email_config:
+                  type: object
+                  description: Email address configuration
+                  properties:
+                    email:
+                      type: string
+                      description: Email who receive alert
+                  required:
+                  - email
+                  x-properties-order:
+                  - email
+                  x-one-of: config
+                webhook_config:
+                  type: object
+                  description: WebHook URI configuration
+                  properties:
+                    uri:
+                      type: string
+                      description: URI who receive POST request
+                  required:
+                  - uri
+                  x-properties-order:
+                  - uri
+                  x-one-of: config
+              required:
+              - name
+              x-properties-order:
+              - name
+              - email_config
+              - webhook_config
+      security:
+      - scaleway: []
