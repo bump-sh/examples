@@ -6,7 +6,7 @@ info:
 
     ## Endpoints
 
-    Scaleway instance API can be reach on
+    Scaleway instance API can be reached on
 
     - `https://api.scaleway.com/instance/v1/zones/fr-par-1`
     - `https://api.scaleway.com/instance/v1/zones/fr-par-2`
@@ -567,6 +567,10 @@ components:
           $ref: '#/components/schemas/scaleway.instance.v1.Image.State'
         project:
           type: string
+        tags:
+          type: array
+          items:
+            type: string
         zone:
           type: string
       x-properties-order:
@@ -583,6 +587,7 @@ components:
       - root_volume
       - state
       - project
+      - tags
       - zone
     scaleway.instance.v1.Image.State:
       type: string
@@ -628,49 +633,41 @@ components:
       properties:
         bootscripts:
           type: array
+          description: List of bootscripts
           items:
             $ref: '#/components/schemas/scaleway.instance.v1.Bootscript'
-        total_count:
-          type: number
       x-properties-order:
       - bootscripts
-      - total_count
     scaleway.instance.v1.ListImagesResponse:
       type: object
       properties:
         images:
           type: array
+          description: List of images
           items:
             $ref: '#/components/schemas/scaleway.instance.v1.Image'
-        total_count:
-          type: number
       x-properties-order:
       - images
-      - total_count
     scaleway.instance.v1.ListIpsResponse:
       type: object
       properties:
         ips:
           type: array
+          description: List of ips
           items:
             $ref: '#/components/schemas/scaleway.instance.v1.Ip'
-        total_count:
-          type: number
       x-properties-order:
       - ips
-      - total_count
     scaleway.instance.v1.ListPlacementGroupsResponse:
       type: object
       properties:
         placement_groups:
           type: array
+          description: List of placement groups
           items:
             $ref: '#/components/schemas/scaleway.instance.v1.PlacementGroup'
-        total_count:
-          type: number
       x-properties-order:
       - placement_groups
-      - total_count
     scaleway.instance.v1.ListPrivateNICsResponse:
       type: object
       properties:
@@ -685,13 +682,11 @@ components:
       properties:
         rules:
           type: array
+          description: List of security groups
           items:
             $ref: '#/components/schemas/scaleway.instance.v1.SecurityGroupRule'
-        total_count:
-          type: number
       x-properties-order:
       - rules
-      - total_count
     scaleway.instance.v1.ListSecurityGroupsResponse:
       type: object
       properties:
@@ -727,19 +722,14 @@ components:
       properties:
         servers:
           type: array
+          description: List of servers
           items:
             $ref: '#/components/schemas/scaleway.instance.v1.Server'
-        total_count:
-          type: number
       x-properties-order:
       - servers
-      - total_count
     scaleway.instance.v1.ListServersTypesResponse:
       type: object
       properties:
-        total_count:
-          type: number
-          description: Total number of server types
         servers:
           type: object
           description: List of server types
@@ -748,46 +738,39 @@ components:
               $ref: '#/components/schemas/scaleway.instance.v1.ServerType'
           additionalProperties: true
       x-properties-order:
-      - total_count
       - servers
     scaleway.instance.v1.ListSnapshotsResponse:
       type: object
       properties:
         snapshots:
           type: array
+          description: List of snapshots
           items:
             $ref: '#/components/schemas/scaleway.instance.v1.Snapshot'
-        total_count:
-          type: number
       x-properties-order:
       - snapshots
-      - total_count
     scaleway.instance.v1.ListVolumesResponse:
       type: object
       properties:
         volumes:
           type: array
+          description: List of volumes
           items:
             $ref: '#/components/schemas/scaleway.instance.v1.Volume'
-        total_count:
-          type: number
       x-properties-order:
       - volumes
-      - total_count
     scaleway.instance.v1.ListVolumesTypesResponse:
       type: object
       properties:
         volumes:
           type: object
+          description: Map of volume types
           properties:
             <volumeKey>:
               $ref: '#/components/schemas/scaleway.instance.v1.VolumeType'
           additionalProperties: true
-        total_count:
-          type: number
       x-properties-order:
       - volumes
-      - total_count
     scaleway.instance.v1.NullableStringValue:
       type: string
       nullable: true
@@ -806,9 +789,14 @@ components:
         project:
           type: string
           description: The placement group project ID
+        tags:
+          type: array
+          description: The placement group tags
+          items:
+            type: string
         policy_mode:
           type: string
-          description: Select the failling mode when the placement cannot be  respected,
+          description: Select the failling mode when the placement cannot be respected,
             either optional or enforced
           enum:
           - optional
@@ -833,6 +821,7 @@ components:
       - name
       - organization
       - project
+      - tags
       - policy_mode
       - policy_type
       - policy_respected
@@ -877,11 +866,20 @@ components:
         mac_address:
           type: string
           description: The private NIC MAC address
+        state:
+          type: string
+          description: The private NIC state
+          enum:
+          - available
+          - syncing
+          - syncing_error
+          default: available
       x-properties-order:
       - id
       - server_id
       - private_network_id
       - mac_address
+      - state
     scaleway.instance.v1.SecurityGroup:
       type: object
       properties:
@@ -918,6 +916,11 @@ components:
         project:
           type: string
           description: The security group project ID
+        tags:
+          type: array
+          description: The security group tags
+          items:
+            type: string
         organization_default:
           type: boolean
           description: True if it is your default security group for this organization
@@ -943,6 +946,14 @@ components:
         stateful:
           type: boolean
           description: True if the security group is stateful
+        state:
+          type: string
+          description: Security group state
+          enum:
+          - available
+          - syncing
+          - syncing_error
+          default: available
         zone:
           type: string
           description: The zone in which is the security group
@@ -955,12 +966,14 @@ components:
       - outbound_default_policy
       - organization
       - project
+      - tags
       - organization_default
       - project_default
       - creation_date
       - modification_date
       - servers
       - stateful
+      - state
       - zone
     scaleway.instance.v1.SecurityGroupRule:
       type: object
@@ -1103,6 +1116,10 @@ components:
               $ref: '#/components/schemas/scaleway.instance.v1.Image.State'
             project:
               type: string
+            tags:
+              type: array
+              items:
+                type: string
             zone:
               type: string
           x-properties-order:
@@ -1119,6 +1136,7 @@ components:
           - root_volume
           - state
           - project
+          - tags
           - zone
         protected:
           type: boolean
@@ -1271,7 +1289,7 @@ components:
           description: The server volumes
           properties:
             <volumeKey>:
-              $ref: '#/components/schemas/scaleway.instance.v1.Volume'
+              $ref: '#/components/schemas/scaleway.instance.v1.VolumeServer'
           additionalProperties: true
         security_group:
           type: object
@@ -1315,9 +1333,14 @@ components:
             project:
               type: string
               description: The placement group project ID
+            tags:
+              type: array
+              description: The placement group tags
+              items:
+                type: string
             policy_mode:
               type: string
-              description: Select the failling mode when the placement cannot be  respected,
+              description: Select the failling mode when the placement cannot be respected,
                 either optional or enforced
               enum:
               - optional
@@ -1342,6 +1365,7 @@ components:
           - name
           - organization
           - project
+          - tags
           - policy_mode
           - policy_type
           - policy_respected
@@ -1604,6 +1628,11 @@ components:
         project:
           type: string
           description: The snapshot project ID
+        tags:
+          type: array
+          description: The snapshot tags
+          items:
+            type: string
         volume_type:
           type: string
           description: The snapshot volume type
@@ -1651,6 +1680,7 @@ components:
       - name
       - organization
       - project
+      - tags
       - volume_type
       - size
       - state
@@ -1797,6 +1827,11 @@ components:
         project:
           type: string
           description: The volume project ID
+        tags:
+          type: array
+          description: The volume tags
+          items:
+            type: string
         server:
           type: object
           description: The server attached to the volume
@@ -1815,6 +1850,10 @@ components:
           - available
           - snapshotting
           - error
+          - fetching
+          - resizing
+          - saving
+          - hotsyncing
           default: available
         zone:
           type: string
@@ -1829,6 +1868,7 @@ components:
       - modification_date
       - organization
       - project
+      - tags
       - server
       - state
       - zone
@@ -1838,6 +1878,96 @@ components:
       - l_ssd
       - b_ssd
       default: l_ssd
+    scaleway.instance.v1.VolumeServer:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        export_uri:
+          type: string
+        organization:
+          type: string
+        server:
+          $ref: '#/components/schemas/scaleway.instance.v1.ServerSummary'
+        size:
+          type: number
+          description: (in bytes)
+        volume_type:
+          $ref: '#/components/schemas/scaleway.instance.v1.VolumeServer.VolumeType'
+        creation_date:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        modification_date:
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        state:
+          $ref: '#/components/schemas/scaleway.instance.v1.VolumeServer.State'
+        project:
+          type: string
+        boot:
+          type: boolean
+        zone:
+          type: string
+      x-properties-order:
+      - id
+      - name
+      - export_uri
+      - organization
+      - server
+      - size
+      - volume_type
+      - creation_date
+      - modification_date
+      - state
+      - project
+      - boot
+      - zone
+    scaleway.instance.v1.VolumeServer.State:
+      type: string
+      enum:
+      - available
+      - snapshotting
+      - error
+      - fetching
+      - resizing
+      - saving
+      - hotsyncing
+      default: available
+    scaleway.instance.v1.VolumeServer.VolumeType:
+      type: string
+      enum:
+      - l_ssd
+      - b_ssd
+      default: l_ssd
+    scaleway.instance.v1.VolumeServerTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          description: UUID of the volume
+        boot:
+          type: boolean
+          description: Force the server to boot on this volume
+          default: "false"
+        name:
+          type: string
+          description: Name of the volume
+        size:
+          type: number
+          description: Disk size of the volume (in bytes)
+        volume_type:
+          type: string
+          description: Type of the volume
+          enum:
+          - l_ssd
+          - b_ssd
+          default: l_ssd
+      x-properties-order:
+      - id
+      - boot
+      - name
+      - size
+      - volume_type
     scaleway.instance.v1.VolumeSummary:
       type: object
       properties:
@@ -1935,6 +2065,11 @@ components:
       - name
       - content_type
       - content
+    scaleway.std.StringsValue:
+      type: array
+      nullable: true
+      items:
+        type: string
   securitySchemes:
     scaleway:
       in: header
@@ -1958,6 +2093,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -2014,6 +2150,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2044,6 +2181,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -2081,6 +2219,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -2114,6 +2253,10 @@ paths:
         name: project
         schema:
           $ref: '#/components/schemas/google.protobuf.StringValue'
+      - in: query
+        name: tags
+        schema:
+          $ref: '#/components/schemas/google.protobuf.StringValue'
       responses:
         "200":
           description: ""
@@ -2139,6 +2282,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       responses:
@@ -2187,6 +2331,11 @@ paths:
                   type: string
                   description: Project ID of the image
                   x-one-of: ProjectIdentifier
+                tags:
+                  type: array
+                  description: The tags of the image
+                  items:
+                    type: string
                 public:
                   type: boolean
                   description: True to create a public image
@@ -2201,6 +2350,7 @@ paths:
               - extra_volumes
               - organization
               - project
+              - tags
               - public
       security:
       - scaleway: []
@@ -2222,6 +2372,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2271,6 +2422,8 @@ paths:
                   $ref: '#/components/schemas/scaleway.instance.v1.Image.State'
                 project:
                   type: string
+                tags:
+                  $ref: '#/components/schemas/scaleway.std.StringsValue'
               x-properties-order:
               - name
               - arch
@@ -2284,6 +2437,7 @@ paths:
               - root_volume
               - state
               - project
+              - tags
       security:
       - scaleway: []
   /instance/v1/zones/{zone}/images/{image_id}:
@@ -2304,6 +2458,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2339,6 +2494,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2370,6 +2526,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -2412,6 +2569,15 @@ paths:
           type: string
           description: The project ID the IPs are reserved in
           nullable: true
+      - in: query
+        name: tags
+        description: Filter IPs with these exact tags (to filter with several tags,
+          use commas to separate them)
+        schema:
+          type: string
+          description: Filter IPs with these exact tags (to filter with several tags,
+            use commas to separate them)
+          nullable: true
       responses:
         "200":
           description: ""
@@ -2437,6 +2603,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       responses:
@@ -2462,20 +2629,20 @@ paths:
                   type: string
                   description: The project ID the IP is reserved in
                   x-one-of: ProjectIdentifier
+                tags:
+                  type: array
+                  description: The tags of the IP
+                  items:
+                    type: string
                 server:
                   type: string
                   description: UUID of the server you want to attach the IP to
                   nullable: true
-                tags:
-                  type: array
-                  description: An array of keywords you want to tag this IP with
-                  items:
-                    type: string
               x-properties-order:
               - organization
               - project
-              - server
               - tags
+              - server
       security:
       - scaleway: []
   /instance/v1/zones/{zone}/ips/{ip}:
@@ -2496,6 +2663,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2530,6 +2698,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2588,6 +2757,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2620,6 +2790,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -2652,6 +2823,15 @@ paths:
         schema:
           type: string
           description: List only placement groups of this project ID
+          nullable: true
+      - in: query
+        name: tags
+        description: List placement groups with these exact tags (to filter with several
+          tags, use commas to separate them)
+        schema:
+          type: string
+          description: List placement groups with these exact tags (to filter with
+            several tags, use commas to separate them)
           nullable: true
       - in: query
         name: name
@@ -2688,6 +2868,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       responses:
@@ -2716,6 +2897,11 @@ paths:
                   type: string
                   description: Project ID of the placement group
                   x-one-of: ProjectIdentifier
+                tags:
+                  type: array
+                  description: The tags of the placement group
+                  items:
+                    type: string
                 policy_mode:
                   type: string
                   description: The operating mode of the placement group
@@ -2734,6 +2920,7 @@ paths:
               - name
               - organization
               - project
+              - tags
               - policy_mode
               - policy_type
       security:
@@ -2756,6 +2943,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2791,6 +2979,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2822,12 +3011,15 @@ paths:
                   $ref: '#/components/schemas/scaleway.instance.v1.PlacementGroup.PolicyType'
                 project:
                   type: string
+                tags:
+                  $ref: '#/components/schemas/scaleway.std.StringsValue'
               x-properties-order:
               - name
               - organization
               - policy_mode
               - policy_type
               - project
+              - tags
       security:
       - scaleway: []
     patch:
@@ -2847,6 +3039,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2874,6 +3067,12 @@ paths:
                   type: string
                   description: Name of the placement group
                   nullable: true
+                tags:
+                  type: array
+                  description: The tags of the placement group
+                  nullable: true
+                  items:
+                    type: string
                 policy_mode:
                   type: string
                   description: The operating mode of the placement group
@@ -2890,6 +3089,7 @@ paths:
                   default: max_availability
               x-properties-order:
               - name
+              - tags
               - policy_mode
               - policy_type
       security:
@@ -2911,6 +3111,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2943,6 +3144,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -2976,6 +3178,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3022,6 +3225,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3071,6 +3275,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -3111,6 +3316,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -3151,6 +3357,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -3191,6 +3398,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -3213,6 +3421,15 @@ paths:
         schema:
           type: string
           description: The security group project ID
+          nullable: true
+      - in: query
+        name: tags
+        description: List security groups with these exact tags (to filter with several
+          tags, use commas to separate them)
+        schema:
+          type: string
+          description: List security groups with these exact tags (to filter with
+            several tags, use commas to separate them)
           nullable: true
       - in: query
         name: per_page
@@ -3256,6 +3473,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       responses:
@@ -3287,6 +3505,11 @@ paths:
                   type: string
                   description: Project ID the security group belong to
                   x-one-of: ProjectIdentifier
+                tags:
+                  type: array
+                  description: The tags of the security group
+                  items:
+                    type: string
                 organization_default:
                   type: boolean
                   description: Whether this security group becomes the default security
@@ -3330,6 +3553,7 @@ paths:
               - description
               - organization
               - project
+              - tags
               - organization_default
               - project_default
               - stateful
@@ -3356,6 +3580,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3382,6 +3607,12 @@ paths:
                 name:
                   type: string
                   description: The name of the security group
+                tags:
+                  type: array
+                  description: The tags of the security group
+                  nullable: true
+                  items:
+                    type: string
                 creation_date:
                   type: string
                   description: The creation date of the security group (will be ignored)
@@ -3436,6 +3667,7 @@ paths:
                   description: True to set the security group as stateful
               x-properties-order:
               - name
+              - tags
               - creation_date
               - modification_date
               - description
@@ -3468,6 +3700,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3502,6 +3735,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3533,6 +3767,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3584,6 +3819,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3659,6 +3895,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3696,6 +3933,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3771,6 +4009,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -3805,6 +4044,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -3885,10 +4125,12 @@ paths:
           default: running
       - in: query
         name: tags
-        description: List servers with these exact tags
+        description: List servers with these exact tags (to filter with several tags,
+          use commas to separate them)
         schema:
           type: string
-          description: List servers with these exact tags
+          description: List servers with these exact tags (to filter with several
+            tags, use commas to separate them)
           nullable: true
       - in: query
         name: private_network
@@ -3897,6 +4139,18 @@ paths:
           type: string
           description: List servers in this Private Network
           nullable: true
+      - in: query
+        name: order
+        description: Define the order of the returned servers
+        schema:
+          type: string
+          description: Define the order of the returned servers
+          enum:
+          - creation_date_desc
+          - creation_date_asc
+          - modification_date_desc
+          - modification_date_asc
+          default: creation_date_desc
       responses:
         "200":
           description: ""
@@ -3922,6 +4176,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       responses:
@@ -3956,7 +4211,7 @@ paths:
                   description: The volumes attached to the server
                   properties:
                     <volumeKey>:
-                      $ref: '#/components/schemas/scaleway.instance.v1.VolumeTemplate'
+                      $ref: '#/components/schemas/scaleway.instance.v1.VolumeServerTemplate'
                   additionalProperties: true
                 enable_ipv6:
                   type: boolean
@@ -4039,6 +4294,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4073,6 +4329,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4112,7 +4369,7 @@ paths:
                   type: object
                   properties:
                     <volumeKey>:
-                      $ref: '#/components/schemas/scaleway.instance.v1.VolumeTemplate'
+                      $ref: '#/components/schemas/scaleway.instance.v1.VolumeServerTemplate'
                   additionalProperties: true
                 bootscript:
                   $ref: '#/components/schemas/google.protobuf.StringValue'
@@ -4165,6 +4422,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4195,6 +4453,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4233,6 +4492,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4296,6 +4556,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4329,6 +4590,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4374,6 +4636,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4412,6 +4675,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4447,6 +4711,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4483,6 +4748,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4525,6 +4791,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4570,6 +4837,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4608,6 +4876,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -4631,6 +4900,10 @@ paths:
           $ref: '#/components/schemas/google.protobuf.StringValue'
       - in: query
         name: project
+        schema:
+          $ref: '#/components/schemas/google.protobuf.StringValue'
+      - in: query
+        name: tags
         schema:
           $ref: '#/components/schemas/google.protobuf.StringValue'
       responses:
@@ -4658,6 +4931,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       responses:
@@ -4680,6 +4954,11 @@ paths:
                 volume_id:
                   type: string
                   description: UUID of the volume
+                tags:
+                  type: array
+                  description: The tags of the snapshot
+                  items:
+                    type: string
                 organization:
                   type: string
                   description: Organization ID of the snapshot
@@ -4694,77 +4973,8 @@ paths:
               x-properties-order:
               - name
               - volume_id
+              - tags
               - organization
-              - project
-      security:
-      - scaleway: []
-  /instance/v1/zones/{zone}/snapshots/{id}:
-    put:
-      tags:
-      - Snapshots
-      operationId: SetSnapshot
-      summary: Update snapshot
-      description: Replace all snapshot properties with a snapshot message.
-      parameters:
-      - in: path
-        name: zone
-        description: The zone you want to target
-        required: true
-        schema:
-          type: string
-          description: The zone you want to target
-          enum:
-          - fr-par-1
-          - fr-par-2
-          - nl-ams-1
-          - pl-waw-1
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/scaleway.instance.v1.SetSnapshotResponse'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                organization:
-                  type: string
-                volume_type:
-                  $ref: '#/components/schemas/scaleway.instance.v1.Volume.VolumeType'
-                size:
-                  type: number
-                  description: (in bytes)
-                state:
-                  $ref: '#/components/schemas/scaleway.instance.v1.Snapshot.State'
-                base_volume:
-                  $ref: '#/components/schemas/scaleway.instance.v1.Snapshot.BaseVolume'
-                creation_date:
-                  $ref: '#/components/schemas/google.protobuf.Timestamp'
-                modification_date:
-                  $ref: '#/components/schemas/google.protobuf.Timestamp'
-                project:
-                  type: string
-              x-properties-order:
-              - name
-              - organization
-              - volume_type
-              - size
-              - state
-              - base_volume
-              - creation_date
-              - modification_date
               - project
       security:
       - scaleway: []
@@ -4786,6 +4996,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4802,6 +5013,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/scaleway.instance.v1.GetSnapshotResponse'
+      security:
+      - scaleway: []
+    put:
+      tags:
+      - Snapshots
+      operationId: SetSnapshot
+      summary: Update snapshot
+      description: Replace all snapshot properties with a snapshot message.
+      parameters:
+      - in: path
+        name: zone
+        description: The zone you want to target
+        required: true
+        schema:
+          type: string
+          description: The zone you want to target
+          enum:
+          - fr-par-1
+          - fr-par-2
+          - fr-par-3
+          - nl-ams-1
+          - pl-waw-1
+      - in: path
+        name: snapshot_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scaleway.instance.v1.SetSnapshotResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                organization:
+                  type: string
+                volume_type:
+                  $ref: '#/components/schemas/scaleway.instance.v1.Volume.VolumeType'
+                size:
+                  type: number
+                  description: (in bytes)
+                state:
+                  $ref: '#/components/schemas/scaleway.instance.v1.Snapshot.State'
+                base_volume:
+                  $ref: '#/components/schemas/scaleway.instance.v1.Snapshot.BaseVolume'
+                creation_date:
+                  $ref: '#/components/schemas/google.protobuf.Timestamp'
+                modification_date:
+                  $ref: '#/components/schemas/google.protobuf.Timestamp'
+                project:
+                  type: string
+                tags:
+                  $ref: '#/components/schemas/scaleway.std.StringsValue'
+              x-properties-order:
+              - id
+              - name
+              - organization
+              - volume_type
+              - size
+              - state
+              - base_volume
+              - creation_date
+              - modification_date
+              - project
+              - tags
       security:
       - scaleway: []
     delete:
@@ -4821,6 +5108,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -4852,6 +5140,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: query
@@ -4896,6 +5185,15 @@ paths:
           description: Filter volume by project ID
           nullable: true
       - in: query
+        name: tags
+        description: Filter volumes with these exact tags (to filter with several
+          tags, use commas to separate them)
+        schema:
+          type: string
+          description: Filter volumes with these exact tags (to filter with several
+            tags, use commas to separate them)
+          nullable: true
+      - in: query
         name: name
         description: Filter volume by name (for eg. "vol" will return "myvolume" but
           not "data")
@@ -4929,6 +5227,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       responses:
@@ -4957,6 +5256,11 @@ paths:
                   type: string
                   description: The volume project ID
                   x-one-of: ProjectIdentifier
+                tags:
+                  type: array
+                  description: The volume tags
+                  items:
+                    type: string
                 volume_type:
                   type: string
                   description: The volume type
@@ -4981,6 +5285,7 @@ paths:
               - name
               - organization
               - project
+              - tags
               - volume_type
               - size
               - base_volume
@@ -5005,6 +5310,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -5031,6 +5337,12 @@ paths:
                 name:
                   type: string
                   description: The volumes names
+                tags:
+                  type: array
+                  description: The tags of the volume
+                  nullable: true
+                  items:
+                    type: string
                 export_uri:
                   type: string
                   description: Show the volumes NBD export URI
@@ -5076,9 +5388,14 @@ paths:
                   - available
                   - snapshotting
                   - error
+                  - fetching
+                  - resizing
+                  - saving
+                  - hotsyncing
                   default: available
               x-properties-order:
               - name
+              - tags
               - export_uri
               - size
               - volume_type
@@ -5108,6 +5425,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -5145,6 +5463,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
@@ -5172,12 +5491,19 @@ paths:
                   type: string
                   description: The volume name
                   nullable: true
+                tags:
+                  type: array
+                  description: The tags of the volume
+                  nullable: true
+                  items:
+                    type: string
                 size:
                   type: number
                   description: The volume disk size (in bytes)
                   nullable: true
               x-properties-order:
               - name
+              - tags
               - size
       security:
       - scaleway: []
@@ -5198,6 +5524,7 @@ paths:
           enum:
           - fr-par-1
           - fr-par-2
+          - fr-par-3
           - nl-ams-1
           - pl-waw-1
       - in: path
