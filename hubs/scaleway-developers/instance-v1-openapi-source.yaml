@@ -252,9 +252,6 @@ components:
     google.protobuf.UInt32Value:
       type: number
       nullable: true
-    google.protobuf.UInt64Value:
-      type: string
-      nullable: true
     scaleway.instance.v1.Arch:
       type: string
       enum:
@@ -740,17 +737,19 @@ components:
     scaleway.instance.v1.ListServersTypesResponse:
       type: object
       properties:
+        total_count:
+          type: number
+          description: Total number of server types
         servers:
           type: object
+          description: List of server types
           properties:
             <serverKey>:
               $ref: '#/components/schemas/scaleway.instance.v1.ServerType'
           additionalProperties: true
-        total_count:
-          type: number
       x-properties-order:
-      - servers
       - total_count
+      - servers
     scaleway.instance.v1.ListSnapshotsResponse:
       type: object
       properties:
@@ -1419,28 +1418,93 @@ components:
       properties:
         monthly_price:
           type: number
+          description: Estimated monthly price, for a 30 days month, in Euro
+          deprecated: true
         hourly_price:
           type: number
+          description: Hourly price in Euro
         alt_names:
           type: array
+          description: Alternative instance name if any
           items:
             type: string
         per_volume_constraint:
-          $ref: '#/components/schemas/scaleway.instance.v1.ServerType.VolumeConstraintsByType'
+          type: object
+          description: Additional volume constraints
+          properties:
+            l_ssd:
+              type: object
+              description: Local SSD volumes
+              properties:
+                min_size:
+                  type: number
+                  description: Minimum volume size in bytes (in bytes)
+                max_size:
+                  type: number
+                  description: Maximum volume size in bytes (in bytes)
+              x-properties-order:
+              - min_size
+              - max_size
+          x-properties-order:
+          - l_ssd
         volumes_constraint:
-          $ref: '#/components/schemas/scaleway.instance.v1.ServerType.VolumeConstraintSizes'
+          type: object
+          description: Initial volume constraints
+          properties:
+            min_size:
+              type: number
+              description: Minimum volume size in bytes (in bytes)
+            max_size:
+              type: number
+              description: Maximum volume size in bytes (in bytes)
+          x-properties-order:
+          - min_size
+          - max_size
         ncpus:
           type: number
+          description: Number of CPU
         gpu:
-          $ref: '#/components/schemas/google.protobuf.UInt64Value'
+          type: number
+          description: Number of GPU
+          nullable: true
         ram:
           type: number
+          description: Available RAM in bytes
         arch:
-          $ref: '#/components/schemas/scaleway.instance.v1.Arch'
+          type: string
+          description: CPU architecture
+          enum:
+          - x86_64
+          - arm
+          default: x86_64
         baremetal:
           type: boolean
+          description: True if it is a baremetal instance
         network:
-          $ref: '#/components/schemas/scaleway.instance.v1.ServerType.Network'
+          type: object
+          description: Network available for the instance
+          properties:
+            interfaces:
+              type: array
+              description: List of available network interfaces
+              items:
+                $ref: '#/components/schemas/scaleway.instance.v1.ServerType.Network.Interface'
+            sum_internal_bandwidth:
+              type: number
+              description: Total maximum internal bandwidth in bits per seconds
+              nullable: true
+            sum_internet_bandwidth:
+              type: number
+              description: Total maximum internet bandwidth in bits per seconds
+              nullable: true
+            ipv6_support:
+              type: boolean
+              description: True if IPv6 is enabled
+          x-properties-order:
+          - interfaces
+          - sum_internal_bandwidth
+          - sum_internet_bandwidth
+          - ipv6_support
       x-properties-order:
       - monthly_price
       - hourly_price
@@ -1453,53 +1517,20 @@ components:
       - arch
       - baremetal
       - network
-    scaleway.instance.v1.ServerType.Network:
-      type: object
-      properties:
-        interfaces:
-          type: array
-          items:
-            $ref: '#/components/schemas/scaleway.instance.v1.ServerType.Network.Interface'
-        sum_internal_bandwidth:
-          $ref: '#/components/schemas/google.protobuf.UInt64Value'
-        sum_internet_bandwidth:
-          $ref: '#/components/schemas/google.protobuf.UInt64Value'
-        ipv6_support:
-          type: boolean
-      x-properties-order:
-      - interfaces
-      - sum_internal_bandwidth
-      - sum_internet_bandwidth
-      - ipv6_support
     scaleway.instance.v1.ServerType.Network.Interface:
       type: object
       properties:
         internal_bandwidth:
-          $ref: '#/components/schemas/google.protobuf.UInt64Value'
+          type: number
+          description: Maximum internal bandwidth in bits per seconds
+          nullable: true
         internet_bandwidth:
-          $ref: '#/components/schemas/google.protobuf.UInt64Value'
+          type: number
+          description: Maximum internet bandwidth in bits per seconds
+          nullable: true
       x-properties-order:
       - internal_bandwidth
       - internet_bandwidth
-    scaleway.instance.v1.ServerType.VolumeConstraintSizes:
-      type: object
-      properties:
-        min_size:
-          type: number
-          description: (in bytes)
-        max_size:
-          type: number
-          description: (in bytes)
-      x-properties-order:
-      - min_size
-      - max_size
-    scaleway.instance.v1.ServerType.VolumeConstraintsByType:
-      type: object
-      properties:
-        l_ssd:
-          $ref: '#/components/schemas/scaleway.instance.v1.ServerType.VolumeConstraintSizes'
-      x-properties-order:
-      - l_ssd
     scaleway.instance.v1.ServerTypesAvailability:
       type: string
       enum:
@@ -3287,6 +3318,11 @@ paths:
                   - accept
                   - drop
                   default: accept
+                enable_default_security:
+                  type: boolean
+                  description: True if SMTP is blocked on IPv4 and IPv6. This feature
+                    is read only, please open a ticket if you need to make it configurable.
+                  nullable: true
               required:
               - name
               x-properties-order:
@@ -3299,6 +3335,7 @@ paths:
               - stateful
               - inbound_default_policy
               - outbound_default_policy
+              - enable_default_security
       security:
       - scaleway: []
   /instance/v1/zones/{zone}/security_groups/{id}:
@@ -5136,7 +5173,7 @@ paths:
                   description: The volume name
                   nullable: true
                 size:
-                  type: string
+                  type: number
                   description: The volume disk size (in bytes)
                   nullable: true
               x-properties-order:
