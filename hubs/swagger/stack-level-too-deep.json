@@ -1,0 +1,12 @@
+{
+  "WorkflowItem": {
+    "properties": {
+      "conditions": {
+        "$ref": "#/Condition"
+      }
+    }
+  },
+  "Condition": {
+    "$ref": "#/WorkflowItem"
+  },
+}

@@ -1,0 +1,275 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "mealcanteen"
+  },
+  "host": "mealcanteen.com",
+  "basePath": "/api",
+  "paths": {
+    "/upcoming": {
+      "get": {
+        "summary": "Fetch upcoming",
+        "responses": {
+          "200": {
+            "schema": null
+          },
+          "description": "OK"
+        }
+      }
+    },
+    "/orders/{order_id}/ratings": {
+      "post": {
+        "summary": "Create rating",
+        "responses": {
+          "201": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "score": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "description": "Created"
+        },
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "url",
+            "required": true,
+            "type": "integer",
+            "description": "Id of the order object to rate"
+          },
+          {
+            "name": "rating.score",
+            "in": "body",
+            "required": true,
+            "type": "integer",
+            "description": "Rating value for the given order"
+          }
+        ]
+      }
+    },
+    "/orders/{order_id}/ratings/{id}": {
+      "patch": {
+        "summary": "Update rating",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "score": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "description": "OK"
+        }
+      },
+      "put": {
+        "summary": "Update rating",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "score": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "description": "OK"
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "summary": "List all orders",
+        "responses": {
+          "200": {
+            "schema": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "can_be_rated_from": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "can_be_destroyed_until": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "lunch": {
+                    "$ref": "lunch"
+                  },
+                  "order_items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "order_item"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "description": "OK"
+        }
+      },
+      "post": {
+        "summary": "Create order",
+        "responses": {
+          "201": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "can_be_rated_from": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "can_be_destroyed_until": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "lunch": {
+                  "type": "string",
+                  "description": "this is lunch property",
+                  "example": "chicken 🐔 🍗"
+                },
+                "order_items": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "order_item"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Created"
+        }
+      }
+    },
+    "/orders/{id}": {
+      "delete": {
+        "summary": "Destroy order",
+        "responses": null
+      }
+    },
+    "/user": {
+      "get": {
+        "summary": "Fetch user",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "first_name": {
+                  "type": "string"
+                },
+                "last_name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "devices": {
+                  "type": "array"
+                },
+                "balance": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "organization": {
+                  "$ref": "organization"
+                }
+              }
+            }
+          },
+          "description": "OK"
+        }
+      }
+    },
+    "/devices": {
+      "post": {
+        "summary": "Create device",
+        "responses": {
+          "201": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "onesignal_uuid": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "description": "Created"
+        }
+      }
+    },
+    "/charges": {
+      "post": {
+        "summary": "Create charge",
+        "responses": {
+          "201": {
+            "schema": null
+          },
+          "description": "Created"
+        }
+      }
+    }
+  }
+}
