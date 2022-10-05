@@ -1,0 +1,38 @@
+name: API diff
+
+on:
+  pull_request:
+
+jobs:
+  twitter-api-diff:
+    name: Check Twitter API diff on Bump
+    if: ${{ github.base_ref == 'main' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Comment pull request with API diff
+        uses: paulrbr/github-action@improve-gh-comment-per-doc
+        with:
+          doc: "7d74a9a2-c29e-45cf-97bd-9c57bca985b5"
+          token: ${{secrets.TWITTER_API_V2_BUMP_TOKEN}}
+          file: apis/twitter-api-v2-openapi-source.json
+          command: diff
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  swaleway-baremetal-api-diff:
+    name: Check Scaleway Baremetal API diff on Bump
+    if: ${{ github.base_ref == 'main' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Comment pull request with API diff
+        uses: paulrbr/github-action@improve-gh-comment-per-doc
+        with:
+          doc: "0efb638f-1a14-42b2-9083-946275661648"
+          token: ${{secrets.SCALEWAY_DEVELOPERS_BUMP_TOKEN}}
+          file: hubs/scaleway-developers/baremetal-v1-openapi-source.yaml
+          command: diff
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
