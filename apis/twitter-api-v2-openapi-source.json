@@ -92,8 +92,6 @@
           "style" : "form",
           "explode" : false
         }, {
-          "$ref" : "#/components/parameters/UserExpansionsParameter"
-        }, {
           "$ref" : "#/components/parameters/TweetFieldsParameter"
         }, {
           "$ref" : "#/components/parameters/UserFieldsParameter"
