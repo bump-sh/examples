@@ -80,9 +80,6 @@ components:
     scaleway.baremetal.v1.BMCAccess:
       type: object
       properties:
-        url:
-          type: string
-          description: URL to access to the server console
         login:
           type: string
           description: The login to use for the BMC (Baseboard Management Controller)
