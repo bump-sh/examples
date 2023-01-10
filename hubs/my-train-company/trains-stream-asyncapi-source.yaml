@@ -30,28 +30,32 @@ channels:
   trains/departures:
     publish:
       summary: Inform of a train departure
-      operationId: TrainDeparture
+      operationId: pubTrainDeparture
       message:
         $ref: '#/components/messages/trainHasLeft'
     subscribe:
       summary: Be informed of all train departures
-      operationId: TrainDeparture
+      operationId: subTrainDeparture
       message:
         $ref: '#/components/messages/trainHasLeft'
   trains/arrivals:
     publish:
       summary: Inform of a train arrival
-      operationId: TrainArrival
+      operationId: pubTrainArrival
       message:
         $ref: '#/components/messages/trainHasArrived'
     subscribe:
-      summary: Be informed of all train departures
-      operationId: TrainArrival
+      summary: Be informed of all train arrivals
+      operationId: subTrainArrival
       message:
         $ref: '#/components/messages/trainHasArrived'
 
 
 components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: user
   messages:
     trainHasLeft:
       name: trainHasLeft

@@ -78,10 +78,29 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+                default:
+                  summary: "Basic Origin-Destination search"
+                  value:
+                    departure_station: "Marseille"
+                    destination_station: "Sisteron"
+                    departure_around: "2023-05-04T09:42:00+00:00"
+                via:
+                  summary: "Search via a specific destination"
+                  value:
+                    departure_station: "Marseille"
+                    via_station: "Valence"
+                    destination_station: "Sisteron"
+                    departure_around: "2023-05-04T09:42:00+00:00"
             schema:
               type: object
+              required:
+                - departure_station
+                - destination_station
               properties:
                 departure_station:
+                  type: string
+                via_station:
                   type: string
                 destination_station:
                   type: string
