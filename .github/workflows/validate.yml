@@ -1,21 +1,21 @@
 name: Deploy documentation
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
 jobs:
-  deploy-doc:
+  validate-doc:
     runs-on: ubuntu-latest
-    name: Deploy API documentations on Bump
+    name: Valide API definition on Bump
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - run: ./.github/scripts/deploy-all.sh
+      - run: ./.github/scripts/bump-all.sh "deploy --dry-run"
         env:
           AMADEUS_BUMP_TOKEN: ${{ secrets.AMADEUS_BUMP_TOKEN }}
           EXAMPLES_BUMP_TOKEN: ${{ secrets.EXAMPLES_BUMP_TOKEN }}

@@ -8,6 +8,9 @@ shopt -s nullglob
 # Install bump-cli
 npm install -g bump-cli
 
+# Command
+cmd="${1:-deploy}"
+
 # For each directory in the hubs/ directory
 for hub in hubs/*/; do
     for api in "${hub}"*-source.{yaml,json}; do
@@ -25,7 +28,7 @@ for hub in hubs/*/; do
         tokenKey="${hubName//-/_}_BUMP_TOKEN"
         tokenKey="${tokenKey^^}"
         echo "* API ${apiName}"
-        bump deploy --doc "${apiName}" --token "${!tokenKey}" --hub "${hubName}" --auto-create "${api}"
+        bump $cmd --doc "${apiName}" --token "${!tokenKey}" --hub "${hubName}" --auto-create "${api}"
     done
 done
 
@@ -41,5 +44,5 @@ for api in apis/*-source.{yaml,json}; do
     tokenKey="${apiName//-/_}_BUMP_TOKEN"
     tokenKey="${tokenKey^^}"
     echo "* API ${apiName}"
-    bump deploy --doc "${apiName}" --token "${!tokenKey}" "${api}"
+    bump $cmd --doc "${apiName}" --token "${!tokenKey}" "${api}"
 done
