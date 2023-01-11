@@ -18,6 +18,7 @@ jobs:
       - run: ./.github/scripts/deploy-all.sh
         env:
           AMADEUS_BUMP_TOKEN: ${{ secrets.AMADEUS_BUMP_TOKEN }}
+          CLEVER_CLOUD_BUMP_TOKEN: ${{ secrets.CLEVER_CLOUD_BUMP_TOKEN }}
           EXAMPLES_BUMP_TOKEN: ${{ secrets.EXAMPLES_BUMP_TOKEN }}
           INTERCOM_BUMP_TOKEN: ${{ secrets.INTERCOM_BUMP_TOKEN }}
           MY_TRAIN_COMPANY_BUMP_TOKEN: ${{ secrets.MY_TRAIN_COMPANY_BUMP_TOKEN }}
