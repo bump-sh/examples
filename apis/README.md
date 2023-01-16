@@ -12,6 +12,8 @@ The files are automatically deployed to Bump.sh:
 - Payfit Partner API documentation: https://bump.sh/demo/doc/payfit-partner
 - Intercom API documentation: https://bump.sh/demo/doc/intercom
 - Clever-Cloud API documentation: https://bump.sh/demo/doc/clever-cloud
+- Pipedrive API documentation: https://bump.sh/demo/doc/pipedrive
+- Greenly API documentation: https://bump.sh/demo/doc/greenly
 
 ## How to add an API here?
 

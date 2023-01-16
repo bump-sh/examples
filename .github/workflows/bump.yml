@@ -27,3 +27,5 @@ jobs:
           ZBOS_MQTT_BUMP_TOKEN: ${{ secrets.ZBOS_MQTT_BUMP_TOKEN }}
           PAYFIT_PARTNER_API_BUMP_TOKEN: ${{ secrets.PAYFIT_PARTNER_API_BUMP_TOKEN }}
           BUMP_HOST: ${{ secrets.BUMP_HOST }}
+          GREENLY_BUMP_TOKEN: ${{ secrets.GREENLY_BUMP_TOKEN }}
+          PIPEDRIVE_BUMP_TOKEN:  ${{ secrets.PIPEDRIVE_BUMP_TOKEN }}

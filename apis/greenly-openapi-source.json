@@ -1,0 +1,1320 @@
+{
+  "components": {
+    "examples": {},
+    "headers": {},
+    "parameters": {},
+    "requestBodies": {},
+    "responses": {},
+    "schemas": {
+      "CountryId": {
+        "enum": [
+          "GB",
+          "FR",
+          "ES",
+          "IT",
+          "SE",
+          "DE"
+        ],
+        "type": "string"
+      },
+      "Record_Language.string_": {
+        "properties": {
+          "en": {
+            "type": "string"
+          },
+          "fr": {
+            "type": "string"
+          },
+          "es": {
+            "type": "string"
+          },
+          "it": {
+            "type": "string"
+          },
+          "sv": {
+            "type": "string"
+          },
+          "de": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "description": "Construct a type with a set of properties K of type T"
+      },
+      "Translations": {
+        "$ref": "#/components/schemas/Record_Language.string_"
+      },
+      "AlternativeDescriptionTranslations": {
+        "$ref": "#/components/schemas/Translations",
+        "description": "Very short intuitive description of the suggested low-carbon advice or provider\n(tweet format with less than 280 characters) in our multilingual format."
+      },
+      "RecommendedProviderOutput": {
+        "properties": {
+          "logoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Url of the provider's logo stored in svg format."
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "description": "Url of the recommended provider."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the recommended provider."
+          }
+        },
+        "required": [
+          "logoUrl",
+          "url",
+          "name"
+        ],
+        "type": "object"
+      },
+      "AlternativeOutput": {
+        "properties": {
+          "recommendedProviders": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendedProviderOutput"
+            },
+            "type": "array",
+            "description": "List of alternative providers"
+          },
+          "ratioEstimatedReduction": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "description": "Estimated average reduction resulting from the suggested low-carbon alternative. Hence a ratio of 0.66 means a reduction\nof 66%, i.e., that the carbon footprint is divided by 3."
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "nullable": true,
+            "description": "A list of url. Can be null."
+          },
+          "description": {
+            "$ref": "#/components/schemas/AlternativeDescriptionTranslations"
+          },
+          "geographicalRestriction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CountryId"
+              }
+            ],
+            "nullable": true,
+            "description": "If specified, it means the alternative is valid only for the specified country.\nIf null, then the alternative is valid everywhere."
+          },
+          "isProviderAlternative": {
+            "type": "boolean",
+            "description": "boolean to indicate whether the alternative is a general advice/behaviour alternative or is related to\na specific alternative provider."
+          },
+          "id": {
+            "type": "string",
+            "description": "UUID4 unique identifier of the alternative"
+          }
+        },
+        "required": [
+          "recommendedProviders",
+          "ratioEstimatedReduction",
+          "sources",
+          "description",
+          "geographicalRestriction",
+          "isProviderAlternative",
+          "id"
+        ],
+        "type": "object"
+      },
+      "OffsetProjectOutput": {
+        "properties": {
+          "remainingOffsetInTCO2eq": {
+            "type": "number",
+            "format": "double",
+            "description": "Remaining quantity of CO2 equivalent that is available for booking through the project (in tons of CO2 equivalents)"
+          },
+          "totalOffsetInTCO2eq": {
+            "type": "number",
+            "format": "double",
+            "description": "Total quantity of CO2 equivalent that will be offset by the project (in tons of CO2 equivalents)"
+          },
+          "priceInEuroPerTCO2eq": {
+            "type": "number",
+            "format": "double",
+            "description": "Price of the offsetting (in euro per ton of CO2 equivalent)"
+          },
+          "certificationsLogoURL": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "List of the logos associated to the certification of the project"
+          },
+          "certifications": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "List of the certifications of the project"
+          },
+          "partnerLogoURL": {
+            "type": "string",
+            "description": "Logo of the company providing the project"
+          },
+          "partner": {
+            "type": "string",
+            "description": "Name of the company providing the project"
+          },
+          "longDescription": {
+            "$ref": "#/components/schemas/Translations",
+            "description": "Description of the project in a detailled paragraph with additional informations (in a multilingual format)."
+          },
+          "shortHandDescription": {
+            "$ref": "#/components/schemas/Translations",
+            "description": "Description of the project in a few words (in a multilingual format)."
+          },
+          "location": {
+            "type": "string",
+            "description": "Geographical localisation of the offsetting project"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the offset project"
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the offset project"
+          }
+        },
+        "required": [
+          "remainingOffsetInTCO2eq",
+          "totalOffsetInTCO2eq",
+          "priceInEuroPerTCO2eq",
+          "certificationsLogoURL",
+          "certifications",
+          "partnerLogoURL",
+          "partner",
+          "longDescription",
+          "shortHandDescription",
+          "location",
+          "name",
+          "id"
+        ],
+        "type": "object"
+      },
+      "BookOffsetOutput": {
+        "properties": {
+          "totalPrice": {
+            "type": "number",
+            "format": "double",
+            "description": "Total price corresponding to the booking realized"
+          },
+          "bookingSuccessful": {
+            "type": "boolean",
+            "description": "Boolean representing whether the booking was successfully done."
+          }
+        },
+        "required": [
+          "totalPrice",
+          "bookingSuccessful"
+        ],
+        "type": "object"
+      },
+      "BookOffsetArgs": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "(Optional) Email of the user carrying out the booking"
+          },
+          "bookedOffsetInTCO2eq": {
+            "type": "number",
+            "format": "double",
+            "description": "Quantity of offsetting being booked (in TCO2eq)"
+          },
+          "offsetProjectId": {
+            "type": "string",
+            "description": "Unique identifier of the chosen project"
+          }
+        },
+        "required": [
+          "bookedOffsetInTCO2eq",
+          "offsetProjectId"
+        ],
+        "type": "object"
+      },
+      "PurchaseCategoryMethodologyTranslations": {
+        "$ref": "#/components/schemas/Translations",
+        "description": "Methodology used to calculate the carbon footprint of transactions belonging to this purchase category.\nIn case of tags applied to the transaction, a methodology is also available within the tag definition."
+      },
+      "ParentPurchaseCategoryId": {
+        "enum": [
+          "Transport",
+          "Food",
+          "Shopping",
+          "Services",
+          "Housing",
+          "Uncategorized"
+        ],
+        "type": "string"
+      },
+      "PurchaseCategoryNameTranslations": {
+        "$ref": "#/components/schemas/Translations",
+        "description": "Name of the purchase category in multilingual format"
+      },
+      "TagType": {
+        "enum": [
+          "boolean",
+          "number",
+          "enum"
+        ],
+        "type": "string"
+      },
+      "EnumValueTranslated": {
+        "properties": {
+          "translations": {
+            "$ref": "#/components/schemas/Translations",
+            "description": "Translations of the enum value"
+          },
+          "id": {
+            "type": "string",
+            "description": "Id of the enum value"
+          }
+        },
+        "required": [
+          "translations",
+          "id"
+        ],
+        "type": "object"
+      },
+      "Tag": {
+        "properties": {
+          "translations": {
+            "$ref": "#/components/schemas/Translations",
+            "description": "Translations of the tag description"
+          },
+          "enumValues": {
+            "items": {
+              "$ref": "#/components/schemas/EnumValueTranslated"
+            },
+            "type": "array",
+            "description": "Possible values for the tag in case of enum"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TagType",
+            "description": "Type of the tag"
+          },
+          "id": {
+            "type": "string",
+            "description": "Id of the tag"
+          }
+        },
+        "required": [
+          "translations",
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "PurchaseCategoryOutput": {
+        "properties": {
+          "possibleTags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "description": "Possible tags that can be applied to transactions in this purchase category.\nIn case of enum, the list of potential values is available."
+          },
+          "translations": {
+            "$ref": "#/components/schemas/PurchaseCategoryNameTranslations"
+          },
+          "parentPurchaseCategory": {
+            "$ref": "#/components/schemas/ParentPurchaseCategoryId",
+            "description": "Parent purchase category which defines the larger type of the purchase (food, housing, transport, etc)"
+          },
+          "methodology": {
+            "$ref": "#/components/schemas/PurchaseCategoryMethodologyTranslations"
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the purchase category"
+          }
+        },
+        "required": [
+          "possibleTags",
+          "translations",
+          "parentPurchaseCategory",
+          "methodology",
+          "id"
+        ],
+        "type": "object"
+      },
+      "TagValue": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number",
+                "format": "double"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "tagId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "tagId"
+        ],
+        "type": "object"
+      },
+      "Pick_Transaction.tagValues_": {
+        "properties": {
+          "tagValues": {
+            "items": {
+              "$ref": "#/components/schemas/TagValue"
+            },
+            "type": "array",
+            "description": "Set of tag values applied to the transaction. These have an influence on carbon footprint calculation."
+          }
+        },
+        "required": [
+          "tagValues"
+        ],
+        "type": "object",
+        "description": "From T, pick a set of properties whose keys are in the union K"
+      },
+      "Pick_CarbonFootprint.emissionsInKg-or-avoidedEmissionsInKg_": {
+        "properties": {
+          "emissionsInKg": {
+            "type": "number",
+            "format": "double",
+            "description": "Emissions generated in kg of CO2 equivalent (all greenhouse gas are converted to CO2)."
+          },
+          "avoidedEmissionsInKg": {
+            "type": "number",
+            "format": "double",
+            "description": "Emissions avoided in kg of CO2 equivalent (all greenhouse gas are converted to CO2).\nEmissions avoided are calculated in regard to a reference situation that can be found\nin the methodology (e.g. carsharing vs driving solo in your car)"
+          }
+        },
+        "required": [
+          "emissionsInKg",
+          "avoidedEmissionsInKg"
+        ],
+        "type": "object",
+        "description": "From T, pick a set of properties whose keys are in the union K"
+      },
+      "Translation": {
+        "properties": {
+          "de": {
+            "type": "string"
+          },
+          "sv": {
+            "type": "string"
+          },
+          "es": {
+            "type": "string"
+          },
+          "it": {
+            "type": "string"
+          },
+          "en": {
+            "type": "string"
+          },
+          "fr": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CarbonFootprintEquivalents": {
+        "properties": {
+          "avoidedEmissionsInKgEquivalent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Translation"
+              }
+            ],
+            "nullable": true,
+            "description": "intuitive equivalent for the avoided CO2e emissions"
+          },
+          "emissionsInKgEquivalent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Translation"
+              }
+            ],
+            "nullable": true,
+            "description": "intuitive equivalent for the emitted CO2e emissions"
+          }
+        },
+        "required": [
+          "avoidedEmissionsInKgEquivalent",
+          "emissionsInKgEquivalent"
+        ],
+        "type": "object",
+        "description": "Intuitive illustration of the calculated carbon footprint in terms of day to day actions and objects"
+      },
+      "Opaque_AlternativeId.string_": {
+        "allOf": [
+          {
+            "type": "string"
+          },
+          {
+            "properties": {
+              "__TYPE__": {
+                "type": "string",
+                "enum": [
+                  "AlternativeId"
+                ],
+                "nullable": false
+              }
+            },
+            "required": [
+              "__TYPE__"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "AlternativeId": {
+        "$ref": "#/components/schemas/Opaque_AlternativeId.string_"
+      },
+      "CarbonFootprintOutput": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pick_Transaction.tagValues_"
+          },
+          {
+            "properties": {
+              "cleanedLabel": {
+                "type": "string",
+                "description": "Cleaned label for the transaction. If a specific provider / brand has been\nidentified in the transaction label, it will be the name of this provider / brand.\nIt might be the same as the input label if no cleaning operations were carried out."
+              },
+              "alternatives": {
+                "items": {
+                  "$ref": "#/components/schemas/AlternativeOutput"
+                },
+                "type": "array",
+                "description": "Populated list of the low-carbon alternatives that are recommended for this particular transaction.\nOptional feature."
+              },
+              "alternativeIds": {
+                "items": {
+                  "$ref": "#/components/schemas/AlternativeId"
+                },
+                "type": "array",
+                "description": "List of the ids of the low-carbon alternatives that are recommended for this particular transaction.\nOptional feature."
+              },
+              "purchaseCategoryId": {
+                "type": "string",
+                "description": "Id of the category of the transaction (e.g. TELECOM, SUPERMARKET, AUTOBUS).\nThe relevant associated information can\nbe found in the purchase categories endpoint."
+              },
+              "isGreen": {
+                "type": "boolean",
+                "description": "Boolean value to indicate whether the transaction is associated with a positive action, i.e., an action\nthat has a carbon footprint that is lower than the conventional behavour. This means that the transaction\nhas generated a positive amount of avoided CO2eq."
+              },
+              "transactionId": {
+                "type": "string",
+                "description": "References the id of the transaction whose carbon footprint it is."
+              },
+              "carbonFootprintEquivalents": {
+                "$ref": "#/components/schemas/CarbonFootprintEquivalents"
+              },
+              "methodology": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Translation"
+                  }
+                ],
+                "nullable": true,
+                "description": "Methodology of the carbon footprint calculation\nOptional feature."
+              },
+              "carbonFootprint": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Pick_CarbonFootprint.emissionsInKg-or-avoidedEmissionsInKg_"
+                  }
+                ],
+                "nullable": true,
+                "description": "Represents the carbon footprint of a transaction.\nIt can be null in the following cases:\n- The transaction could not be categorized\n- The transaction has a positive amount in euros and represents revenues\n- The transaction type is not compatible with carbon footprint analysis"
+              }
+            },
+            "required": [
+              "cleanedLabel",
+              "purchaseCategoryId",
+              "isGreen",
+              "transactionId",
+              "carbonFootprintEquivalents",
+              "carbonFootprint"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "CalculateCarbonFootprintsOutput": {
+        "items": {
+          "$ref": "#/components/schemas/CarbonFootprintOutput"
+        },
+        "type": "array"
+      },
+      "TransactionType": {
+        "description": "The input type is type of the bank transaction and can take any of the following values:\n* CREDIT: Default type when it is not possible to determine the type of a revenue entry.\n* DEBIT: Default type when it is not possible to determine the type of a disbursement of money.\n* DINTEREST: Interest on a bank account.\n* DIVIDEND: Payment of a company to its shareholders.\n* BANK_FEE: Fees on a bank account.\n* DEPOSIT: Deposit of money in an agency.\n* ATM: Withdrawing money from an ATM.\n* POINT_OF_SALE: Payment with a credit card.\n* CREDIT_CARD_PAYMENT: Month-end debit on a deferred card.\n* INTERNAL_TRANSFER: Transfer of money between two bank accounts of the same customer.\n* TRANSFER: Transfer of money between two bank accounts of two different customers.\n* CHECK: Transaction made by check.\n* CASH: Transaction carried out using a physical currency (notes and coins).\n* DIRECT_DEPOSIT: Deposit of money made by a payer directly into the payee's bank account.\n* DIRECT_DEBIT: Transaction in which one person (or company) withdraws funds from another person's bank account.\n* OTHER: When a transaction does not correspond to any of these types.\n\nOnly the types POINT_OF_SALE, TRANSFER, DIRECT_DEBIT, DEBIT leads the transaction to be analyzed for carbon footprint.",
+        "enum": [
+          "CREDIT",
+          "DEBIT",
+          "INTEREST",
+          "DIVIDEND",
+          "BANK_FEE",
+          "DEPOSIT",
+          "ATM",
+          "POINT_OF_SALE",
+          "CREDIT_CARD_PAYMENT",
+          "INTERNAL_TRANSFER",
+          "TRANSFER",
+          "CHECK",
+          "CASH",
+          "DIRECT_DEPOSIT",
+          "DIRECT_DEBIT",
+          "OTHER"
+        ],
+        "type": "string"
+      },
+      "InputTransaction": {
+        "properties": {
+          "countryCode": {
+            "type": "string",
+            "description": "(Optional) A country-code in the ISO 3166-1 alpha-2 format (see list below). In the absence of a country-code\n  the default country code if 'FR'.\nAustria:\tAT\nBelgium:\tBE\nBulgaria:\tBG\nCroatia:\tHR\nCyprus:\tCY\nCzech Republic:\tCZ\nDenmark:\tDK\nEstonia:\tEE\nFinland\tFI\nFrance:\tFR\nGermany:\tDE\nGreece:\tGR\nHungary:\tHU\nIreland, Republic of (EIRE):\tIE\nItaly:\tIT\nLatvia:\tLV\nLithuania: LT\nLuxembourg:\tLU\nMalta:\tMT\nNetherlands:\tNL\nNorway: NO\nPoland:\tPL\nPortugal:\tPT\nRomania:\tRO\nSlovakia:\tSK\nSlovenia:\tSI\nSpain:\tES\nSweden:\tSE\nSwitzerland: CH\nUnited Kingdom:\tGB"
+          },
+          "tagValues": {
+            "items": {
+              "$ref": "#/components/schemas/TagValue"
+            },
+            "type": "array",
+            "description": "(Optional) Additional tag values to be applied to the transaction carbon footprint calculation (e.g. ORGANIC for restaurant or supermarket).\nAvailable tag values per purchase category can be retrieved in the purchase categories endpoint."
+          },
+          "purchaseCategoryId": {
+            "type": "string",
+            "description": "(Optional) PurchaseCategory's id to bypass the purchase category estimated from the label. The emission coefficient of the input purchase\ncategory is then used to calculate the carbon footprint (possibly modified by input tagValues), instead of the predicted one.\nThe possible purchaseCategory's ids can be obtained using the purchaseCategories endpoint.\n\nIt is also possible to input a higher level, less precise purchase category (so-called parentPurchase category). The possible parent purchase\ncategories are :\n- 'TRANSPORT'\n- 'FOOD'\n- 'SHOPPING'\n- 'SERVICES'\n- 'HOUSING'\n\nThe mapping between the purchase categories and the parent purchase categories can be also found in the purchaseCategories endpoint."
+          },
+          "mccCode": {
+            "type": "string",
+            "description": "(Optional) MCC Code (following ISO 18245) which serves as fallback in case the categorization based on the label failed."
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Amount of the transaction.\nAmount is positive for revenues and negative for purchases."
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType",
+            "description": "The type of the transaction.\nOnly the types POINT_OF_SALE, CASH, TRANSFER, DIRECT_DEBIT, DEBIT lead the transaction to be analysed for carbon footprints."
+          },
+          "label": {
+            "type": "string",
+            "description": "Transaction raw label."
+          },
+          "amountInEur": {
+            "type": "number",
+            "format": "double",
+            "description": "Amount in euros of the transaction.\nAmount is positive for revenues and negative for purchases."
+          },
+          "id": {
+            "type": "string",
+            "description": "Id of the transaction.\nThe transaction will be referenced with this id in\nlinked ouputs (such as carbon footprint objects)"
+          }
+        },
+        "required": [
+          "type",
+          "label",
+          "id"
+        ],
+        "type": "object",
+        "description": "Represents a transaction which can be either a bank transaction\nor a cash transaction"
+      },
+      "Language": {
+        "enum": [
+          "en",
+          "fr",
+          "es",
+          "it",
+          "sv",
+          "de"
+        ],
+        "type": "string"
+      },
+      "CalculateCarbonFootprintsArgs": {
+        "properties": {
+          "languages": {
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            },
+            "type": "array",
+            "description": "languages requested for the methodologies.\nIf no language is provided we use a default language based on the countryId of the transaction."
+          },
+          "transactions": {
+            "items": {
+              "$ref": "#/components/schemas/InputTransaction"
+            },
+            "type": "array",
+            "description": "List of the user transactions."
+          },
+          "userId": {
+            "type": "string",
+            "description": "Id of the user owning the transactions."
+          }
+        },
+        "required": [
+          "transactions"
+        ],
+        "type": "object"
+      },
+      "Pick_Profile.defaultTagValues_": {
+        "properties": {
+          "defaultTagValues": {
+            "items": {
+              "$ref": "#/components/schemas/TagValue"
+            },
+            "type": "array",
+            "description": "Set of tag values that are set as default for this user's transactions."
+          }
+        },
+        "required": [
+          "defaultTagValues"
+        ],
+        "type": "object",
+        "description": "From T, pick a set of properties whose keys are in the union K"
+      },
+      "UserProfile": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pick_Profile.defaultTagValues_"
+          },
+          {
+            "properties": {
+              "userId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "userId"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "UserAPIUpdateArgs": {
+        "properties": {
+          "defaultTagValues": {
+            "items": {
+              "$ref": "#/components/schemas/TagValue"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "defaultTagValues"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "api-key",
+        "in": "header"
+      }
+    }
+  },
+  "info": {
+    "title": "Greenly Carbon Analytics API",
+    "version": "1.5",
+    "description": "# Introduction\nThe Greenly Carbon Analytics API is a set of RESTful services which enable the enrichment of bank transactions with carbon footprint analytics.\n\n All request and response payloads, including errors, use the JSON naming convention.\n\n2 API environments are available: a sandbox environment used to test the API capacities and your integration with these services and the production environment.\n\nTo have access to these environments, you will need to obtain API keys by contacting us at contact@greenly.earth.\n\nThe 2 environments are available at the following URL:\n - Sandbox environment: <https://apisandbox.greenly.earth/v1.5>\n - Production environment: <https://api.greenly.earth/v1.5>\n# Getting Started\nYou can download our sample Postman requests at the following URL: <http://offspend.github.io/PostmanRequests.zip>\n\nYou then need to add your API key in the Greenly Sandbox API environment. After that, you should be able to create a user. Executing this Postman request will automatically set the latest created userId as a global env in your Postman environment. So after creating this user, you can directly try all the other requests including the Calculate Carbon Footprints one which will show you the carbon footprint analysis for a lot of different transactions.\n# Input Transaction Labels\nThe algorithm classifies transactions to providers and purchase categories so as to measure their carbon footprint based on their labels. In the best case, this label would consist only of the name of the recipient of the payment. Yet, in general, raw label contain overhead information, related in particular to the type of payment and the date of the transaction.\n\nIn the case where a cleaning of the overhead is done on the bank side, only the cleaned label should be transmitted to the API. If no cleaning is done or the cleaning is deemed to be too noisy or unreliable, raw labels can be also transmitted to the API. \n\nIndeed, when a label is received, the classification algorithm looks for all common overhead patterns, such as  “CB XXXXX”, “paiement par carte”, or “01/06/2020”, among many other overhead patterns.The classification algorithm removes all such patterns used by all banks that it was possible to enumerate during the R&D process. Yet, it is always possible that some patterns could not be found, or that the format evolves at some time. In that case, the cleaning of the pattern should either be done at the user side, or the user should contact the Greenly support team to ensure proper cleaning of the raw label and hence proper classification and estimation of the carbon footprint.\n\nAs a toy example, let us consider the following raw label to illustrate the allowed format: “paiement par carte super u 35 st jacques de 05/07”. Providing the “cleaned label” would be “super u 35 st jacques de“ or variations thereof, and as it can be observed the cleaned label does not need to be perfectly informative nor cleaned. As mentioned above, it is also possible to simply provide the raw label and the API will take care of removing the date and the overhead linked to card payment. Yet, it is not desired to provide both cleaned and raw labels using a separator (e.g. a new line ‘\n’ separator or other variations) as this would lead to degraded performances.\n\n# Authentication\n\n<!-- ReDoc-Inject: <security-definitions> -->",
+    "contact": {
+      "email": "contact@greenly.earth"
+    }
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/alternatives": {
+      "get": {
+        "operationId": "GetAlternatives",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AlternativeOutput"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Retrieve the details of all low-carbon alternatives, either advices or low-carbon provider.",
+        "summary": "Get all alternatives",
+        "tags": [
+          "alternatives"
+        ],
+        "security": [],
+        "parameters": []
+      }
+    },
+    "/alternatives/{id}": {
+      "get": {
+        "operationId": "GetAlternative",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AlternativeOutput"
+                    },
+                    {}
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Retrieve the details of one low-carbon alternative, either advice or low-carbon provider.",
+        "summary": "Get alternative",
+        "tags": [
+          "alternatives"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/offsetProjects": {
+      "get": {
+        "operationId": "GetOffsetProjects",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OffsetProjectOutput"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Retrieve the details of all offset projects",
+        "summary": "Get all offset projects",
+        "tags": [
+          "offsetProjects"
+        ],
+        "security": [],
+        "parameters": []
+      }
+    },
+    "/offsetProjects/{offsetProjectId}": {
+      "get": {
+        "operationId": "GetOffsetProject",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/OffsetProjectOutput"
+                    },
+                    {}
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Retrieve the details of one offset project.",
+        "summary": "Get offset project",
+        "tags": [
+          "offsetProjects"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "offsetProjectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/offsetProjects/bookOffsetQuantity": {
+      "post": {
+        "operationId": "BookOffsetQuantity",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/BookOffsetOutput"
+                    },
+                    {}
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "422": {
+            "description": "Input request body does not have the right format"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Booking a quantity of CO2 equivalent to offset from an offset project",
+        "summary": "Book offset project",
+        "tags": [
+          "offsetProjects"
+        ],
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookOffsetArgs"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/live": {
+      "get": {
+        "operationId": "IsLive",
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "503": {
+            "description": "Down"
+          }
+        },
+        "tags": [
+          "live"
+        ],
+        "security": [],
+        "parameters": []
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "IsReady",
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "503": {
+            "description": "Not ready"
+          }
+        },
+        "tags": [
+          "ready"
+        ],
+        "security": [],
+        "parameters": []
+      }
+    },
+    "/purchaseCategories": {
+      "get": {
+        "operationId": "GetPurchaseCategories",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PurchaseCategoryOutput"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "500": {
+            "description": "An unexpected error occurred while processing the request"
+          }
+        },
+        "description": "Retrieve the details of all purchase categories.",
+        "summary": "Get all purchase categories",
+        "tags": [
+          "purchaseCategories"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "countryId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/purchaseCategories/{purchaseCategoryId}": {
+      "get": {
+        "operationId": "GetPurchaseCategory",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PurchaseCategoryOutput"
+                    },
+                    {}
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "An unexpected error occurred while processing the request"
+          }
+        },
+        "description": "Retrieve the details of one purchase category.",
+        "summary": "Get purchase category",
+        "tags": [
+          "purchaseCategories"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "purchaseCategoryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "countryId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/transactions/calculateCarbonFootprints": {
+      "post": {
+        "operationId": "CalculateCarbonFootprints",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/CalculateCarbonFootprintsOutput"
+                    },
+                    {}
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "422": {
+            "description": "Input request body does not have the right format"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Calculate the carbon footprints of the input transactions",
+        "summary": "Calculate carbon footprints",
+        "tags": [
+          "transactions"
+        ],
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateCarbonFootprintsArgs"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/createUser": {
+      "post": {
+        "operationId": "CreateUserAPI",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "422": {
+            "description": "Input request body does not have the right format"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Create a user.",
+        "summary": "Create user",
+        "tags": [
+          "users"
+        ],
+        "security": [],
+        "parameters": []
+      }
+    },
+    "/users/{userId}": {
+      "put": {
+        "operationId": "UpdateUser",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/UserProfile"
+                    },
+                    {}
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "422": {
+            "description": "Input request body does not have the right format"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Update a user with new default tag values. All previous tag values are replaced (the two objects are not merged) so you\nmust provide all tag values that apply to the user during each call.",
+        "summary": "Update user",
+        "tags": [
+          "users"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAPIUpdateArgs"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetUser",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/UserProfile"
+                    },
+                    {}
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Retrieve user default tag values applied to all user transactions.",
+        "summary": "Get user",
+        "tags": [
+          "users"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "DeleteUserAPI",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Authentication Failed"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "An unexpected error occured while processing the request"
+          }
+        },
+        "description": "Delete a user and all associated data. Warning: this operation is irreversible.",
+        "summary": "Delete user",
+        "tags": [
+          "users"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.greenly.earth/v1.5"
+    }
+  ]
+}
