@@ -10,7 +10,7 @@ npm install -g bump-cli
 
 # For each directory in the hubs/ directory
 for hub in hubs/*/; do
-    for api in "${hub}"*-source.{yaml,json}; do
+    for api in "${hub}"*-source.{yml,yaml,json}; do
         # Extract the Hub name from directory structure
         hubName="${hub%/*}"
         hubName="${hubName#*/}"
@@ -30,7 +30,7 @@ for hub in hubs/*/; do
 done
 
 # For each *-source.yaml files in the apis/ directory
-for api in apis/*-source.{yaml,json}; do
+for api in apis/*-source.{yml,yaml,json}; do
     # Extract the API name from filename `<api_name>-<spec>-source.yaml`
     apiName="${api%-*}"
     apiName="${apiName%-*}"
