@@ -9,7 +9,7 @@ The files are automatically deployed to Bump.sh:
 
 - Bump official documentation: https://developers.bump.sh/
 - Twitter API v2 documentation: https://bump.sh/demo/doc/twitter-api-v2
-- Payfit Partner API documentation: https://bump.sh/demo/doc/payfit-partner
+- Payfit Partner API documentation: https://bump.sh/demo/doc/payfit-partner-api
 - Intercom API documentation: https://bump.sh/demo/doc/intercom
 - Clever-Cloud API documentation: https://bump.sh/demo/doc/clever-cloud
 - Pipedrive API documentation: https://bump.sh/demo/doc/pipedrive
