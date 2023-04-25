@@ -1,0 +1,48 @@
+name: API diff on Pull Requests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  pull_request_target:
+    branches:
+      - main
+
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gitlab-api-diff:
+    if: ${{ github.event_name == 'pull_request_target' }}
+    name: Check public Gitlab API diff on Bump
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Comment pull request with API diff
+        uses: bump-sh/github-action@v1
+        with:
+          file: apis/gitlab-openapi-source.yaml
+          command: diff
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+  greenly-api-diff:
+    if: ${{ github.event_name == 'pull_request' }}
+    name: Check Greenly API diff on Bump
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Comment pull request with API diff
+        uses: bump-sh/github-action@v1
+        with:
+          doc: greenly
+          token: ${{ secrets.GREENLY_BUMP_TOKEN }}
+          file: apis/greenly-openapi-source.json
+          command: diff
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
