@@ -29,3 +29,4 @@ jobs:
           BUMP_HOST: ${{ secrets.BUMP_HOST }}
           GREENLY_BUMP_TOKEN: ${{ secrets.GREENLY_BUMP_TOKEN }}
           PIPEDRIVE_BUMP_TOKEN:  ${{ secrets.PIPEDRIVE_BUMP_TOKEN }}
+          GITLAB_BUMP_TOKEN: ${{ secrets.GITLAB_BUMP_TOKEN }}
