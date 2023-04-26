@@ -14,6 +14,7 @@ The files are automatically deployed to Bump.sh:
 - Clever-Cloud API documentation: https://bump.sh/demo/doc/clever-cloud
 - Pipedrive API documentation: https://bump.sh/demo/doc/pipedrive
 - Greenly API documentation: https://bump.sh/demo/doc/greenly
+- Gitlab API documentation: https://bump.sh/demo/doc/gitlab
 
 ## How to add an API here?
 
