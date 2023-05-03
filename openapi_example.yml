@@ -6,7 +6,7 @@ servers:
 info:
   description: |
     This simple Joke API allows you to publish joke and vote for you favourite!
-  version: 1.0.0
+  version: 1.1.0
   title: Simple Joke API
   contact:
     email: you@your-company.com
@@ -50,21 +50,32 @@ paths:
         required: false
         schema:
           type: string
+          enum:
+            - Word game
+            - Classic
+            - School
+            - KnockKnock
       - in: query
         name: sortBy
-        description: 'Allowed: thumbsUp, thumbsDown, dateAdded.'
         example: thumbsUp
         required: false
         schema:
           type: string
+          enum:
+            - thumbsUp
+            - thumbsDown
+            - dateAdded
       - name: sortOrder
         in: query
-        description: 'Allowed: asc, desc. asc is ascending and sorts from A to Z.
-          desc is descending and sorts from Z to A.'
+        description: "asc is ascending and sorts from A to Z.
+          desc is descending and sorts from Z to A."
         example: desc
         required: false
         schema:
           type: string
+          enum:
+            - asc
+            - desc
       responses:
         '200':
           description: search results matching criteria
@@ -74,6 +85,11 @@ paths:
                 type: array
                 items:
                   "$ref": "#/components/schemas/Joke"
+              examples:
+                Homework:
+                  $ref: "#/components/examples/Homework"
+                OpenTheDoor:
+                  $ref: "#/components/examples/OpenTheDoor"
         '400':
           description: bad input parameter
     post:
@@ -86,6 +102,9 @@ paths:
         content:
           application/json:
             schema:
+              oneOf:
+                - $ref: "#/components/schemas/JokeWithPunchline"
+                - $ref: "#/components/schemas/Pun"
               type: object
               required:
               - joke
@@ -110,6 +129,11 @@ paths:
             application/vnd.json:
               schema:
                 "$ref": "#/components/schemas/Joke"
+              examples:
+                SmartDog:
+                  $ref: "#/components/examples/SmartDog"
+                OpenTheDoor:
+                  $ref: "#/components/examples/OpenTheDoor"
         '400':
           description: invalid input, object invalid
         '409':
@@ -150,6 +174,7 @@ paths:
       responses:
         '200':
           description: Thumbs down added
+
 components:
   schemas:
     Joke:
@@ -165,29 +190,102 @@ components:
       properties:
         id:
           type: string
-          example: ce0b9fbe-7ad8-11eb-9439-0242ac130002
           description: The id of the Joke. Assigned when added.
         joke:
           type: string
-          example: What is the name to open the door?
           description: The lead-in to the joke.
         punchline:
           type: string
-          example: Open your chakra
           description: This bit should make you laugh :).
         category:
           type: string
-          example: Classic
           description: the category of the joke.
+          enum:
+            - Word game
+            - Classic
+            - School
+            - KnockKnock
+            - French humour
         thumbsUp:
           type: integer
-          example: 2
           description: Count of upvotes for the joke.
         thumbsDown:
           type: integer
-          example: 4
           description: Count of down votes for the joke.
         dateAdded:
           type: string
           format: date-time
-          example: '2016-08-29T09:12:33.001Z'
+    JokeWithPunchline:
+      title: Joke with punchline
+      type: object
+      required:
+      - joke
+      example:
+        joke: Knock Knock. Who's there? Hike. Hike Who?
+        punchline: I didn't know you liked Japanese poetry.
+        category: KnockKnock
+      properties:
+        joke:
+          type: string
+          description: The joke
+        punchline:
+          description: The punchline.
+          type: string
+        category:
+          description: category of the joke
+          type: string
+          enum:
+            - Word game
+            - Classic
+            - School
+            - KnockKnock
+    Pun:
+      type: object
+      required:
+      - joke
+      properties:
+        joke:
+          type: string
+          description: The pun, single sentence
+        category:
+          description: category of the joke
+          type: string
+          enum:
+            - Word game
+            - Classic
+            - School
+            - KnockKnock
+      example:
+        joke: He had a photographic memory but never developed it.
+        category: Word game
+  examples:
+    Homework:
+      summary: Well done, son
+      value:
+        - id: 42
+          joke: "Teacher: Did your father help you with your homework?"
+          punchline: "Student: No, he did it all by himself."
+          category: School
+          dateAdded: '2015-07-12T20:12:33.001Z'
+          thumbsUp: 6
+          thumbsDown: 2
+    OpenTheDoor:
+      summary: Open your mind
+      value:
+        - id: 42
+          joke: What is the name to open the door?
+          punchline: Open your chakra
+          category: Classic
+          dateAdded: '1998-07-12T20:12:33.001Z'
+          thumbsUp: 4
+          thumbsDown: 2
+    SmartDog:
+      summary: Long way top school
+      value:
+        - id: 33
+          joke: "He used to take his dog to school every day, but he finally had to stop. How come?"
+          punchline: "The dog got graduated."
+          category: School
+          dateAdded: '2017-07-12T20:12:33.001Z'
+          thumbsUp: 3
+          thumbsDown: 3
