@@ -15,6 +15,21 @@ permissions:
   pull-requests: write
 
 jobs:
+  realworld-api-diff:
+    if: ${{ github.event_name == 'pull_request_target' }}
+    name: Check public Realworld API diff on Bump
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Comment pull request with API diff
+        uses: bump-sh/github-action@v1
+        with:
+          file: apis/realworld-openapi-source.yml
+          command: diff
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
   gitlab-api-diff:
     if: ${{ github.event_name == 'pull_request_target' }}
     name: Check public Gitlab API diff on Bump

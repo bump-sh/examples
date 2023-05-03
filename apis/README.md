@@ -15,6 +15,7 @@ The files are automatically deployed to Bump.sh:
 - Pipedrive API documentation: https://bump.sh/demo/doc/pipedrive
 - Greenly API documentation: https://bump.sh/demo/doc/greenly
 - Gitlab API documentation: https://bump.sh/demo/doc/gitlab
+- RealWorld API documentation: https://bump.sh/demo/doc/realworld
 
 ## How to add an API here?
 

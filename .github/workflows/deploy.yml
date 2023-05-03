@@ -30,3 +30,4 @@ jobs:
           GREENLY_BUMP_TOKEN: ${{ secrets.GREENLY_BUMP_TOKEN }}
           PIPEDRIVE_BUMP_TOKEN:  ${{ secrets.PIPEDRIVE_BUMP_TOKEN }}
           GITLAB_BUMP_TOKEN: ${{ secrets.GITLAB_BUMP_TOKEN }}
+          REALWORLD_BUMP_TOKEN: ${{ secrets.REALWORLD_BUMP_TOKEN }}
