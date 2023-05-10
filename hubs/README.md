@@ -1,6 +1,6 @@
 # Hubs examples
 
-This directory holds OpenAPI & AsyncAPI Example API Contract files for API Portals or [Hubs](https://docs.bump.sh/help/hubs/) as we call them.
+This directory holds OpenAPI & AsyncAPI Example API Contract files for API Portals or [Hubs](https://bump.sh/api-catalog) as we call them.
 
 These API contract files are deployed to [bump.sh](https://bump.sh) to generate elegant and always up-to-date
 API documentation Hubs. You can view them live at:
