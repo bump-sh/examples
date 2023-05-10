@@ -50,7 +50,7 @@ Bump created and owned API contract files are:
 
 ### Note to maintainers on new APIs specification files
 
-In order for the files to be deployed automatically, we must create a new Documentation or Hub in the Bump demo organization.
+In order for the files to be deployed automatically, we must create a new Documentation or Hub in the [Bump demo organization](https://bump.sh/demo/docs).
 The Bump documentation slug must be the same as in the new file name following this naming convention: `<bump-doc-slug>-[openapi|asyncapi]-source.[json|yml]`.
 We also need to add a Bump.sh token in the `.github/workflows/bump.yml` file. The variable key name needs to be of the form `<BUMP_DOC_SLUG>_BUMP_TOKEN`.
 Then add the token value in the [GitHub secrets of the current repo](https://github.com/bump-sh/examples/settings/secrets/actions).
