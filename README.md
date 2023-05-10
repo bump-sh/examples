@@ -10,7 +10,7 @@ You can find all available examples of OpenAPI and AsyncAPI API contract files i
 
 You can find all available examples of Hubs (or API Portals) of OpenAPI and AsyncAPI API contract files in the [`hubs` folder of this repo](https://github.com/bump-sh/examples/tree/main/hubs)
 
-## What are these API contract files ?
+## What are these API contract files?
 
 Most of them are publicly available API contract files from real tech companies and products.
 Bump created and owned API contract files are:
