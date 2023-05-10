@@ -14,7 +14,7 @@ You can find all available examples of Hubs of OpenAPI and AsyncAPI API contract
 
 Most of them are publicly available API contract files from real tech companies and products.
 Bump created and owned API contract files are:
-- [Bump ](https://github.com/bump-sh/examples/tree/main/hubs/my-train-company) is Bump.sh [publicly available demo](https://demo.bump.sh/)
+- [Bump](https://github.com/bump-sh/examples/tree/main/apis/bump.yml) is Bump.sh [publicly available API](https://developers.bump.sh)
 - [My train Company](https://github.com/bump-sh/examples/tree/main/hubs/my-train-company) is Bump.sh publicly available demo and has its live generated documentation [available here](https://demo.bump.sh/).
 
 ## How to contribute ?
