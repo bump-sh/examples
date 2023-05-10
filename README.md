@@ -1,6 +1,6 @@
 # OpenAPI & AsyncAPI example files
 
-This directory holds [OpenAPI](https://spec.openapis.org/oas/latest.html) & [AsyncAPI](https://www.asyncapi.com/docs/reference/specification/latest) example API Contracts files for [standalone APIs](https://github.com/bump-sh/examples/tree/main/apis) and [API Hubs](https://github.com/bump-sh/examples/tree/main/hubs) which are deployed to [bump.sh](https://bump.sh) to generate elegant and always up-to-date API documentation.
+This directory holds [OpenAPI](https://spec.openapis.org/oas/latest.html) & [AsyncAPI](https://www.asyncapi.com/docs/reference/specification/latest) example API contract files for [standalone APIs](https://github.com/bump-sh/examples/tree/main/apis) and [API Hubs](https://github.com/bump-sh/examples/tree/main/hubs) which are deployed to [bump.sh](https://bump.sh) to generate elegant and always up-to-date API documentation.
 
 ## View example standalone API contract files and generated documentation
 
