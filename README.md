@@ -42,7 +42,7 @@ Bump created and owned API contract files are:
 
 ℹ️ The only edits allowed are updates of the public specification files to reflect more up-to dates versions of the API contracts.
 
-3️⃣ Locate the file you would like to edit under `./apis/` if Standalone API or repository under `./hubs` if an API portal and proceed with updating the documents.
+3️⃣ Locate the file you would like to edit under `./apis/` if Standalone API or under `./hubs` if an API portal and proceed with updating the documents.
 4️⃣ `git add <path/to/file>` the updated API specification files and `git commit` the files to your new branch.
 5️⃣ `git push origin <branch-name>` from your new branch and create a new pull request in this repo.
 6️⃣ In the pull request description add a link to the public source of the files.
