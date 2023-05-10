@@ -30,7 +30,7 @@ Bump created and owned API contract files are:
 <bump-doc-slug>-[openapi|asyncapi]-source.[json|yml]
 ```
 
-`bump-doc-slug` must be replaced by your file name.
+`bump-doc-slug` must be replaced by your api name with hyphens instead of spaces.
 
 
 4️⃣ `git add <path/to/file>` your new API specification file content and `git commit` the file to your new branch.
