@@ -4,7 +4,7 @@ This directory holds [OpenAPI](https://spec.openapis.org/oas/latest.html) & [Asy
 
 ## View example standalone API contract files and generated documentation
 
-You can find all available examples of OpenAPI and AsyncAPI API contracts files in the [`api` folder of this repo](https://github.com/bump-sh/examples/tree/main/apis)
+You can find all available examples of OpenAPI and AsyncAPI API contract files in the [`apis` folder of this repo](https://github.com/bump-sh/examples/tree/main/apis)
 
 ## View example API Hubs and generated documentation
 
