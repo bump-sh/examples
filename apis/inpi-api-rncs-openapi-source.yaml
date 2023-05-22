@@ -1,0 +1,538 @@
+openapi: 3.0.1
+info:
+  title: INPI-RCNS
+  version: "1.0.1"
+servers:
+  - url: 'https://opendata-rncs.inpi.fr'
+tags:
+  - name: Authentification
+    description: >-
+      Authentification pour accès aux API RCNS (API Actes PDF - API Compte
+      Annuel PDF - API Compte Annuel saisi - API IMR)
+  - name: Actes
+    description: API Actes PDF
+  - name: Document
+    description: API Document
+  - name: Compte annuel pdf
+    description: API Compte Annuel PDF
+  - name: Compte annuel saisi
+    description: API Compte Annuel PDF
+  - name: IMR
+    description: API IMR (format XML)
+paths:
+  /services/diffusion/login:
+    post:
+      tags:
+        - Authentification
+      summary: Se connecter au service
+      description: >-
+        Dans le header HTTP, fourniture d’un Cookie contenant
+        :JSESSIONID=########## Où ########## est une chaîne de caractères
+        correspondant au jeton de session. Ce cookie est à renvoyer lors de
+        chaque appel aux autres webservices. <br>Exemple de requête =>
+        https://opendata-rncs.inpi.fr/services/diffusion/login
+      parameters:
+        - name: login
+          in: header
+          description: >-
+            Login du compte utilisateur (tel que transmis lors de la création de
+            votre compte)
+          required: true
+          schema: {}
+        - name: password
+          in: header
+          description: Mot de passe du compte utilisateur (personnalisé)
+          required: true
+          schema: {}
+      responses:
+        '200':
+          description: >
+            Athentification réussi.
+            Le token de session est envoyé dans un cookie nommé `JSESSIONID`. Vous devez inclure ce cookie dans les autres requêtes pour être autorisé.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: JSESSIONID=abcde12345; Path=/; HttpOnly
+        '400':
+          description: 'bad request : requête invalide'
+          content: {}
+        '500':
+          description: 'serveur error : erreur inattendue'
+          content: {}
+  /services/diffusion/logout:
+    post:
+      tags:
+        - Authentification
+      summary: Se déconnecter du service
+      description: >-
+        Se déconnecter du service. <br>Exemple de requête =>
+        https://opendata-rncs.inpi.fr/services/diffusion/logout
+      responses:
+        '200':
+          description: 'Exemple de réponse : { Déconnexion réussie }'
+        '400':
+          description: 'bad request : requête invalide'
+        '500':
+          description: 'serveur error : erreur inattendue'
+      security:
+        - cookieAuth: []
+
+  /services/diffusion/actes/find:
+    get:
+      tags:
+        - Actes
+      summary: Recherche d’un acte
+      description: >-
+        Ce service web fournit certaines métadonnées dont l’identifiant d’accès
+        au fichier de téléchargement de l’Acte au format PDF et du fichier de
+        métadonnées associé (XML). <br>Exemple de requête =>
+        https://opendata-rncs.inpi.fr/services/diffusion/actes/find?siren=XXXXXXXXX
+      parameters:
+        - name: siren
+          in: query
+          description: "Numérique 9 chiffres. Recherche de type «\_exacte\_»"
+          required: true
+          schema:
+            type: integer
+        - name: denominationSociale
+          in: query
+          description: "Chaîne de caractères (300) Recherche de type «\_contient\_»"
+          schema:
+            type: integer
+        - name: dateDepotDebut
+          in: query
+          description: Date (AAAAMMJJ) Début de la période de date de dépôt recherchée
+          schema:
+            type: string
+        - name: dateDepotFin
+          in: query
+          description: Date (AAAAMMJJ) Fin de la période de date de dépôt recherchée
+          schema:
+            type: string
+        - name: codeGreffe
+          in: query
+          description: "4 caractères, recherche de type «\_exacte\_»"
+          schema:
+            type: string
+        - name: natureArchive
+          in: query
+          description: "Chaîne de caractères, 100 caractères max Valeurs\_(A, R, P) avec : A (actes) R (ordonnances) P (personnes physiques) Recherche de type «\_exacte\_»"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "La sortie est composée d’un ensemble de résultats contenant les informations suivantes\_: { 'idFichier': 23779442, 'siren': 123456789, 'denominationSociale': DENOM_SOCIALE, 'codegreffe': 7606, 'dateDepot': 20171123, 'natureArchive': 'A', }"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActeResponse'
+        '400':
+          description: 'bad request : requête invalide'
+        '500':
+          description: 'serveur error : erreur inattendue'
+      security:
+        - cookieAuth: []
+
+  /services/diffusion/document/get:
+    get:
+      tags:
+        - Document
+      summary: Accès aux documents
+      description: >-
+        Ce webservice REST permet de fournir un ensemble de fichiers à partir
+        d’une liste d’identifiant de fichiers. Cet ensemble de fichiers est
+        fourni dans un fichier zip. Récupérer le ou les identifiants lors de la
+        précédente URL =>
+        https://opendata-rncs.inpi.fr/services/diffusion/imrs-saisis/find?siren=123456789
+        et les copier après le nom de variable listeIdFichier, séparés par des
+        virgules. <br>Exemple de requête =>
+        https://opendata-rncs.inpi.fr/services/diffusion/document/get?listeIdFichier=11948393,111903
+      parameters:
+        - name: listeIdFichier
+          in: query
+          description: >-
+            Ce paramètre contient une liste d’ « idFichier » dont le
+            téléchargement est demandé (séparateur ‘,’).
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            Documents contenus dans le fichier zip La réponse est constituée
+            d’un zip nommé fichierResultat.zip contenant : - Les comptes annuels
+            au format PDF - Le fichier d’indexation au format XML - Le fichier
+            md5 associé - Un fichier nommé « Response.json »
+          content:
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/ZipFileResponse'
+        '400':
+          description: 'bad request : requête invalide'
+        '500':
+          description: 'serveur error : erreur inattendue'
+      security:
+        - cookieAuth: []
+
+  /services/diffusion/bilans/find:
+    get:
+      tags:
+        - Compte annuel pdf
+      summary: "Recherche de comptes annuels\_: pdf + métadonnées"
+      description: >-
+        Ce service web fournit certaines métadonnées dont l’identifiant d’accès
+        au fichier de téléchargement des comptes annuels au format PDF et du
+        fichier de métadonnées associé (XML). <br>Exemple de requête =>
+        https://opendata-rncs.inpi.fr/services/diffusion/bilans/find?siren=123456789&amp;dateDepotDebut=20170723
+      parameters:
+        - name: siren
+          in: query
+          description: "Numérique 9 chiffres. Recherche de type «\_exacte\_»"
+          required: true
+          schema:
+            type: integer
+        - name: denominationSociale
+          in: query
+          description: "Chaîne de caractères (300) Recherche de type «\_contient\_»"
+          schema:
+            type: integer
+        - name: dateDepotDebut
+          in: query
+          description: Date (AAAAMMJJ) Début de la période de date de dépôt recherchée
+          schema:
+            type: string
+        - name: dateDepotFin
+          in: query
+          description: Date (AAAAMMJJ) Fin de la période de date de dépôt recherchée
+          schema:
+            type: string
+        - name: codeGreffe
+          in: query
+          description: "4 caractères, recherche de type «\_exacte\_»"
+          schema:
+            type: string
+        - name: natureArchive
+          in: query
+          description: "Chaîne de caractères, 100 caractères max Valeurs B-C, B-S, B-CO, B-BA, avec : B-C (bilan consolidé) B-S (bilan simplifié) B-CO (bilan complet) B-BA (bilan banques et assurances) Recherche de type «\_exacte\_»"
+          schema:
+            type: string
+        - name: Confidentiel
+          in: query
+          description: "1\_chiffre\_: 0 = public 1 = confidentiel 2 = partiellement confidentiel"
+          schema: {}
+        - name: dateClotureDebut
+          in: query
+          description: Date (AAAAMMJJ) Début de la période de date de clôture recherchée
+          schema:
+            type: string
+        - name: dateClotureFin
+          in: query
+          description: Date (AAAAMMJJ) Fin de la période de date de clôture recherchée
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "La sortie est composée d’un ensemble de résultats qui contiennent les informations suivantes\_: { 'idFichier': 11948393, 'siren': 123456789, 'denominationSociale': '&quot;'DENOM_SOCIALE', 'codegreffe': 6601, 'dateDepot': '&quot;'20180517'&quot;', 'natureArchive': 'B-S', 'confidentiel': 0, 'dateCloture': '2017-12-31T00:00:00.000Z', 'numgestion': 'aaaaBxxxxx'; }"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BilansResponse'
+        '400':
+          description: 'bad request : requête invalide'
+        '500':
+          description: 'serveur error : erreur inattendue'
+      security:
+        - cookieAuth: []
+
+  /services/diffusion/bilans-saisis/find:
+    get:
+      tags:
+        - Compte annuel saisi
+      summary: "Recherche d’un bilan\_: données saisies"
+      description: >-
+        Ce service web fournit certaines métadonnées dont l’identifiant d’accès
+        au fichier de téléchargement du document intégral en pdf. <br>Exemple de
+        requête =>
+        https://opendata-rncs.inpi.fr/services/diffusion/bilans-saisis/find?siren=810541516
+      parameters:
+        - name: siren
+          in: query
+          description: "Numérique 9 chiffres. Recherche de type «\_exacte\_»"
+          required: true
+          schema:
+            type: integer
+        - name: denominationSociale
+          in: query
+          description: "Chaîne de caractères (300) Recherche de type «\_contient\_»"
+          schema:
+            type: integer
+        - name: dateDepotDebut
+          in: query
+          description: Date (AAAAMMJJ) Début de la période de date de dépôt recherchée
+          schema:
+            type: string
+        - name: dateDepotFin
+          in: query
+          description: Date (AAAAMMJJ) Fin de la période de date de dépôt recherchée
+          schema:
+            type: string
+        - name: numeroGestion
+          in: query
+          description: 'Numéro de gestion (dans le greffe), 10 caractères'
+          schema:
+            type: integer
+        - name: codeGreffe
+          in: query
+          description: "4 caractères, recherche de type «\_exacte\_»"
+          schema:
+            type: string
+        - name: codeTypeBilan
+          in: query
+          description: >-
+            1 caractère : C = Complet S = Simplifié K = Consolidé B = Banque A =
+            Assurance
+          schema:
+            type: string
+        - name: Confidentiel
+          in: query
+          description: "1\_chiffre\_: 0 = public 1 = confidentiel 2 = partiellement confidentiel"
+          schema: {}
+        - name: dateClotureDebut
+          in: query
+          description: Date (AAAAMMJJ) Début de la période de date de clôture recherchée
+          schema:
+            type: string
+        - name: dateClotureFin
+          in: query
+          description: Date (AAAAMMJJ) Fin de la période de date de clôture recherchée
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            Documents contenus dans le fichier zip { 'idFichier': 11948393,
+            'siren': 123456789, 'codeTypeBilan': S, 'numGestion': AAAAB01914,
+            'codegreffe': 3102, 'denominationSociale': DENOM_SOCIALE,
+            'dateDepot': 20171123, 'confidentiel': 0, 'dateCloture':
+            '2017-12-31T00:00:00.000Z', }
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BilansSaisisResponse'
+        '400':
+          description: 'bad request : requête invalide'
+        '500':
+          description: 'serveur error : erreur inattendue'
+      security:
+        - cookieAuth: []
+
+  /services/diffusion/imrs-saisis/find:
+    get:
+      tags:
+        - IMR
+      summary: "Recherche d’un IMR\_: données saisies – Recherche d’une dénomination"
+      description: >-
+        Ce webservice REST permet de rechercher le siren d’une dénomination ou
+        les sirens ayant une similitude dans la dénomination. <br>Exemple de
+        requête =>
+        https://opendata-rncs.inpi.fr/services/diffusion/imrs-saisis/find?siren=123456789
+      parameters:
+        - name: siren
+          in: query
+          description: "Numérique 9 chiffres. Recherche de type «\_exacte\_»"
+          schema:
+            type: integer
+          required: true
+        - name: denominationSociale
+          in: query
+          description: "Chaîne de caractères (300). Recherche de type «\_contient\_»"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "La sortie est composée d’un ensemble de résultats contenant les informations suivantes\_: { siren:123456789, denominationSociale: société, },"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImrsSaisieResponse'
+        '400':
+          description: 'bad request : requête invalide'
+        '500':
+          description: 'serveur error : erreur inattendue'
+      security:
+        - cookieAuth: []
+  /services/diffusion/imrs-saisis/get:
+    get:
+      tags:
+        - IMR
+      summary: >-
+        Accès aux IMR données saisies consolidés à partir d’un ou plusieurs
+        siren
+      description: >-
+        Ce webservice REST permet de fournir un ensemble de fichiers IMR données
+        saisies consolidés à partir d’une liste de SIREN. Cet ensemble de
+        fichier est fourni dans un fichier zip. <br>Exemple de requête =>
+        https://opendata-rncs.inpi.fr/services/diffusion/imrs-saisis/get?listeSirens=589754123,548548239,789458799
+      parameters:
+        - name: listeSirens
+          in: query
+          description: >-
+            Ce paramètre contient une liste de Siren pour lesquels le
+            téléchargement de l’IMR données saisies consolidé est demandé
+            (séparateur ‘,’).
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            La réponse est constituée d’un zip nommé imrs_saisis_consolides.zip
+            contenant : • Les fichiers consolidés des sirens demandés • Un
+            fichier nommé « Response.json » contenant la réponse décrite
+            ci-dessous.
+          content:
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/ZipFileResponse'
+        '400':
+          description: 'bad request : requête invalide'
+        '500':
+          description: 'serveur error : erreur inattendue'
+      security:
+        - cookieAuth: []
+components:
+  schemas:
+    ZipFileResponse:
+      type: string
+      format: binary
+    ImrsSaisieResponse:
+      type: object
+      properties:
+        siren:
+          type: string
+          description: Le siren de l'entreprise.
+          example: "123456789"
+        denominationSociale:
+          type: string
+          description: La dénomination de l'entreprise.
+          example: "Dénomination Sociale"
+    BilansSaisisResponse:
+      type: object
+      properties:
+        idFichier:
+          type: integer
+          description: L'id du fichier.
+          example: 12345678
+        siren:
+          type: integer
+          description: Le siren de l'entreprise.
+          example: 123456789
+        codeTypeBilan:
+          type: string
+          description: Code du type du bilan.
+          example: "C"
+        numGestion:
+          type: string
+          description: Numéro de gestion.
+          example: "1234B12345"
+        codeGreffe:
+          type: integer
+          description: Code greffe.
+          example: 1234
+        denominationSociale:
+          type: string
+          description: La dénomination de l'entreprise.
+          example: "Dénomination Sociale"
+        dateDepot:
+          type: string
+          format: date-time
+          description: Date de dépot.
+          example: "20191231"
+        confidentiel:
+          type: integer
+          description: confidentialité du document (0 = non, 1 = oui).
+          example: 1
+        dateCloture:
+          type: string
+          format: date-time
+          description: Date de clôture.
+          example: "2019-12-31T00:00:00.000Z"
+    BilansResponse:
+      type: object
+      properties:
+        idFichier:
+          type: integer
+          description: L'id du fichier.
+          example: 12345678
+        siren:
+          type: integer
+          description: Le siren de l'entreprise.
+          example: 123456789
+        denominationSociale:
+          type: string
+          description: La dénomination de l'entreprise.
+          example: "Dénomination Sociale"
+        codeGreffe:
+          type: integer
+          description: Code greffe.
+          example: 1234
+        dateDepot:
+          type: string
+          description: Date de dépot.
+          example: "20191231"
+        natureArchive:
+          type: string
+          description: Nature de l'archive.
+          example: "B-C"
+        confidentiel:
+          type: integer
+          description: confidentialité du document (0 = non, 1 = oui).
+          example: 1
+        dateCloture:
+          type: string
+          format: date-time
+          description: Date de clôture.
+          example: "2019-12-31T00:00:00.000Z"
+        numGestion:
+          type: string
+          description: Numéro de gestion.
+          example: "1234B12345"
+    ActeResponse:
+      type: object
+      properties:
+        idFichier:
+          type: integer
+          description: L'id du fichier.
+          example: 12345678
+        siren:
+          type: integer
+          description: Le siren de l'entreprise.
+          example: 123456789
+        denominationSociale:
+          type: string
+          description: La dénomination de l'entreprise.
+          example: "Dénomination Sociale"
+        codeGreffe:
+          type: integer
+          description: Code greffe.
+          example: 1234
+        dateDepot:
+          type: string
+          description: Date de dépot.
+          example: "20191231"
+        natureArchive:
+          type: string
+          description: Nature de l'archive.
+          example: "B-C"
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID

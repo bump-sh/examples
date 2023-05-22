@@ -1,0 +1,2245 @@
+---
+openapi: 3.0.1
+info:
+  title: Taleez API
+  description: |
+    To get access to the API, go to your Taleez account settings, in "API & Webhooks" menu.
+
+    For any questions about the API, you can contact technical support : tech.support@taleez.com.
+
+    You can generate :
+
+    * a "public" API key : it allows you to access the "public" resources of your account (like list of the jobs and questions of a job).
+    * a "secret" API key : it allows access to all the API endpoints. It must not be shared or accessible (e.g. javascript code of a website).
+
+    The API key used must be present in each request, in the following HTTP header :
+
+    * X-taleez-api-key : for the public key
+    * X-taleez-api-secret : for the secret key
+
+    Request limit rate : 100 requests/minute
+  version: 0.4.0
+servers:
+- url: https://api.taleez.com
+paths:
+  "/0/pools/{id}/candidates":
+    post:
+      tags:
+      - pools
+      summary: Add candidates to a pool
+      operationId: addCandidate
+      parameters:
+      - name: id
+        in: path
+        description: Id of the pool
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Ids of the candidates to add
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/listOfIds"
+        required: true
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: Candidates has been added to the pool
+      security:
+      - secret-key: []
+  "/0/jobs/{id}/candidates":
+    post:
+      tags:
+      - jobs
+      summary: Add candidates to a job
+      description: "<b>Use this endpoint to link an existing candidates to a job offer.
+        To create a candidate application (with answers to the job questions) to a
+        job offer, use the '/jobs/{jobId}/applications' endpoint.</b><br/>Currently,
+        automatic actions (workflow, automatic emails and webhooks) are not triggered
+        by this way."
+      operationId: addCandidate_1
+      parameters:
+      - name: id
+        in: path
+        description: Id of the job
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Ids of the candidates to add
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/listOfIds"
+        required: true
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: Candidates has been added to the job
+      security:
+      - secret-key: []
+  "/0/jobs/{id}/applications":
+    post:
+      tags:
+      - jobs
+      summary: Create an application for a job
+      description: If candidate does not exist (search by mail) it will be created,
+        otherwise the application will be added to the existing candidate.<br/><b>Use
+        this endpoint to create a candidate application to a job offer (with answers
+        to the job questions). To link an existing candidate to a job offer, use the
+        '/jobs/{jobId}/candidates' or the '/candidates/{candidateId}/jobs' endpoints.</b><br/>Currently,
+        automatic actions (workflow, automatic emails and webhooks) are not triggered
+        by this way.
+      operationId: createApplication
+      parameters:
+      - name: id
+        in: path
+        description: Id of the job
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Application information
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/jobApplication"
+        required: true
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: Application has been created
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/createdApplicationResponse"
+      security:
+      - secret-key: []
+  "/0/documents":
+    post:
+      tags:
+      - documents
+      summary: Add a document to a candidate
+      description: Use this endpoint to add a document to an existing candidate.<br/><b>If
+        the document already exists for the candidate (same content), the name is
+        updated and only one document will appear in the candidate card in Taleez.</b><br/>Currently
+        it is only possible to upload pdf files.
+      operationId: create
+      parameters:
+      - name: candidateId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: cv
+        in: query
+        required: true
+        schema:
+          type: boolean
+      requestBody:
+        description: The file content
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '201':
+          description: Return the id of the created document, or the id of the existing
+            document if document already exists for this candidate
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/createdResourceResult"
+      security:
+      - secret-key: []
+  "/0/documents/tmp":
+    post:
+      tags:
+      - documents
+      summary: Upload a temporary document
+      description: Use this endpoint to upload a temporary document, not linked to
+        a specific candidate.<br/>The returned id can then be used in an answer in
+        the job application creation request.<br/>Currently it is only possible to
+        upload pdf files.
+      operationId: uploadTempDoc
+      requestBody:
+        description: The file content
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '201':
+          description: Return the id of the temporary document.
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/createdResourceResult"
+      security:
+      - secret-key: []
+  "/0/candidates":
+    get:
+      tags:
+      - candidates
+      summary: Search candidates
+      operationId: searchCandidate
+      parameters:
+      - name: page
+        in: query
+        description: |-
+          Page number.
+          Start at '0'
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: pageSize
+        in: query
+        description: |-
+          Page size.
+          Max size of the list returned. Max value : 100
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: mail
+        in: query
+        description: Search candidate by mail
+        required: true
+        schema:
+          type: string
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/CandidateList"
+      security:
+      - secret-key: []
+    post:
+      tags:
+      - candidates
+      summary: Add a candidate
+      description: "<b>Use this endpoint for sourcing use case, to create a new candidate
+        from his personal information (names, mail...). To create a candidate application
+        (with answers to the job questions) to a job offer, use the '/jobs/{jobId}/applications'
+        endpoint.</b><br/>Currently, automatic actions (workflow, automatic emails
+        and webhooks) are not triggered by this way."
+      operationId: create_1
+      requestBody:
+        description: Candidate information
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/candidateToCreate"
+        required: true
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '201':
+          description: Return the id of the created candidate
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/createdResourceResult"
+      security:
+      - secret-key: []
+  "/0/candidates/{id}/properties":
+    get:
+      tags:
+      - candidates
+      summary: Get candidate property values
+      operationId: getCandidateProperties
+      parameters:
+      - name: id
+        in: path
+        description: Id of the candidate
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/candidatePropertyValue"
+        '404':
+          description: Candidate cannot be found
+      security:
+      - secret-key: []
+    post:
+      tags:
+      - candidates
+      summary: Update candidate properties values
+      operationId: updateProperties
+      parameters:
+      - name: id
+        in: path
+        description: Id of the candidate
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Candidate properties
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                "$ref": "#/components/schemas/candidatePropertyParameter"
+        required: true
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: Properties have been updated
+      security:
+      - secret-key: []
+  "/0/candidates/{id}/pools":
+    get:
+      tags:
+      - candidates
+      summary: Get candidate pool list
+      operationId: getCandidatePools
+      parameters:
+      - name: id
+        in: path
+        description: Id of the candidate
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/candidatePool"
+        '404':
+          description: Candidate cannot be found
+      security:
+      - secret-key: []
+    post:
+      tags:
+      - candidates
+      summary: Add candidate to pools
+      operationId: addToPools
+      parameters:
+      - name: id
+        in: path
+        description: Id of the candidate
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Ids of the pools to add the candidate
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/listOfIds"
+        required: true
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: Candidate has been added to the pools
+      security:
+      - secret-key: []
+  "/0/candidates/{id}/jobs":
+    post:
+      tags:
+      - candidates
+      summary: Associate candidate to jobs
+      description: "<b>Use this endpoint to link an existing candidate to job offers.
+        To create a candidate application (with answers to the job questions) to a
+        job offer, use the '/jobs/{jobId}/applications' endpoint.</b><br/>Currently,
+        automatic actions (workflow, automatic emails and webhooks) are not triggered
+        by this way."
+      operationId: addToJobs
+      parameters:
+      - name: id
+        in: path
+        description: Id of the candidate
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Ids of the jobs to add the candidate
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/listOfIds"
+        required: true
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: Candidate has been associated to the jobs
+      security:
+      - secret-key: []
+  "/0/recruiters":
+    get:
+      tags:
+      - recruiters
+      summary: List all recruiters in your company
+      operationId: list
+      parameters:
+      - name: page
+        in: query
+        description: |-
+          Page number.
+          Start at '0'
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: pageSize
+        in: query
+        description: |-
+          Page size.
+          Max size of the list returned. Max value : 100
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/RecruiterList"
+      security:
+      - secret-key: []
+  "/0/properties":
+    get:
+      tags:
+      - properties
+      summary: List available candidate properties in your company
+      operationId: listProperties
+      parameters:
+      - name: page
+        in: query
+        description: |-
+          Page number.
+          Start at '0'
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: pageSize
+        in: query
+        description: |-
+          Page size.
+          Max size of the list returned. Max value : 100
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: withDisabled
+        in: query
+        description: Include properties that have been disabled in account settings
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/PropertyList"
+      security:
+      - secret-key: []
+  "/0/pools":
+    get:
+      tags:
+      - pools
+      summary: List all pools in your company
+      operationId: list_1
+      parameters:
+      - name: page
+        in: query
+        description: |-
+          Page number.
+          Start at '0'
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: pageSize
+        in: query
+        description: |-
+          Page size.
+          Max size of the list returned. Max value : 100
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/PoolList"
+      security:
+      - secret-key: []
+  "/0/jobs":
+    get:
+      tags:
+      - jobs
+      summary: List all jobs in your company
+      description: "\U0001F4A1 <br/><b>You can use same filter parameter more than
+        once to make a logical OR.</b><br/>Works with : status, profile, contract,
+        city, companyLabel, tag"
+      operationId: list_2
+      parameters:
+      - name: page
+        in: query
+        description: |-
+          Page number.
+          Start at '0'
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: pageSize
+        in: query
+        description: |-
+          Page size.
+          Max size of the list returned. Max value : 100
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: status
+        in: query
+        description: Filter on job status. Can be used with others filters.
+        required: false
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - PUBLISHED
+          - DONE
+          - SUSPENDED
+      - name: profile
+        in: query
+        description: Filter on job profile. Can be used with others filters.
+        required: false
+        schema:
+          type: string
+          enum:
+          - COMPTABILITE
+          - ADMINISTRATION
+          - ART_ET_DESIGN
+          - DEVELOPPEMENT_COMMERCIAL
+          - SERVICE_A_LA_COMMUNAUTE_ET_SOCIAL
+          - CONSEIL
+          - ENSEIGNEMENT
+          - INGENIERIE
+          - ENTREPRENARIAT
+          - FINANCE
+          - SERVICE_DE_SANTE
+          - RESSOURCES_HUMAINES
+          - TECHNOLOGIES_DE_LINFORMATION
+          - SERVICE_JURIDIQUE
+          - MARKETING
+          - MEDIAS_ET_COMMUNICATION
+          - OPERATIONS
+          - RESPONSABLE_PRODUIT
+          - MANAGEMENT_DE_PROJET
+          - ACHATS
+          - CONTROLE_QUALITE
+          - IMMOBILIER
+          - RECHERCHE
+          - VENTES
+          - ASSISTANCE
+          - AUTRES
+      - name: contract
+        in: query
+        description: Filter on job contract. Can be used with others filters.
+        required: false
+        schema:
+          type: string
+          enum:
+          - CDI
+          - CDD
+          - INTERIM
+          - FREELANCE
+          - INTERNSHIP
+          - APPRENTICESHIP
+          - STUDENT
+          - VIE
+          - FRANCHISE
+          - STATUTE
+          - INTERMITTENT
+          - SEASON
+          - OTHER
+          - VOLUNTEER
+          - PERMANENT
+          - FIXEDTERM
+      - name: city
+        in: query
+        description: Filter on job city. Can be used with others filters.
+        required: false
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: companyLabel
+        in: query
+        description: Filter on job company label (strict search). Can be used with
+          others filters.
+        required: false
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: tag
+        in: query
+        description: Filter on job tag. Can be used with others filters.
+        required: false
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: public
+        in: query
+        description: Filter jobs public/restricted
+        required: false
+        schema:
+          type: boolean
+      - name: withDetails
+        in: query
+        description: Include all details (job, profile and company descriptions)
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - name: sort
+        in: query
+        description: 'Sort the list by one or multiple properties. Ex : sort=dateCreation.desc,label.asc.
+          Any field can be used except URLs and lat, long.'
+        required: false
+        schema:
+          type: string
+          default: id.desc
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/JobList"
+      security:
+      - secret-key: []
+      - public-key: []
+  "/0/jobs/{id}":
+    get:
+      tags:
+      - jobs
+      summary: Get details of a job
+      operationId: getJob
+      parameters:
+      - name: id
+        in: path
+        description: Id of the job
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/job"
+        '404':
+          description: Job cannot be found
+      security:
+      - secret-key: []
+      - public-key: []
+  "/0/jobs/{id}/questions":
+    get:
+      tags:
+      - jobs
+      summary: Get questions of a job
+      operationId: getJobQuestions
+      parameters:
+      - name: id
+        in: path
+        description: Id of the job
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/jobQuestion"
+        '404':
+          description: Job cannot be found
+      security:
+      - secret-key: []
+      - public-key: []
+  "/0/jobs/filters":
+    get:
+      tags:
+      - jobs
+      summary: Count all jobs and count jobs by filter values (with at least one job)
+      operationId: filters
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/jobFilters"
+      security:
+      - secret-key: []
+      - public-key: []
+  "/0/candidates/{id}":
+    get:
+      tags:
+      - candidates
+      summary: Get a candidate
+      operationId: getCandidate
+      parameters:
+      - name: id
+        in: path
+        description: Id of the candidate
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                "$ref": "#/components/schemas/candidate"
+        '404':
+          description: Candidate cannot be found
+      security:
+      - secret-key: []
+  "/0/candidates/{id}/applications":
+    get:
+      tags:
+      - candidates
+      summary: 'Get candidate applications list (can be : spontaneous, application
+        to a job, association to a job)'
+      operationId: getCandidateApplications
+      parameters:
+      - name: id
+        in: path
+        description: Id of the candidate
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '400':
+          description: Something's wrong with your request, additional info will be
+            provided in error message
+        '200':
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/candidateApplication"
+        '404':
+          description: Candidate cannot be found
+      security:
+      - secret-key: []
+components:
+  schemas:
+    listOfIds:
+      type: object
+      properties:
+        ids:
+          type: array
+          description: Ids of resources
+          example:
+          - 12785
+          - 25987
+          items:
+            type: integer
+            description: Ids of resources
+            format: int64
+    StarValue:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Question choice id
+          format: int64
+          example: 46577
+        value:
+          type: integer
+          description: Rating value, between 0 and 5
+          format: int32
+          example: 3
+      description: Answer value for question type STAR
+    answer:
+      required:
+      - choices
+      - docData
+      - docTempId
+      - questionId
+      - socialLinks
+      - starValues
+      - value
+      type: object
+      properties:
+        questionId:
+          type: integer
+          description: Job question id
+          format: int64
+          example: 654167
+        value:
+          type: string
+          description: 'Answer value for question types : INPUT, TEXTAREA, NUMBER,
+            DATE and DOC. For DOC it must contains document original name (ex: my_cv.pdf)'
+          example: My answer
+        choices:
+          type: array
+          description: 'Answer value(s) for question types : CHECKBOX, SELECTMUL,
+            RADIO, SELECT'
+          example:
+          - 5487
+          - 9873
+          items:
+            type: integer
+            description: 'Answer value(s) for question types : CHECKBOX, SELECTMUL,
+              RADIO, SELECT'
+            format: int64
+        starValues:
+          type: array
+          description: Answer value for question type STAR
+          items:
+            "$ref": "#/components/schemas/StarValue"
+        docTempId:
+          type: string
+          description: 'Temporary document id. For DOC questions : docTempId OR docData
+            must be provided'
+          example: 31ccd003-77e7-46af-9c88-07b71f54a90a
+        docData:
+          type: string
+          description: 'Document content encoded in Base64. For DOC questions : docTempId
+            OR docData must be provided'
+          example: JVBERi0xLjUKJcOkw7zDtsO...
+        socialLinks:
+          "$ref": "#/components/schemas/socialLinks"
+      description: Application answers to the job questions
+    jobApplication:
+      required:
+      - email
+      - firstName
+      - lastName
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Candidate first name
+          example: Paul
+        lastName:
+          type: string
+          description: Candidate last name
+          example: Lefebvre
+        email:
+          type: string
+          description: Candidate email
+          example: p.lefebvre@provider.com
+        phone:
+          type: string
+          description: 'Candidate phone (formats : 0611223344, +33611223344, 00336112233).
+            Ignored if not valid.'
+          example: '0611223344'
+        initialReferrer:
+          type: string
+          description: 'Application initial referer. Default : ''API Taleez'''
+          example: My web site
+        bypassRequiredQuestions:
+          type: boolean
+          description: True to allow required questions to do not have answer
+          example: false
+          default: false
+        answers:
+          type: array
+          description: Application answers to the job questions
+          items:
+            "$ref": "#/components/schemas/answer"
+    socialLinks:
+      type: object
+      properties:
+        linkedin:
+          type: string
+        viadeo:
+          type: string
+        twitter:
+          type: string
+        github:
+          type: string
+        behance:
+          type: string
+        other:
+          type: string
+        website:
+          type: string
+        dribble:
+          type: string
+      description: Candidate social links
+    createdApplicationResponse:
+      type: object
+      properties:
+        candidateId:
+          type: integer
+          description: Id of the candidate (newly created or not)
+          format: int64
+          example: 12785
+        applicationId:
+          type: integer
+          description: Id of the newly created application
+          format: int64
+          example: 45789
+    createdResourceResult:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the newly created resource
+          example: '12785'
+    candidateToCreate:
+      required:
+      - firstName
+      - lastName
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        mail:
+          type: string
+          description: Candidate mail. If specified, must be unique in your company.
+          example: john.doe@gmail.com
+        phone:
+          type: string
+          description: 'Candidate phone (formats : 0611223344, +33611223344, 00336112233).
+            Ignored if not valid.'
+          example: '0611223344'
+        initialReferrer:
+          type: string
+          description: Candidate source.
+          example: My web site
+          default: API Taleez
+        lang:
+          type: string
+          description: Candidate lang
+          example: FR
+          default: FR
+          enum:
+          - FR
+          - EN
+        recruiterId:
+          type: integer
+          description: Id of the recruiter who add this candidate. If specified, the
+            candidate will appear as added by this recruiter in Taleez.
+          format: int64
+          example: 5489
+        socialLinks:
+          "$ref": "#/components/schemas/socialLinks"
+    candidatePropertyParameter:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Property id
+          format: int64
+          example: 12785
+        value:
+          type: string
+          description: 'Used only for property without choice. The value of the property
+            for this candidate. For DATE property the format must be : dd/MM/yyyy'
+          example: My new value
+        choices:
+          type: array
+          description: 'Used only for property with choices : list of choice ids selected
+            for this candidate. Empty list to remove all selected choices'
+          example:
+          - 5487
+          - 9873
+          items:
+            type: integer
+            description: 'Used only for property with choices : list of choice ids
+              selected for this candidate. Empty list to remove all selected choices'
+            format: int64
+        starValues:
+          type: array
+          description: Used only for property of type STAR
+          items:
+            "$ref": "#/components/schemas/StarValue"
+        documentId:
+          type: integer
+          description: 'Used only for property of type DOC : id of the document to
+            associate for the property'
+          format: int64
+          example: 549672
+        appendChoices:
+          type: boolean
+          description: 'Used only for property that allow multiple choices (CHECkBOX,
+            SELECTMUL..) : indicate if choice ids specified in ''choices'' parameter
+            has to be append to existing selected choices, or replace its. Default
+            is false'
+          example: false
+    RecruiterList:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Number of the current page
+          format: int32
+          example: 0
+        pageSize:
+          type: integer
+          description: Size of the page
+          format: int32
+          example: 25
+        listSize:
+          type: integer
+          description: Number of results returned in the list
+          format: int32
+          example: 3
+        list:
+          type: array
+          description: Result list
+          items:
+            "$ref": "#/components/schemas/recruiter"
+    recruiter:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1337
+        dateCreation:
+          type: string
+          format: date-time
+        mail:
+          type: string
+          example: john.doe@gmail.com
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        phone:
+          type: string
+          example: '0611223344'
+        mailConfirmed:
+          type: boolean
+          example: true
+        disabled:
+          type: boolean
+          example: false
+        role:
+          type: string
+          example: ADMIN
+          enum:
+          - OWNER
+          - ADMIN
+          - RECRUITER
+          - MANAGER
+          - CONTRIBUTOR
+          - PUBLISHER
+          - READER
+          - ADMIN,RECRUITER,MANAGER,CONTRIBUTOR,READER
+        picture:
+          type: string
+          example: https://taleez.com/pics/profiles/130x130/OTQ1Nzc4Y2EtZjY0Ni02UDD5LWJjN2ItMDYwNTUwZjQ5OTA3.png
+        hardBouncer:
+          type: boolean
+          description: This recruiter has been flagged as hard bouncer, we don't send
+            mail to this address anymore
+          example: false
+        companyId:
+          type: integer
+          format: int64
+          example: 1337
+      description: Result list
+    PropertyList:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Number of the current page
+          format: int32
+          example: 0
+        pageSize:
+          type: integer
+          description: Size of the page
+          format: int32
+          example: 25
+        listSize:
+          type: integer
+          description: Number of results returned in the list
+          format: int32
+          example: 3
+        list:
+          type: array
+          description: Result list
+          items:
+            "$ref": "#/components/schemas/property"
+    choice:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Choice unique id
+          format: int64
+          example: 78962
+        labelFr:
+          type: string
+          description: French label
+          example: 1 an d'expérience
+        labelEn:
+          type: string
+          description: English label
+          example: 1 year of experience
+        order:
+          type: integer
+          description: Choice order when displayed
+          format: int32
+          example: 1
+        category:
+          type: boolean
+          description: For property type SELECT and SELECTMUL, true value indicate
+            that this choice is a category (and can not be selected as a value)
+          example: false
+      description: If property has choices, list of the available choices
+    property:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Property unique id
+          format: int64
+          example: 12785
+        key:
+          type: string
+          description: Internal name
+          example: Expérience
+        name:
+          type: string
+          description: Public french label
+          example: Votre expérience
+        nameEn:
+          type: string
+          description: Public english label
+          example: Your experience level
+        type:
+          type: string
+          description: Property type
+          example: SELECT
+          enum:
+          - INPUT
+          - TEXTAREA
+          - NUMBER
+          - DATE
+          - DOC
+          - SOCIALS
+          - RADIO
+          - SELECT
+          - CHECKBOX
+          - SELECTMUL
+          - STAR
+        locked:
+          type: boolean
+          description: True if it's a default property created by Taleez (so name
+            and choices are not updatable)
+          example: true
+        adminOnly:
+          type: boolean
+          description: True if property values is only visible for Admin
+          example: false
+        hasChoices:
+          type: boolean
+          description: True if property has choices (like SELECT, RADIO, ...), false
+            otherwise (like INPUT, DATE, DOC, ...)
+          example: true
+        multiChoiceAllowed:
+          type: boolean
+          description: True if property can have several choices selected for a candidate
+            (like CHECKBOX, SELECTMUL,...), false otherwise (like SELECT, RADIO, ...)
+          example: false
+        fr:
+          type: boolean
+          description: True if property can be used in french form
+          example: true
+        en:
+          type: boolean
+          description: True if property can be used in english form
+          example: true
+        nbCandidate:
+          type: integer
+          description: Number of candidate associated with this property (with a value)
+          format: int32
+          example: 78
+        lastUpdatedByName:
+          type: string
+          description: Name of the last user who update this property
+          example: David Morel
+        lastUpdatedById:
+          type: integer
+          description: Id of the last user who update this property
+          format: int64
+          example: 456
+        choices:
+          type: array
+          description: If property has choices, list of the available choices
+          items:
+            "$ref": "#/components/schemas/choice"
+      description: Result list
+    PoolList:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Number of the current page
+          format: int32
+          example: 0
+        pageSize:
+          type: integer
+          description: Size of the page
+          format: int32
+          example: 25
+        listSize:
+          type: integer
+          description: Number of results returned in the list
+          format: int32
+          example: 3
+        list:
+          type: array
+          description: Result list
+          items:
+            "$ref": "#/components/schemas/pool"
+    pool:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1337
+        dateCreation:
+          type: string
+          format: date-time
+        name:
+          type: string
+          example: Marketing
+        sourcing:
+          type: boolean
+          description: true when this pool is your default sourcing pool
+          example: true
+        recruiterId:
+          type: integer
+          format: int64
+          example: 1337
+      description: Result list
+    JobList:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Number of the current page
+          format: int32
+          example: 0
+        pageSize:
+          type: integer
+          description: Size of the page
+          format: int32
+          example: 25
+        listSize:
+          type: integer
+          description: Number of results returned in the list
+          format: int32
+          example: 3
+        totalSize:
+          type: integer
+          description: Number of results for this search
+          format: int64
+          example: 120
+        list:
+          type: array
+          description: Result list
+          items:
+            "$ref": "#/components/schemas/job"
+    job:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Job unique id
+          format: int64
+          example: 12785
+        token:
+          type: string
+          description: Job token.
+          example: 17k7r5e
+        dateCreation:
+          type: integer
+          description: Timestamp of the job creation date
+          format: int64
+          example: 1567771321
+        dateFirstPublish:
+          type: integer
+          description: Timestamp of the job first publication date. Can be null if
+            job was never published
+          format: int64
+          example: 1567771418
+        dateLastPublish:
+          type: integer
+          description: Timestamp of the job last publication date. Can be null if
+            job was never published
+          format: int64
+          example: 1567771418
+        label:
+          type: string
+          description: Job label. Can be null if job is in DRAFT status.
+          example: Assistant administratif
+        profile:
+          type: string
+          description: Job profile type. Can be null if job is in DRAFT status.
+          example: ADMINISTRATION
+          enum:
+          - COMPTABILITE
+          - ADMINISTRATION
+          - ART_ET_DESIGN
+          - DEVELOPPEMENT_COMMERCIAL
+          - SERVICE_A_LA_COMMUNAUTE_ET_SOCIAL
+          - CONSEIL
+          - ENSEIGNEMENT
+          - INGENIERIE
+          - ENTREPRENARIAT
+          - FINANCE
+          - SERVICE_DE_SANTE
+          - RESSOURCES_HUMAINES
+          - TECHNOLOGIES_DE_LINFORMATION
+          - SERVICE_JURIDIQUE
+          - MARKETING
+          - MEDIAS_ET_COMMUNICATION
+          - OPERATIONS
+          - RESPONSABLE_PRODUIT
+          - MANAGEMENT_DE_PROJET
+          - ACHATS
+          - CONTROLE_QUALITE
+          - IMMOBILIER
+          - RECHERCHE
+          - VENTES
+          - ASSISTANCE
+          - AUTRES
+        currentStatus:
+          type: string
+          description: Job current status
+          example: DONE
+          enum:
+          - DRAFT, PUBLISHED, DONE, SUSPENDED
+        contract:
+          type: string
+          description: Job contract type. Can be null if job is in DRAFT status.
+          example: INTERNSHIP
+          enum:
+          - CDI
+          - CDD
+          - INTERIM
+          - FREELANCE
+          - INTERNSHIP
+          - APPRENTICESHIP
+          - STUDENT
+          - VIE
+          - FRANCHISE
+          - STATUTE
+          - INTERMITTENT
+          - SEASON
+          - OTHER
+          - VOLUNTEER
+          - PERMANENT
+          - FIXEDTERM
+        contractLength:
+          type: integer
+          description: Job contract length in months, if applicable. Can be null
+          format: int32
+          example: 3
+        fullTime:
+          type: boolean
+          description: True if it's a full time job, false otherwise
+          example: true
+        workHours:
+          type: number
+          description: If job is not full time, number of working hours. Can be null.
+          format: float
+          example: 26
+        qualification:
+          type: string
+          description: 'Job qualification type. Used with following contracts : CDI,
+            CDD, INTERIM, INTERMITTENT, SEASON. Can be null if job is in DRAFT status.'
+          example: CADRE
+          enum:
+          - MANOEUVRE
+          - OUVRIER_SPECIALISE
+          - OUVRIER_QUALIFIE_P1_P2
+          - OUVRIER_QUALIFIE_P3_P4_OHQ
+          - EMPLOYE_NON_QUALIFIE
+          - EMPLOYE_QUALIFIE
+          - TECHNICIEN
+          - AGENT_DE_MAITRISE
+          - CADRE
+        remote:
+          type: boolean
+          description: True if it's a remote position job, false otherwise
+          example: false
+        country:
+          type: string
+          description: Job country
+          example: FRANCE
+          enum:
+          - AFGHANISTAN
+          - SOUTH_AFRICA
+          - ALBANIA
+          - ALGERIA
+          - GERMANY
+          - ANDORRA
+          - ANGOLA
+          - ANTIGUA_ET_BARBUDA
+          - SAUDI_ARABIA
+          - ARGENTINA
+          - ARMENIA
+          - AUSTRALIA
+          - CHRISTMAS_ISLANDS
+          - NORFOLK_ISLAND
+          - COCOS_ISLAND
+          - HEARD_ISLAND_AND_MCDONALD_ISLANDS
+          - AUSTRIA
+          - AZERBAIJAN
+          - BAHAMAS
+          - BAHRAIN
+          - BANGLADESH
+          - BARBADOS
+          - BELGIUM
+          - BELIZE
+          - BENIN
+          - BHUTAN
+          - BELARUS
+          - MYANMAR
+          - BOLIVIA
+          - BOSNIA_AND_HERZEGOVINA
+          - BOTSWANA
+          - BRAZIL
+          - BRUNEI_DARUSSALAM
+          - BULGARIA
+          - BURKINA_FASO
+          - BURUNDI
+          - CAMBODIA
+          - CAMEROON
+          - CANADA
+          - CABO_VERDE
+          - CHILE
+          - CHINA
+          - HONG_KONG
+          - MACAO
+          - TAIWAN
+          - CYPRUS
+          - COLOMBIA
+          - COMOROS
+          - NORTH_KOREA
+          - SOUTH_KOREA
+          - COSTA_RICA
+          - COTE_DIVOIRE
+          - CROATIA
+          - CUBA
+          - DENMARK
+          - GROENLAND
+          - FAROE_ISLANDS
+          - DJIBOUTI
+          - DOMINICA
+          - EGYPT
+          - THE_UNITED_ARAB_EMIRATES
+          - ECUADOR
+          - ERITREA
+          - SPAIN
+          - ESTONIA
+          - MICRONESIA
+          - UNITED_STATES_OF_AMERICA
+          - GUAM
+          - NORTHERN_MARIANA_ISLANDS
+          - UNITED_STATES_MINOR_OUTLYING_ISLANDS
+          - US_VIRGIN_ISLANDS
+          - PORTO_RICO
+          - AMERICAN_SAMOA
+          - ETHIOPIA
+          - FIJI
+          - FINLAND
+          - ÅLAND_ISLANDS
+          - FRANCE
+          - GUADELOUPE
+          - MARTINIQUE
+          - GUYANE
+          - LA_REUNION
+          - SAINT_PIERRE_ET_MIQUELON
+          - MAYOTTE
+          - NEW_CALEDONIA
+          - FRENCH_POLYNESIA
+          - SAINT_MARTIN
+          - FRENCH_SOUTHERN_AND_ANTARCTIC_LANDS
+          - SAINT_BARTHELEMY
+          - WALLIS_AND_FUTUNA
+          - GABON
+          - GAMBIA
+          - GEORGIA
+          - GHANA
+          - GREECE
+          - GRENADA
+          - GUATEMALA
+          - GUINEA
+          - EQUATORIAL_GUINEA
+          - GUINEA_BISSAU
+          - GUYANA
+          - HAITI
+          - HONDURAS
+          - HONGRIA
+          - MARSHALL_ISLANDS
+          - INDIA
+          - INDONESIA
+          - IRAK
+          - IRAN
+          - IRELAND
+          - ICELAND
+          - ISRAEL
+          - ITALY
+          - JAMAICA
+          - JAPAN
+          - JORDANIA
+          - KAZAKHSTAN
+          - KENYA
+          - KYRGYZSTAN
+          - KIRIBATI
+          - KUWAIT
+          - LAO
+          - LESOTHO
+          - LATVIA
+          - LEBANON
+          - LIBERIA
+          - LIBYA
+          - LIECHTENSTEIN
+          - LITUANIA
+          - LUXEMBOURG
+          - NORTH_MACEDONIA
+          - MADAGASCAR
+          - MALAYSIA
+          - MALAWI
+          - MALDIVES
+          - MALI
+          - MALTA
+          - MOROCCO
+          - MAURITIUS
+          - MAURITANIA
+          - MEXICO
+          - MOLDOVA
+          - MONACO
+          - MONGOLIA
+          - MONTENEGRO
+          - MOZAMBIQUE
+          - NAMIBIA
+          - NAURU
+          - NEPAL
+          - NICARAGUA
+          - NIGER
+          - NIGERIA
+          - NORWAY
+          - BOUVET_ISLAND
+          - SVALBARD_AND_JAN_MAYEN_ISLAND
+          - NEW_ZEALAND
+          - COOK_ISLANDS
+          - NIUE
+          - TOKELAU
+          - OMAN
+          - UGANDA
+          - OUZBEKISTAN
+          - PAKISTAN
+          - PALAU
+          - STATE_OF_PALESTINE
+          - PANAMA
+          - PAPUA_NEW_GUINEA
+          - PARAGUAY
+          - NETHERLANDS
+          - ARUBA
+          - CURACAO
+          - CARIBBEAN_NETHERLANDS
+          - PERU
+          - PHILIPPINES
+          - POLAND
+          - PORTUGAL
+          - QATAR
+          - CENTRAL_AFRICAN_REPUBLIC
+          - DEMOCRATIC_REPUBLIC_OF_THE_CONGO
+          - DOMINICAN_REPUBLIC
+          - CONGO
+          - CZECHIA
+          - ROUMANIA
+          - UNITED_KINGDOM
+          - BRITISH_VIRGIN_ISLANDS
+          - TURKS_AND_CAICOS
+          - SOUTH_GEORGIA_AND_THE_SOUTH_SANDWICH_ISLANDS
+          - SAINT_HELENA
+          - PITCAIRN
+          - MONTSERRAT
+          - GIBRALTAR
+          - FALKLAND_ISLANDS
+          - CAYMAN_ISLANDS
+          - BRITISH_INDIAN_OCEAN_TERRITORY
+          - BERMUDA
+          - ANGUILLA
+          - RUSSIAN_FEDERATION
+          - RWANDA
+          - SAINT_KITTS_AND_NEVIS
+          - SAINT_MARINO
+          - SAINT_VINCENT_AND_THE_GRENADINES
+          - SAINT_LUCIA
+          - SOLOMON_ISLANDS
+          - EL_SALVADOR
+          - SAMOA
+          - SAO_TOME_AND_PRINCIPE
+          - SENEGAL
+          - SERBIA
+          - SEYCHELLES
+          - SIERRA_LEONE
+          - SINGAPORE
+          - SLOVAKIA
+          - SLOVENIA
+          - SOMALIA
+          - SUDAN
+          - SOUTH_SUDAN
+          - SRI_LANKA
+          - SWEDEN
+          - SWITZERLAND
+          - SURINAME
+          - ESWATINI
+          - SYRIAN_ARAB_REPUBLIC
+          - TAJIKISTAN
+          - TANZANIA
+          - CHAD
+          - THAILAND
+          - TIMOR_LESTE
+          - TOGO
+          - TONGA
+          - TRINIDAD_AND_TOBAGO
+          - TUNISIA
+          - TURKMENISTAN
+          - TURKEY
+          - TUVALU
+          - UKRAINE
+          - URUGUAY
+          - VANUATU
+          - HOLY_SEE
+          - VENEZUELA
+          - VIET_NAM
+          - YEMEN
+          - ZAMBIA
+          - ZIMBABWE
+        city:
+          type: string
+          description: Label of the job city. Can be null if it's a remote job, or
+            if job is in DRAFT status.
+          example: Toulouse
+        postalCode:
+          type: string
+          description: Postal code of the job location. Only used for France. Can
+            be null if it's a remote job, or if job is in DRAFT status.
+          example: '31500'
+        lat:
+          type: string
+          description: Latitude of the job city, if exists.
+          example: '43.6182606'
+        lng:
+          type: string
+          description: Longitude of the job city, if exists
+          example: '1.4285272'
+        recruiterId:
+          type: integer
+          description: Unique id of the recruiter who create the job
+          format: int64
+          example: 1568
+        who:
+          type: string
+          description: Name of the recruiter who create the job
+          example: David Morel
+        logo:
+          type: string
+          description: Url of the job logo. Can be null
+        banner:
+          type: string
+          description: Url of the job banner. Can be null
+        companyLabel:
+          type: string
+          description: Label of the company. Can be null if job is in DRAFT status.
+          example: Entreprise ABC
+        tags:
+          type: array
+          description: Tags of the jobs
+          example:
+          - Marketing
+          - Technique
+          items:
+            type: string
+            description: Tags of the jobs
+            example: '["Marketing","Technique"]'
+        url:
+          type: string
+          description: Url of the job (specified only if currentStatus = PUBLISHED)
+        urlApplying:
+          type: string
+          description: Url to apply (specified only if currentStatus = PUBLISHED)
+        jobDescription:
+          type: string
+          description: Job description. Can be null/absent if job is in DRAFT status.
+          example: Nous vous proposons de rejoindre...
+        profileDescription:
+          type: string
+          description: Job profile description. Can be null/absent if job is in DRAFT
+            status.
+          example: Nous cherchons un nouveau collaborateur...
+        companyDescription:
+          type: string
+          description: Job company description. Can be null/absent if job is in DRAFT
+            status.
+          example: Fondée en 1987, l'entreprise...
+        public:
+          type: boolean
+          description: 'True : job is displayed on career website and indexed by web
+            search engines. False : only people with the url can see the job'
+      description: Result list
+    jobQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Question id
+          format: int64
+          example: 35874
+        order:
+          type: integer
+          description: Question order. Start at 0.
+          format: int32
+          example: 2
+        label:
+          type: string
+          description: Question label
+          example: First Name
+        required:
+          type: boolean
+          description: True if answer is required
+          example: true
+        type:
+          type: string
+          description: Question type
+          example: CHECKBOX
+          enum:
+          - INPUT
+          - TEXTAREA
+          - NUMBER
+          - DATE
+          - DOC
+          - SOCIALS
+          - RADIO
+          - SELECT
+          - CHECKBOX
+          - SELECTMUL
+          - STAR
+        choices:
+          type: array
+          description: 'Available choices for answer. Only present for question types
+            : RADIO, SELECT, CHECKBOX, SELECTMUL, STAR'
+          example:
+          - id: 2365455
+            order: 0
+            label: Answer A
+            inCategory: false
+            category: false
+          - id: 2365456
+            order: 1
+            label: Answer B
+            inCategory: false
+            category: false
+          items:
+            "$ref": "#/components/schemas/questionChoice"
+    questionChoice:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Choice id
+          format: int64
+          example: 54877
+        order:
+          type: integer
+          description: Choice order. Start at 0.
+          format: int32
+          example: 0
+        label:
+          type: string
+          description: Choice label
+          example: Answer A
+        category:
+          type: boolean
+          description: True if the choice is a category title and cannot be selectable
+            (only present for SELECT and SELECTMUL question type)
+          example: false
+        inCategory:
+          type: boolean
+          description: True if the choice is inside a category, false if it's outside
+            (only present for SELECT and SELECTMUL question type)
+          example: false
+      description: 'Available choices for answer. Only present for question types
+        : RADIO, SELECT, CHECKBOX, SELECTMUL, STAR'
+      example:
+      - id: 2365455
+        order: 0
+        label: Answer A
+        inCategory: false
+        category: false
+      - id: 2365456
+        order: 1
+        label: Answer B
+        inCategory: false
+        category: false
+    jobFilterItem:
+      type: object
+      properties:
+        value:
+          type: object
+        count:
+          type: integer
+          format: int64
+      description: Number of jobs by company label
+      example:
+      - value: MyCompany
+        count: 6
+      - value: MyCompany subsidiary 1
+        count: 5
+      - value: MyCompany subsidiary 2
+        count: 3
+    jobFilters:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+          description: Total number of jobs
+          format: int64
+          example: 9
+        statusFilter:
+          type: array
+          description: Number of jobs by status
+          example:
+          - value: PUBLISHED
+            count: 5
+          - value: DRAFT
+            count: 3
+          - value: SUSPENDED
+            count: 1
+          items:
+            "$ref": "#/components/schemas/jobFilterItem"
+        contractFilter:
+          type: array
+          description: Number of jobs by contract type
+          example:
+          - value: CDI
+            count: 5
+          - value: CDD
+            count: 4
+          items:
+            "$ref": "#/components/schemas/jobFilterItem"
+        profileFilter:
+          type: array
+          description: Number of jobs by profile
+          example:
+          - value: ADMINISTRATION
+            count: 3
+          - value: COMPTABILITE
+            count: 2
+          - value: RECHERCHE
+            count: 3
+          items:
+            "$ref": "#/components/schemas/jobFilterItem"
+        cityFilter:
+          type: array
+          description: Number of jobs by city
+          example:
+          - value: Toulouse
+            count: 1
+          - value: Lyon
+            count: 5
+          - value: Paris
+            count: 3
+          items:
+            "$ref": "#/components/schemas/jobFilterItem"
+        tagFilter:
+          type: array
+          description: Number of jobs by tag
+          example:
+          - value: Marketing
+            count: 3
+          - value: Technique
+            count: 5
+          items:
+            "$ref": "#/components/schemas/jobFilterItem"
+        companyLabelFilter:
+          type: array
+          description: Number of jobs by company label
+          example:
+          - value: MyCompany
+            count: 6
+          - value: MyCompany subsidiary 1
+            count: 5
+          - value: MyCompany subsidiary 2
+            count: 3
+          items:
+            "$ref": "#/components/schemas/jobFilterItem"
+    CandidateList:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Number of the current page
+          format: int32
+          example: 0
+        pageSize:
+          type: integer
+          description: Size of the page
+          format: int32
+          example: 25
+        listSize:
+          type: integer
+          description: Number of results returned in the list
+          format: int32
+          example: 3
+        list:
+          type: array
+          description: Result list
+          items:
+            "$ref": "#/components/schemas/candidate"
+    candidate:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Candidate unique id
+          format: int64
+          example: 1234
+        firstName:
+          type: string
+          description: Candidate first name
+          example: John
+        lastName:
+          type: string
+          description: Candidate last name
+          example: Doe
+        mail:
+          type: string
+          description: Candidate mail
+          example: john.doe@gmail.com
+        phone:
+          type: string
+          description: Candidate phone
+          example: '0611223344'
+        initialReferrer:
+          type: string
+          description: Candidate initial referrer.
+          example: linkedin.com
+        lang:
+          type: string
+          description: Candidate lang
+          example: FR
+          enum:
+          - FR
+          - EN
+        socialLinks:
+          "$ref": "#/components/schemas/socialLinks"
+      description: Result list
+    DocDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Document id
+          format: int64
+          example: 46577
+        name:
+          type: string
+          description: Document name
+          example: MyCv.pdf
+        path:
+          type: string
+          description: Document URL
+          example: https://storage.gra.cloud.ovh.net/v1/AUTH_2f72edb3d8ee420a8791ff0c7f76ec14/taleez/...
+        size:
+          type: integer
+          description: Document size in bytes
+          format: int32
+          example: 125000
+      description: Document associated to the property (only for property of type
+        DOC)
+    SelectedChoiceDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Choice id
+          format: int64
+          example: 46577
+        fr:
+          type: string
+          description: French label
+          example: 1 an d'expérience
+        en:
+          type: string
+          description: English label
+          example: 1 year of experience
+        value:
+          type: integer
+          description: Rating value, between 1 and 5 (only specified for property
+            of type STAR)
+          format: int64
+          example: 3
+      description: Selected values for a property with choices
+    candidatePropertyValue:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Property id
+          format: int64
+          example: 12785
+        key:
+          type: string
+          description: Property internal name
+          example: Expérience
+        type:
+          type: string
+          description: Property type
+          example: SELECT
+          enum:
+          - INPUT
+          - TEXTAREA
+          - NUMBER
+          - DATE
+          - DOC
+          - SOCIALS
+          - RADIO
+          - SELECT
+          - CHECKBOX
+          - SELECTMUL
+          - STAR
+        value:
+          type: string
+          description: Value for a property without choice.
+          example: This is the value
+        choices:
+          type: array
+          description: Selected values for a property with choices
+          items:
+            "$ref": "#/components/schemas/SelectedChoiceDTO"
+        document:
+          "$ref": "#/components/schemas/DocDTO"
+    candidatePool:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Pool id
+          format: int64
+          example: 2545
+        name:
+          type: string
+          description: Pool name
+          example: Marketing
+        date:
+          type: integer
+          description: Date when candidate has been added to the pool (timestamp)
+          format: int64
+          example: 1579978410000
+        referer:
+          type: string
+          description: Referer. Can be Taleez, API Taleez, Workflow or external website
+            if added via browser extension
+          example: Linkedin
+        recruiterId:
+          type: integer
+          description: Recruiter id who add the candidate to the pool. Not specified
+            if candidate has been associated via the API.
+          format: int64
+          example: 8442
+    candidateApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Application id
+          format: int64
+          example: 2545
+        type:
+          type: string
+          description: Application type
+          example: APPLICATION_TO_A_JOB
+          enum:
+          - SPONTANEOUS
+          - APPLICATION_TO_A_JOB
+          - ASSOCIATED_TO_A_JOB
+        date:
+          type: integer
+          description: Application date (timestamp)
+          format: int64
+          example: 1579978410000
+        referer:
+          type: string
+          description: Application referer (source)
+          example: Pole Emploi
+        jobId:
+          type: integer
+          description: Job id (specified if application type is ASSOCIATED_TO_A_JOB
+            or APPLICATION_TO_A_JOB)
+          format: int64
+          example: 2545
+        recruiterId:
+          type: integer
+          description: Recruiter id who associate candidate with the job. Can only
+            be present if application type is ASSOCIATED_TO_A_JOB, but not specified
+            if candidate has been associated via the API.
+          format: int64
+          example: 8442
+        currentStepName:
+          type: string
+          description: Application current step name, or last step if application
+            has been rejected (specified if application type is ASSOCIATED_TO_A_JOB
+            or APPLICATION_TO_A_JOB)
+          example: CV sélectionné
+        rejected:
+          type: boolean
+          description: true if application has been rejected (specified if application
+            type is ASSOCIATED_TO_A_JOB or APPLICATION_TO_A_JOB)
+  securitySchemes:
+    public-key:
+      type: apiKey
+      name: X-taleez-api-key
+      in: header
+    secret-key:
+      type: apiKey
+      name: X-taleez-api-secret
+      in: header

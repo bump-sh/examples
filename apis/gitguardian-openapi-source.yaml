@@ -1,0 +1,1647 @@
+---
+openapi: 3.0.2
+servers:
+- url: https://api.gitguardian.com
+info:
+  title: GitGuardian API
+  version: 1.1.0
+  termsOfService: https://www.gitguardian.com/legal-terms
+  license:
+    name: GitGuardian
+    url: https://www.gitguardian.com/legal-terms
+  x-logo:
+    url: https://static.gitguardian.com/Logo-blue.png
+    altText: GitGuardian
+  contact:
+    name: GitGuardian
+    email: support@gitguardian.com
+    url: https://www.gitguardian.com
+  description: |2
+
+    # Introduction
+
+    Whether you want to build a complete integration with your software development
+    workflow or simply want to test GitGuardian's policy break detection on any text content,
+    you can use our API.
+
+    - The base url for the latest version is `api.gitguardian.com/v1` over `HTTPS`.
+    - All data is sent and received as JSON by default.
+    - All timestamps returned are ISO-8601 compliant, example:
+    ```python
+    2020-03-16T04:46:00+00:00 # for date-time
+    ```
+
+    GitGuardian supported wrappers:
+    - Python: [**py-gitguardian**](https://github.com/GitGuardian/py-gitguardian)
+
+    GitGuardian provides you with [**GitGuardian Shield**](https://github.com/GitGuardian/gg-shield),
+    a CLI application that uses the GitGuardian API through py-gitguardian
+    to scan your files and detect potential secrets or issues in your code.
+
+    This CLI application can be used in many CIs (such as GitHub Actions, GitLab Pipelines, CircleCI,...)
+    or as a pre-commit or pre-receive hook.
+
+    # Authentication
+
+    The GitGuardian API uses API keys to authenticate requests.
+
+    You need to [create an account](https://dashboard.gitguardian.com/auth/signup) before getting started
+    in order to get an API key.
+
+    Your API key can be created and revoked from the
+    [API section of your dashboard](https://dashboard.gitguardian.com/api).
+
+    Your API key must kept private and should neither be embedded directly in the code nor versioned in Git.
+    (Please do not push GitGuardian's API keys to public GitHub repositories ^^).
+
+    Beware your API keys can expire and can be revoked.
+
+    Use [/v1/health](#operation/health_check) to check the
+    validity of your token if needed.
+
+    ```bash
+    curl -H "Authorization: Token ${TOKEN}" \
+      https://api.gitguardian.com/v1/health
+    ```
+
+
+    <!-- ReDoc-Inject: <security-definitions> -->
+tags:
+- name: Incidents
+  description: 'Manage incidents found by post-receive hooks on your GitGuardian Dashboard.
+
+    '
+- name: Sources
+  description: 'Retrieve details on sources monitored by GitGuardian.
+
+    '
+- name: Scanning
+  description: |
+    Use GitGuardian's brain at your leisure.
+
+    Scanning API allows you to scan any content you want using GitGuardian's secrets detection algorithms.
+- name: Status
+  description: 'Check the status of the API and the overall system health.
+
+    '
+paths:
+  "/v1/scan":
+    post:
+      tags:
+      - Scanning
+      operationId: content_scan
+      summary: Content Scan
+      description: |
+        Scan provided document content for policy breaks.
+
+        Request body shouldn't exceed 1MB.
+
+        This endpoint is stateless and as such will not store in our servers neither the documents nor the secrets found.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/document"
+      responses:
+        '200':
+          description: Successful Scan
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/scan_result"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/OverQuotaError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+      x-code-samples:
+      - lang: Shell
+        label: cURL
+        source: |
+          curl --request POST \
+            --url https://api.gitguardian.com/v1/scan \
+            --header 'authorization: Token <Insert API Key>' \
+            --header 'content-type: application/json' \
+            --data '{
+          "document": "import urllib.request\nurl = '\''http://jen_barber:correcthorsebatterystaple@cake.gitguardian.com/isreal.json'\''\nresponse = urllib.request.urlopen(url)\nconsume(response.read())",
+          "filename": ".env"
+          } '
+      - lang: Python
+        source: |
+          import os
+          from pygitguardian import GGClient
+          doc_content = "import urllib.request\n
+          url = 'http://jen_barber:correcthorsebatterystaple@cake.gitguardian.com/isreal.json'\n
+          response = urllib.request.urlopen(url)\n
+          consume(response.read())"
+          client = GGClient(token=API_KEY)
+          scan_result = client.content_scan(filename=".env", document=doc_content)
+          print("Scan results:", scan_result.has_secrets, ":", scan_result.policy_break_count)
+  "/v1/multiscan":
+    post:
+      tags:
+      - Scanning
+      operationId: multiple_scan
+      summary: Multiple Content Scan
+      description: |
+        Scan provided document contents for policy breaks.
+        Multiple documents are returned by the same index order.
+
+        Request body shouldn't exceed 2MB and individual documents shouldn't exceed 1MB.
+
+        This endpoint is stateless and as such will not store in our servers neither the documents nor the secrets found.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              description: List of documents to scan.
+              minItems: 1
+              items:
+                "$ref": "#/components/schemas/document"
+              example:
+              - filename: ".env"
+                document: |
+                  import urllib.request
+                  url = 'http://jen_barber:correcthorsebatterystaple@cake.gitguardian.com/isreal.json'
+                  response = urllib.request.urlopen(url)
+                  consume(response.read())
+              - filename: __init__.py
+                document: __version__="1.0.0"
+      responses:
+        '200':
+          description: Successful Scan
+          content:
+            application/json:
+              schema:
+                type: array
+                description: List of scan results. Corresponding index to document
+                  array.
+                minItems: 1
+                items:
+                  "$ref": "#/components/schemas/scan_result"
+                example:
+                - policy_break_count: 2
+                  policies:
+                  - Filename
+                  - File extensions
+                  - Secrets detection
+                  policy_breaks:
+                  - type: ".env"
+                    policy: Filenames
+                    matches:
+                    - type: filename
+                      match: ".env"
+                  - type: Basic Auth String
+                    policy: Secrets detection
+                    validity: cannot_check
+                    matches:
+                    - type: username
+                      match: jen_barber
+                      index_start: 52
+                      index_end: 61
+                      line_start: 2
+                      line_end: 2
+                    - type: password
+                      match: correcthorsebatterystaple
+                      index_start: 63
+                      index_end: 87
+                      line_start: 2
+                      line_end: 2
+                    - type: host
+                      match: cake.gitguardian.com
+                      index_start: 89
+                      index_end: 108
+                      line_start: 2
+                      line_end: 2
+                - policy_break_count: 0
+                  policies:
+                  - Filename
+                  - File extensions
+                  - Secrets detection
+                  policy_breaks: []
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/OverQuotaError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+      x-code-samples:
+      - lang: Shell
+        label: cURL
+        source: "curl --request POST \\\n  --url https://api.gitguardian.com/v1/multiscan
+          \\\n  --header 'authorization: Token <Insert API Key>' \\\n  --header 'content-type:
+          application/json' \\\n  --data '[\n{\n\"document\":\t\"import urllib.request\\nurl
+          = '\\''http://jen_barber:correcthorsebatterystaple@cake.gitguardian.com/isreal.json'\\''\\nresponse
+          = urllib.request.urlopen(url)\\nconsume(response.read())\",\n\"filename\":
+          \".env\"\n},\n{\n  \"document\":\t\"__version__=\\\"1.0.0\\\"\",\n  \"filename\":
+          \"__init__.py\"\n}\n]'\n"
+      - lang: Python
+        source: |
+          import os
+          from pygitguardian import GGClient
+          doc_content = "import urllib.request\n
+          url = 'http://jen_barber:correcthorsebatterystaple@cake.gitguardian.com/isreal.json'\n
+          response = urllib.request.urlopen(url)\n
+          consume(response.read())"
+          client = GGClient(token=API_KEY)
+          to_scan = [{"filename": ".env", "document": doc_content},
+            {"filename": "__init__.py", "document": "__version__="1.0.0"}]
+          scan_results = client.multi_content_scan(to_scan)
+          print(scan_results)
+  "/v1/health":
+    get:
+      tags:
+      - Status
+      operationId: health_check
+      summary: Health Check
+      description: Check the status of the API and your token without spending your
+        quota.
+      parameters: []
+      responses:
+        '200':
+          "$ref": "#/components/responses/HealthResponse"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+      x-code-samples:
+      - lang: Shell
+        label: cURL
+        source: |
+          curl --request GET \
+              --url https://api.gitguardian.com/v1/health \
+              --header 'authorization: Token <Insert API Key>'
+      - lang: Python
+        source: |
+          import os
+          from pygitguardian import GGClient
+          # store your API key in an environment variable
+          client = GGClient(token=os.getenv("GG_API_KEY"))
+          health_obj = client.health_check()
+          if bool(health_obj):
+              print("Healthy API server")
+  "/v1/quotas":
+    get:
+      tags:
+      - Scanning
+      operationId: quotas
+      summary: Quota Overview
+      description: 'Check available scanning calls for this token. Quota is shared
+        between all tokens of a workspace
+
+        '
+      parameters: []
+      responses:
+        '200':
+          "$ref": "#/components/responses/QuotaResponse"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets":
+    get:
+      tags:
+      - Incidents
+      operationId: list-incidents
+      summary: List Secret Incidents
+      description: |
+        List secret incidents detected by the GitGuardian dashboard.
+        Occurrences are not returned in this route.
+      parameters:
+      - "$ref": "#/components/parameters/page"
+      - "$ref": "#/components/parameters/per_page"
+      - "$ref": "#/components/parameters/date_before"
+      - "$ref": "#/components/parameters/date_after"
+      - "$ref": "#/components/parameters/status"
+      - "$ref": "#/components/parameters/assignee_email"
+      - "$ref": "#/components/parameters/severity"
+      - "$ref": "#/components/parameters/validity"
+      responses:
+        '200':
+          description: Secret Incident List
+          headers:
+            X-Next-Page:
+              "$ref": "#/components/headers/xNextPage"
+            X-Page:
+              "$ref": "#/components/headers/xPage"
+            X-Per-Page:
+              "$ref": "#/components/headers/xPerPage"
+            X-Prev-Page:
+              "$ref": "#/components/headers/xPrevPage"
+            X-Total:
+              "$ref": "#/components/headers/xTotal"
+            X-Total-Pages:
+              "$ref": "#/components/headers/xTotalPages"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/incidentWithoutOccurrences"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}":
+    get:
+      tags:
+      - Incidents
+      operationId: retrieve-incidents
+      summary: Retrieve Secret Incident
+      description: |
+        Retrieve secret incident detected by the GitGuardian dashboard with
+        its occurrences.
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      - "$ref": "#/components/parameters/withOccs"
+      responses:
+        '200':
+          "$ref": "#/components/responses/SecretIncidentDetailResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/assign":
+    post:
+      tags:
+      - Incidents
+      operationId: assign-incident
+      summary: Assign Secret Incident
+      description: |
+        Assign secret incident detected by the GitGuardian dashboard to a workspace member
+        by email.
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/assigneeRequest"
+      responses:
+        '200':
+          "$ref": "#/components/responses/SecretIncidentWithoutOccsResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/unassign":
+    post:
+      tags:
+      - Incidents
+      operationId: unassign-incident
+      summary: Unassign Secret Incident
+      description: 'Unassign secret incident from a workspace member by email.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      responses:
+        '200':
+          "$ref": "#/components/responses/SecretIncidentWithoutOccsResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/resolve":
+    post:
+      tags:
+      - Incidents
+      operationId: resolve-incident
+      summary: Resolve Secret Incident
+      description: 'Resolve a secret incident detected by the GitGuardian dashboard.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Resolve Request
+              required:
+              - secret_revoked
+              properties:
+                secret_revoked:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          "$ref": "#/components/responses/SecretIncidentWithoutOccsResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/ignore":
+    post:
+      tags:
+      - Incidents
+      operationId: ignore-incident
+      summary: Ignore Secret Incident
+      description: 'Ignore a secret incident detected by the GitGuardian dashboard.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Ignore Request
+              required:
+              - ignore_reason
+              properties:
+                ignore_reason:
+                  allOf:
+                  - "$ref": "#/components/schemas/SecretStatusEnum"
+                  example: low_risk
+      responses:
+        '200':
+          "$ref": "#/components/responses/SecretIncidentWithoutOccsResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/reopen":
+    post:
+      tags:
+      - Incidents
+      operationId: reopen-incident
+      summary: Reopen Secret Incident
+      description: 'Unresolve or Unignore a secret incident detected by the GitGuardian
+        dashboard.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      responses:
+        '200':
+          "$ref": "#/components/responses/SecretIncidentWithoutOccsResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/share":
+    post:
+      tags:
+      - Incidents
+      operationId: share-incident
+      summary: Share a Secret Incident
+      description: 'Share a secret incident by creating a public link.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/incidentShareRequest"
+      responses:
+        '200':
+          "$ref": "#/components/responses/IncidentShareResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/unshare":
+    post:
+      tags:
+      - Incidents
+      operationId: unshare-incident
+      summary: Unshare a Secret Incident
+      description: 'Unshare a secret incident by revoking its public link.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      responses:
+        '204':
+          description: The public link was revoked successfully.
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/grant_access":
+    post:
+      tags:
+      - Incidents
+      operationId: grant-access-incident
+      summary: Grant Access to a Secret Incident
+      description: 'Grant a restricted user access to a secret incident.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/incidentAccessRequest"
+      responses:
+        '204':
+          description: The access was granted successfully.
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/incidents/secrets/{incident_id}/revoke_access":
+    post:
+      tags:
+      - Incidents
+      operationId: revoke-access-incident
+      summary: Revoke Access to a Secret Incident
+      description: 'Revoke access of a restricted user to a secret incident.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/incident_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/incidentAccessRequest"
+      responses:
+        '204':
+          description: The access was revoked successfully.
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '409':
+          "$ref": "#/components/responses/ConflictError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/occurrences/secrets":
+    get:
+      tags:
+      - Incidents
+      operationId: list-occs
+      parameters:
+      - "$ref": "#/components/parameters/page"
+      - "$ref": "#/components/parameters/per_page"
+      - "$ref": "#/components/parameters/date_before"
+      - "$ref": "#/components/parameters/date_after"
+      - "$ref": "#/components/parameters/incident_idQuery"
+      - "$ref": "#/components/parameters/sourceName"
+      - "$ref": "#/components/parameters/source_idQuery"
+      - "$ref": "#/components/parameters/presence"
+      summary: List Secret Occurrences
+      description: 'List occurrences of secrets in the monitored perimeter.
+
+        '
+      responses:
+        '200':
+          description: List occurrences
+          headers:
+            X-Next-Page:
+              "$ref": "#/components/headers/xNextPage"
+            X-Page:
+              "$ref": "#/components/headers/xPage"
+            X-Per-Page:
+              "$ref": "#/components/headers/xPerPage"
+            X-Prev-Page:
+              "$ref": "#/components/headers/xPrevPage"
+            X-Total:
+              "$ref": "#/components/headers/xTotal"
+            X-Total-Pages:
+              "$ref": "#/components/headers/xTotalPages"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/occurrence"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/sources":
+    get:
+      tags:
+      - Sources
+      operationId: list-sources
+      summary: List Sources
+      parameters:
+      - "$ref": "#/components/parameters/page"
+      - "$ref": "#/components/parameters/per_page"
+      - "$ref": "#/components/parameters/sourceSearch"
+      - "$ref": "#/components/parameters/sourceType"
+      description: 'List sources monitored by GitGuardian.
+
+        '
+      responses:
+        '200':
+          description: Source List
+          headers:
+            X-Next-Page:
+              "$ref": "#/components/headers/xNextPage"
+            X-Page:
+              "$ref": "#/components/headers/xPage"
+            X-Per-Page:
+              "$ref": "#/components/headers/xPerPage"
+            X-Prev-Page:
+              "$ref": "#/components/headers/xPrevPage"
+            X-Total:
+              "$ref": "#/components/headers/xTotal"
+            X-Total-Pages:
+              "$ref": "#/components/headers/xTotalPages"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/source"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+  "/v1/sources/{source_id}":
+    get:
+      tags:
+      - Sources
+      operationId: retrieve-source
+      summary: Retrieve Source
+      description: 'Retrieve source monitored by GitGuardian.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/source_id"
+      responses:
+        '200':
+          description: Source List
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/source"
+        '400':
+          "$ref": "#/components/responses/BadRequestError"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '503':
+          "$ref": "#/components/responses/MaintenanceResponse"
+components:
+  schemas:
+    document:
+      type: object
+      title: Document
+      required:
+      - document
+      properties:
+        filename:
+          type: string
+          example: ".env"
+          maxLength: 256
+        document:
+          type: string
+          example: |2
+
+            import urllib.request
+            url = 'http://jen_barber:correcthorsebatterystaple@cake.gitguardian.com/isreal.json'
+            response = urllib.request.urlopen(url)
+            consume(response.read())
+    quota:
+      type: object
+      title: Quota Overview
+      required:
+      - content
+      properties:
+        content:
+          type: object
+          properties:
+            count:
+              type: integer
+            limit:
+              type: integer
+            remaining:
+              type: integer
+            since:
+              type: string
+              format: date
+      example:
+        content:
+          count: 2
+          limit: 5000
+          remaining: 4998
+          since: '2021-04-18'
+    scan_result:
+      type: object
+      title: Scan Result
+      description: Result of a content scan.
+      required:
+      - policy_break_count
+      - policies
+      - policy_breaks
+      properties:
+        policy_break_count:
+          type: integer
+          description: Number of policy breaks on this document.
+          minimum: 0
+          example: 2
+        policies:
+          type: array
+          description: Policies checked on this document.
+          minItems: 0
+          items:
+            type: string
+          example:
+          - Filename
+          - File extensions
+          - Secrets detection
+        policy_breaks:
+          type: array
+          description: List of policy breaks.
+          minItems: 0
+          items:
+            "$ref": "#/components/schemas/policy_break"
+          example:
+          - type: ".env"
+            policy: Filenames
+            matches:
+            - type: filename
+              match: ".env"
+          - type: Basic Auth String
+            policy: Secrets detection
+            validity: cannot_check
+            matches:
+            - type: username
+              match: jen_barber
+              index_start: 52
+              index_end: 61
+              line_start: 2
+              line_end: 2
+            - type: password
+              match: correcthorsebatterystaple
+              index_start: 63
+              index_end: 87
+              line_start: 2
+              line_end: 2
+            - type: host
+              match: cake.gitguardian.com
+              index_start: 89
+              index_end: 108
+              line_start: 2
+              line_end: 2
+    policy_break:
+      type: object
+      title: Policy Break
+      description: Issue found in your Document
+      required:
+      - type
+      - policy
+      - matches
+      properties:
+        type:
+          type: string
+          description: Type of detected policy.
+        policy:
+          type: string
+          description: Name of failing policy.
+        validity:
+          type: string
+          nullable: true
+          enum:
+          - cannot_check
+          - valid
+          - invalid
+          - unknown
+          description: Validity of the found secret.
+        matches:
+          type: array
+          description: List of secret matches.
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/match"
+    match:
+      type: object
+      required:
+      - type
+      - match
+      properties:
+        type:
+          type: string
+          description: Type of match
+        match:
+          type: string
+          description: Matched string of failure
+        line_start:
+          type: integer
+          description: start line number of match (index origin = 1)
+        line_end:
+          type: integer
+          description: end line number of match (index origin = 1)
+        index_start:
+          type: integer
+          description: start index of match in file as an array (index origin = 0)
+        index_end:
+          type: integer
+          description: end index of match in file as an array (index origin = 0)
+    error:
+      type: object
+      title: Error
+      description: Error obtained in an API response
+      required:
+      - detail
+      properties:
+        detail:
+          type: string
+          description: Details on response.
+    assigneeRequest:
+      type: object
+      title: Assignee Request
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          example: toto@gitguardian.com
+    incidentWithoutOccurrences:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 3759
+        date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Last trigger date
+          example: '2019-08-22T14:15:22Z'
+        detector:
+          "$ref": "#/components/schemas/Detector"
+        secret_hash:
+          type: string
+          readOnly: true
+          title: Unique hash
+          example: Ri9FjVgdOlPnBmujoxP4XPJcbe82BhJXB/SAngijw/juCISuOMgPzYhV28m6OG24
+        gitguardian_url:
+          type: string
+          readOnly: true
+          title: URL on the dashboard
+          example: https://dashboard.gitguardian.com/workspace/1/incidents/3899
+        regression:
+          type: boolean
+          readOnly: true
+          example: false
+        status:
+          allOf:
+          - "$ref": "#/components/schemas/StatusEnum"
+          readOnly: true
+        assignee_email:
+          type: string
+          nullable: true
+          example: toto@gitguardian.com
+        occurrence_count:
+          type: integer
+          example: 4
+        occurrences:
+          type: array
+          nullable: true
+          items:
+            "$ref": "#/components/schemas/occurrence"
+          example: 
+        ignore_reason:
+          type: string
+          allOf:
+          - "$ref": "#/components/schemas/SecretStatusEnum"
+          nullable: true
+          example: test_credential
+        ignored_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2019-08-24T14:15:22Z'
+        secret_revoked:
+          type: boolean
+          example: false
+        severity:
+          type: string
+          allOf:
+          - "$ref": "#/components/schemas/SeverityEnum"
+          example: high
+        validity:
+          type: string
+          allOf:
+          - "$ref": "#/components/schemas/ValidityEnum"
+          example: valid
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: 
+        share_url:
+          type: string
+          readOnly: true
+          example: https://dashboard.gitguardian.com/share/incidents/11111111-1111-1111-1111-111111111111
+      required:
+      - assignments
+      - date
+      - detector
+      - hash
+      - id
+      - ignored
+      - regression
+      - resolved
+      - status
+    incident:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 3759
+        date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Last trigger date
+          example: '2019-08-22T14:15:22Z'
+        detector:
+          "$ref": "#/components/schemas/Detector"
+        secret_hash:
+          type: string
+          readOnly: true
+          title: Unique hash
+          example: Ri9FjVgdOlPnBmujoxP4XPJcbe82BhJXB/SAngijw/juCISuOMgPzYhV28m6OG24
+        gitguardian_url:
+          type: string
+          readOnly: true
+          title: URL on the dashboard
+          example: https://dashboard.gitguardian.com/workspace/1/incidents/3899
+        regression:
+          type: boolean
+          readOnly: true
+          example: false
+        status:
+          allOf:
+          - "$ref": "#/components/schemas/StatusEnum"
+          readOnly: true
+        assignee_email:
+          type: string
+          nullable: true
+          example: toto@gitguardian.com
+        occurrence_count:
+          type: integer
+          example: 4
+        occurrences:
+          type: array
+          nullable: true
+          items:
+            "$ref": "#/components/schemas/occurrence"
+        ignore_reason:
+          type: string
+          allOf:
+          - "$ref": "#/components/schemas/SecretStatusEnum"
+          nullable: true
+          example: test_credential
+        severity:
+          type: string
+          allOf:
+          - "$ref": "#/components/schemas/SeverityEnum"
+          example: high
+        validity:
+          type: string
+          allOf:
+          - "$ref": "#/components/schemas/ValidityEnum"
+          example: valid
+        ignored_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2019-08-24T14:15:22Z'
+        secret_revoked:
+          type: boolean
+          example: false
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: 
+        share_url:
+          type: string
+          readOnly: true
+          example: https://dashboard.gitguardian.com/share/incidents/11111111-1111-1111-1111-111111111111
+      required:
+      - assignments
+      - date
+      - detector
+      - hash
+      - id
+      - ignored
+      - regression
+      - resolved
+      - status
+    incidentToken:
+      type: object
+      title: Incident Sharing Information
+      properties:
+        share_url:
+          type: string
+          readOnly: true
+          example: https://dashboard.gitguardian.com/share/incidents/11111111-1111-1111-1111-111111111111
+        incident_id:
+          type: integer
+          readOnly: true
+          example: 3759
+        feedback_collection:
+          type: boolean
+          example: true
+          description: Allow the developer to submit their feedback through the share
+            link
+        auto_healing:
+          type: boolean
+          example: false
+          description: Allow the developer to resolve or ignore through the share
+            link
+        token:
+          type: string
+          example: 12345678-1234-1234-1234-123456789012
+        expire_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2019-08-24T14:15:22Z'
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: 
+    incidentShareRequest:
+      type: object
+      title: Incident Share Request
+      properties:
+        auto_healing:
+          type: boolean
+          example: true
+          default: false
+          description: Allow the developer to resolve or ignore through the share
+            link
+        feedback_collection:
+          type: boolean
+          example: true
+          default: true
+          description: Allow the developer to submit their feedback through the share
+            link
+        lifespan:
+          type: integer
+          example: 720
+          default: 0
+          description: Lifespan, in hours, of the share link. If 0 or unset, a default
+            value will be applied based on the workspace settings.
+    incidentAccessRequest:
+      type: object
+      title: Grant Access Request
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          example: toto@gitguardian.com
+          description: Email address of a restricted user.
+    occurrence:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 4421
+        incident_id:
+          type: integer
+          readOnly: true
+          example: 3759
+        kind:
+          allOf:
+          - "$ref": "#/components/schemas/OccurrenceKindEnum"
+          readOnly: true
+          title: Kind when created
+        sha:
+          type: string
+          readOnly: true
+          title: Commit SHA
+          example: d670460b4b4aece5915caf5c68d12f560a9fe3e4
+        source:
+          "$ref": "#/components/schemas/source"
+        author_name:
+          type: string
+          readOnly: true
+          example: toto
+        author_info:
+          type: string
+          readOnly: true
+          example: toto@gitguardian.com
+        date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Publish date
+          example: '2021-05-20T12:40:55.662949Z'
+        presence:
+          type: string
+          allOf:
+          - "$ref": "#/components/schemas/PresenceEnum"
+          example: present
+        url:
+          type: string
+          readOnly: true
+          example: https://github.com/prm-dev-team/QATest_staging/commit/76dd18a2a8d27eaf00a45851cc7731c53b59ed19#diff-0f372f3171c8f13a15a22a1081487ed54fa70ad088e17c6c6386196a179a04ffR1
+        matches:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Match"
+        filepath:
+          type: string
+          readOnly: true
+          description: This is filename for old models with incomplete data
+          example: test_data/12123testfile.txt
+      required:
+      - account
+      - author_info
+      - author_name
+      - date
+      - sha
+      - filepath
+      - kind
+      - matches
+      - source
+      - url
+    source:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 6531
+        url:
+          type: string
+          format: uri
+          example: https://github.com/GitGuardian/gg-shield
+        type:
+          type: string
+          example: github
+        full_name:
+          type: string
+          example: gitguardian/gg-shield
+        visibility:
+          type: string
+          example: public
+      required:
+      - display_name
+      - id
+      - type
+      - url
+      - visibility
+    OccurrenceKindEnum:
+      enum:
+      - Realtime
+      - Historical
+      type: string
+    Match:
+      type: object
+      properties:
+        name:
+          type: string
+          readOnly: true
+          title: Match name
+          example: apikey
+        indice_start:
+          type: integer
+          readOnly: true
+          title: Match start index
+          example: 32
+        indice_end:
+          type: integer
+          readOnly: true
+          title: Match end index
+          example: 79
+        pre_line_start:
+          type: integer
+          nullable: true
+          readOnly: true
+          title: Match start line before Git patch
+          example: 
+        pre_line_end:
+          type: integer
+          nullable: true
+          readOnly: true
+          title: Match end line before Git patch
+          example: 
+        post_line_start:
+          type: integer
+          readOnly: true
+          title: Match start line after Git patch
+          example: 1
+        post_line_end:
+          type: integer
+          readOnly: true
+          title: Match end line after Git patch
+          example: 1
+      required:
+      - indice_end
+      - indice_start
+      - name
+      - post_line_end
+      - post_line_start
+      - pre_line_end
+      - pre_line_start
+    StatusEnum:
+      enum:
+      - IGNORED
+      - TRIGGERED
+      - ASSIGNED
+      - RESOLVED
+      type: string
+    Detector:
+      type: object
+      properties:
+        name:
+          type: string
+          readOnly: true
+          example: slack_bot_token
+        display_name:
+          type: string
+          readOnly: true
+          example: Slack Bot Token
+        nature:
+          type: string
+          readOnly: true
+          example: specific
+        family:
+          type: string
+          readOnly: true
+          example: apikey
+        detector_group_name:
+          type: string
+          readOnly: true
+          example: slackbot_token
+        detector_group_display_name:
+          type: string
+          readOnly: true
+          example: Slack Bot Token
+      required:
+      - name
+      - display_name
+      - nature
+    ValidityEnum:
+      enum:
+      - valid
+      - invalid
+      - unknown
+      - cannot_check
+      type: string
+    PresenceEnum:
+      enum:
+      - present
+      - removed
+      type: string
+    SecretStatusEnum:
+      enum:
+      - test_credential
+      - false_positive
+      - low_risk
+      type: string
+    SeverityEnum:
+      enum:
+      - critical
+      - high
+      - medium
+      - low
+      - info
+      - unknown
+      type: string
+  securitySchemes:
+    API Key:
+      description: |2
+
+
+        Usage: `Token <API Key>` in `authorization` header.
+      type: http
+      scheme: bearer
+      bearerFormat: Token <API Key>
+  responses:
+    HealthResponse:
+      description: API on and key valid response
+      content:
+        application/json:
+          schema:
+            type: object
+            title: Health Status
+            description: Health check response.
+            required:
+            - detail
+            properties:
+              detail:
+                type: string
+                description: API key status.
+          examples:
+            healthy:
+              summary: Valid API Key.
+              value:
+                detail: Valid API key.
+    QuotaResponse:
+      description: Quota Overview
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/quota"
+    SecretIncidentDetailResponse:
+      description: Secret Incident Details
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/incident"
+    SecretIncidentWithoutOccsResponse:
+      description: Secret Incident Details without occurrences.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/incidentWithoutOccurrences"
+    IncidentShareResponse:
+      description: Incident Sharing Details
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/incidentToken"
+    MaintenanceResponse:
+      description: API under maintenance
+      headers:
+        X-Maintenance:
+          required: true
+          schema:
+            type: boolean
+          example: true
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/error"
+          examples:
+            error:
+              summary: API maintenance
+              value:
+                detail: API under scheduled maintenance.
+    ConflictError:
+      description: Data conflict
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/error"
+          examples:
+            error:
+              summary: Data conflict
+              value:
+                detail: Request conflicts with existing data.
+    BadRequestError:
+      description: Invalid data
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/error"
+          examples:
+            error:
+              summary: Invalid Data
+              value:
+                detail: Invalid data.
+    UnauthorizedError:
+      description: Invalid API key
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/error"
+          examples:
+            error:
+              summary: Invalid APIKey
+              value:
+                detail: Invalid API key.
+    OverQuotaError:
+      description: Quota limit reached
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/error"
+          examples:
+            error:
+              summary: Quota limit reached.
+              value:
+                detail: Quota limit reached.
+  parameters:
+    source_id:
+      name: source_id
+      in: path
+      required: true
+      description: The id of the source to retrieve.
+      schema:
+        type: integer
+        example: 5523
+    source_idQuery:
+      name: source_id
+      in: query
+      description: Filter on the source ID.
+      schema:
+        type: integer
+        example: 5523
+    sourceName:
+      in: query
+      name: source_name
+      schema:
+        type: string
+        description: Entries matching this source name search.
+        example: gitguardian/test-repository
+    incident_id:
+      name: incident_id
+      in: path
+      required: true
+      description: The id of the incident to retrieve
+      schema:
+        type: integer
+    withOccs:
+      name: with_occurrences
+      in: query
+      description: Retrieve a number of occurrences of this incident.
+      schema:
+        type: integer
+        default: 20
+        minimum: 0
+        maximum: 100
+    page:
+      name: page
+      in: query
+      description: Page number.
+      schema:
+        type: integer
+        minimum: 0
+        default: 1
+    per_page:
+      name: per_page
+      in: query
+      description: Number of items to list per page.
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+    incident_idQuery:
+      name: incident_id
+      in: query
+      description: Filter by incident ID.
+      schema:
+        type: integer
+    date_before:
+      in: query
+      name: date_before
+      schema:
+        type: string
+        format: datetime
+        description: Entries found before this date.
+        example: '2019-08-30T14:15:22Z'
+    date_after:
+      in: query
+      name: date_after
+      schema:
+        type: string
+        format: datetime
+        description: Entries found after this date.
+        example: '2019-08-22T14:15:22Z'
+    sourceSearch:
+      in: query
+      name: search
+      schema:
+        type: string
+        description: Sources matching this search.
+        example: test-repository
+    sourceType:
+      in: query
+      name: type
+      schema:
+        type: string
+        description: Filter by integration type.
+        example: github
+        enum:
+        - bitbucket
+        - github
+        - gitlab
+    presence:
+      in: query
+      name: presence
+      schema:
+        allOf:
+        - "$ref": "#/components/schemas/PresenceEnum"
+        description: Entries that have the following presence status.
+    severity:
+      in: query
+      name: severity
+      schema:
+        allOf:
+        - "$ref": "#/components/schemas/SeverityEnum"
+        description: Filter incidents by severity.
+    validity:
+      in: query
+      name: validity
+      schema:
+        allOf:
+        - "$ref": "#/components/schemas/ValidityEnum"
+        description: Secrets with the following validity.
+    status:
+      in: query
+      name: status
+      schema:
+        allOf:
+        - "$ref": "#/components/schemas/StatusEnum"
+        description: Incidents with the following status.
+    assignee_email:
+      in: query
+      name: assignee_email
+      schema:
+        type: string
+        description: Incidents assigned to this email.
+        example: toto@gitguardian.com
+  headers:
+    xPage:
+      schema:
+        type: integer
+        description: The index of the current page.
+        minimum: 1
+    xPerPage:
+      schema:
+        type: integer
+        description: The number of items per page.
+        default: 20
+        minimum: 1
+        maximum: 100
+    xNextPage:
+      schema:
+        type: integer
+        description: The index of the next page.
+        minimum: 1
+    xPrevPage:
+      schema:
+        type: integer
+        description: The index of the previous page.
+        minimum: 1
+    xTotal:
+      schema:
+        type: integer
+        description: The total number of items.
+        minimum: 1
+    xTotalPages:
+      schema:
+        type: integer
+        description: The total number of pages.
+        minimum: 1
+security:
+- API Key: []

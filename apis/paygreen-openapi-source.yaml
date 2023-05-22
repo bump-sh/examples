@@ -1,0 +1,2057 @@
+---
+swagger: '2.0'
+info:
+  title: Intégration de PayGreen par API
+  description: |-
+    # API de paiement<br />
+    <br />
+    Si vous souhaitez intégrer la solution de paiement PayGreen pour faire du paiement en ligne, vous êtes au bon endroit&nbsp;! <br />
+    Cette documentation traite du **paiement** (paiement comptant, en plusieurs fois, abonnement, différé/à la livraison).<br />
+    <br />
+    Découvrez nos autres API&nbsp;:<br />
+    - [API d'intégration sur un CMS](api-documentation-categorie?cat=cms)&nbsp;: intégrez PayGreen sur votre CMS.<br />
+    - [API d'intégration pour une MarketPlace](api-documentation-categorie?cat=mkp)&nbsp;: intégrez PayGreen sur votre MarketPlace.<br />
+    - [API d'intégration complète](api-documentation-categorie?cat=all)&nbsp;: toutes les informations pour intégrer PayGreen sur votre plateforme e-commerce, qu'il s'agisse d'un CMS, d'une MarketPlace ou d'un site classique.<br />
+    <br />
+    > Nous nous efforçons d'étoffer et de clarifier cette documentation au fil du temps afin de simplifier au maximum l'intégration de notre solution. Toutefois, si certains points demeurent problématiques, notre équipe technique est joignable à l'adresse serviceclient@paygreen.fr et vous répondra dans les meilleurs délais.<br />
+    ## Flux de paiement<br />
+    <br />
+    Le schéma suivant représente le fonctionnement de cette API lorsqu'un consommateur effectue un paiement sur un site e-commerce&nbsp;:<br />
+    <br />
+    ![Schéma de flux](../api/img/schema-flux.svg)<br />
+    <br />
+    1. Le consommateur remplit et **valide son panier**.<br />
+    2. Le e-commerce envoie à PayGreen les informations permettant de **créer le paiement**.<br />
+    3. Le consommateur règle sa commande sur une **interface de paiement PayGreen**&nbsp;: selon la configuration de la boutique, il s'agit soit d'une **page déportée**, soit d'un affichage en iframe (**insite**) sur le site e-commerce.<br />
+    4. Le consommateur est automatiquement **redirigé** sur le e-commerce (paramètre `returned_url`).<br />
+    5. PayGreen envoie l'**IPN de la transaction** au e-commerce (paramètre `notified_url`). Il s'agit d'une notification permettant au e-commerce de mettre à jour le statut d'une commande. L'IPN contient en effet les informations sur la transaction (*voir le paragraphe consacré dans les chapitres [Les transactions](#tag/Les-transactions) et [Les virements](#tag/Les-virements) pour plus de détails*).<br />
+    6. Le e-commerce renvoit une **demande de détails** sur la transaction. Cette étape n'est pas absolument obligatoire, mais elle est fortement recommandée pour des raisons de sécurité&nbsp;: en effet, recevoir une IPN ne garantit pas la véracité des informations transmises (elle peut être envoyée par un tiers souhaitant compromettre vos données). Cette demande permet donc de **vérifier les informations transmises** par l'IPN.<br />
+    7. Un message de confirmation informe le consommateur que la transaction **a été effectuée** avec succès (ou a échoué si tel est le cas).<br />
+    # Pré-requis<br />
+    ## Identifiant et clé privée<br />
+    <br />
+    Pour tout appel API PayGreen, vous aurez besoin de renseigner l'*identifiant PayGreen* (`shop ID`) et parfois, la *clé privée* de la boutique. <br />
+    Ces deux informations se trouvent à différents endroits sur le [back-office PayGreen](../shop/wizard-activation)&nbsp;:<br />
+    - En bas à gauche de la ***page d'activation*** (1)&nbsp;;<br />
+    - Dans la fenêtre accessible sur chaque page du back-office en cliquant sur le lien ***Toutes mes boutiques*** (2).<br />
+    <br />
+    ![Capture 1](../api/img/id-privatekey-1.png)<br />
+    *Capture 1*<br />
+    <br />
+    ![Capture 1](../api/img/id-privatekey-2.png)<br />
+    *Capture 2*<br />
+    ## Paramétrage de l'interface de paiement<br />
+    <br />
+    Beaucoup d'options relatives à l'interface de paiement sont disponibles directement dans le back-office PayGreen&nbsp;: il n'est donc pas nécessaire d'être développeur pour personnaliser la page de paiement. <br />
+    Parmi les options à votre disposition, le e-commerçant a la possibilité de choisir son type d'interface de paiement&nbsp;:<br />
+    - Par défaut, il s'agit d'une **page de paiement** externe au site e-commerce, sur laquelle le consommateur est redirigé après validation de son panier. **Aucune manipulation n'est nécessaire pour opter pour ce type d'interface**. Elle présente l'avantage d'être parfaitement responsive sans que vous n'ayez à développer quoi que ce soit. Le e-commerçant peut en outre ajouter son logo et en personnaliser le wording et le fond de la page.<br />
+    - L'**insite** est le second type d'interface à la disposition du e-commerçant. Il lui permet d'afficher l'interface dans un *iframe* intégré à son site e-commerce&nbsp;: cela permet de conserver un tunnel de paiement uniforme. Cette option n'est accessible que sur activation du module par notre équipe d'account managers (que vous pouvez contacter à serviceclient@paygreen.fr). Une fois le module *insite* activé, il suffit d'afficher sur le e-commerce un iframe ayant pour URL le lien fourni, en y ajoutant à la fin la mention `?display=insite`.<br />
+    <br />
+    # Titres restaurant<br />
+    <br />
+    Ce chapitre vous concerne si&nbsp;:<br />
+    1. Votre activité est liée à la **restauration**.<br />
+    2. Vous êtes **conventionné** pour recevoir des paiements en titres restaurant ou pouvez le devenir.<br />
+    <br />
+    PayGreen vous permet d'intégrer simplement plusieurs moyens de paiement pour régler des **achats éligibles aux titres restaurant**. Par ailleurs, PayGreen gère intégralement les éventuels **compléments** (en carte bancaire ou American Express).<br />
+    <br />
+    ## Les moyens de paiement Restauration<br />
+    <br />
+    ### Titres Restaurant Dématérialisés `TRD`<br />
+    <br />
+    Ce moyen de paiement vous permet d'encaisser les paiements réalisés via n'importe quelle carte du **réseau Conecs**&nbsp;:<br />
+    - Apetiz (Natixis)<br />
+    - Pass Restaurant (de Sodexo)<br />
+    - Up Chèque Déjeuner<br />
+    <br />
+    Si le solde de la carte est insuffisant pour régler la totalité du panier, un **moyen de paiement complémentaire** sera utilisé pour régler le montant restant (*exemple&nbsp;: CB/Visa/MasterCard*). Cette opération est réalisée automatiquement côté PayGreen à partir de la configuration de votre moyen de paiement (réalisée par notre support)&nbsp;: vous n'avez **aucun appel API à effectuer**.<br />
+    <br />
+    ### Resto Flash `RESTOFLASH`<br />
+    <br />
+    Ce moyen de paiement permet à vos clients de régler leur achat en utilisant leur **compte Resto Flash**. Il s'agit d'un moyen de paiement 100&#37; digital, sans carte à renseigner, et optimisé pour une expérience mobile. Le consommateur alimente son compte Resto Flash avec ses tickets restaurant papier, ce qui lui permet de les utiliser en ligne.<br />
+    <br />
+    ### Lunchr `LUNCHR`<br />
+    <br />
+    Lunchr est une alternative au réseau Conecs et aux titres restaurant papier. Les employeurs qui choisissent ce prestataire pour les titres restaurant permettent à leurs salariés de disposer d'une carte du réseau MasterCard, sur laquelle le solde journalier est crédité. Les consommateurs peuvent suivre l'évolution de leur solde via une application mobile.<br />
+    <br />
+    ## Activer un moyen de paiement<br />
+    <br />
+    Par défaut (*sous réserve d'acceptation de vos documents justificatifs ou de votre numéro VAD lors de votre inscription sur PayGreen*) votre boutique peut encaisser des paiements par carte bancaire CB/Visa/MasterCard.<br />
+    Si vous souhaitez proposer d'autres moyens de paiement à vos clients, il vous suffit d'en faire la demande auprès de notre support à l'adresse serviceclient@paygreen.fr.<br />
+    <br />
+    ## Appels API<br />
+    <br />
+    Une fois vos moyens de paiement activés par notre support, vous pourrez les utiliser pour créer des transactions. Voici la procédure à suivre&nbsp;:<br />
+    1. Envoyez une requête (GET) pour obtenir la [liste de vos moyens de paiement activés](#tag/Les-moyens-de-paiement) (paragraphe **Liste des moyens de paiement**).<br />
+    2. Vérifiez que la réponse reçue (*voir l'exemple de réponse dans le lien ci-dessus*) renvoie bien le ou les moyens de paiement souhaités. Cela vous évitera de créer une transaction pour un moyen de paiement désactivé, ce qui ferait échouer la transaction.<br />
+    3. Vérifiez le paramètre `availablePaymentMode`&nbsp;: il doit contenir le ou les modes de paiement (*comptant, abonnement&hellip;*) qui peuvent être effectués avec le moyen de paiement correspondant. Cela vous évitera de créer une transaction dont le type n'est pas pris en charge par le moyen de paiement (*exemple&nbsp;: les moyens de paiement "Titres restaurant" ne permettent pas de faire du paiement par abonnement*). <br />
+    4. Enfin, récupérez le tableau renvoyé dans le paramètre `iframe`&nbsp;: il vous indique, pour chaque mode de paiement, quelle est la **taille minimale conseillée** (en pixels) pour l'iframe qui contiendra l'interface de paiement PayGreen. Nous vous conseillons de respecter ces préconisations afin d'optimiser l'expérience de paiement de vos clients.<br />
+    5. Une fois toutes ces informations en main, vous pouvez créer une [transaction](#tag/Les-transactions).
+  version: 1.0.0
+  contact:
+    email: serviceclient@paygreen.fr
+tags:
+- name: Les moyens de paiement
+  description: |-
+    Pour créer des transactions, vous aurez besoin de savoir quels sont les moyens de paiement disponibles et **activés** sur votre boutique, et les devises pour chacun.<br />
+    <br />
+    En effet, lors de la création d'une transaction, le **moyen de paiement** et la **devise** doivent être renseignés. Il est donc préférable d'envoyer une requête afin de récupérer les moyens de paiement disponibles **avant** de créer une transaction, ce afin d'éviter toute erreur liée à l'absence du moyen de paiement ou de la devise souhaités.<br />
+    <br />
+    Le moyen de paiement `CB/Visa/MasterCard` est activé par défaut pour chaque boutique (sous réserve de validation du compte par notre support). Actuellement, les autres moyens de paiement sont disponibles exclusivement sur demande auprès du support PayGreen (serviceclient@paygreen.fr), qui se chargera d'activer les moyens de paiement souhaités.<br />
+    <br />
+    Voici la liste complète des moyens de paiement proposés par PayGreen&nbsp;:<br />
+    <br />
+    <table><tbody><tr><th>Moyens de paiement <code>paymentType</code></th><th>Devise <code>currency</code></th><th>Modes de paiement <code>availablePaymentMode</code></th><th>Complémentaire*</th></tr><tr><td>CB/Visa/Mastercard <code>CB</code></td><td><li>Euros <code>EUR</code></li></td><td><ul><li>Comptant <code>CASH</code></li><li>Abonnement <code>RECURRING</code></li><li>N fois <code>XTIME</code></li><li>Avec confirmation <code>TOKENIZE</code></li></ul></td><td>&#10004;&nbsp;Oui</td></tr><tr><td>American Express <code>AMEX</code></td><td><li>Euros <code>EUR</code></li></td><td><ul><li>Comptant <code>CASH</code></li></ul></td><td>&#10004;&nbsp;Oui</td></tr><tr><td>Chèques-Vacances Connect <code>CVD</code></td><td><li>Euros <code>EUR</code></li></td><td><ul><li>Comptant <code>CASH</code></li></ul></td><td>&#10060;&nbsp;Non</td></tr><tr><td>Titres Restaurant Dématérialisés <code>TRD</code></td><td><li>Euros <code>EUR</code></li></td><td><ul><li>Comptant <code>CASH</code></li></ul></td><td>&#10060;&nbsp;Non</td></tr><tr><td>Resto Flash <code>RESTOFLASH</code></td><td><li>Euros <code>EUR</code></li></td><td><ul><li>Comptant <code>CASH</code></li></ul></td><td>&#10060;&nbsp;Non</td></tr><tr><td>Lunchr <code>LUNCHR</code></td><td><li>Euros <code>EUR</code></li></td><td><ul><li>Comptant <code>CASH</code></li></ul></td><td>&#10060;&nbsp;Non</td></tr><tr><td>Prélèvement SEPA <code>SEPA</code></td><td><li>Euros <code>EUR</code></li></td><td><ul><li>Comptant <code>CASH</code></li><li>Abonnement <code>RECURRING</code></li><li>N fois <code>XTIME</code></li></ul></td><td>&#10060;&nbsp;Non</td></tr></tbody></table><br />
+    <br />
+    <blockquote><strong>Complémentaire*&nbsp;:</strong> certains moyens de paiement ne permettent pas toujours de régler un achat en intégralité (<em>exemple&nbsp;: les titres restaurant dématérialisés, qui ne permettent de régler que 19&nbsp;€ par jour maximum</em>). Dans ce cas, un moyen de paiement <strong>complémentaire</strong> sera mis en oeuvre afin de permettre au consommateur de régler le montant complémentaire. Pour plus de détails, consultez la section ci-dessous.</blockquote><br />
+    <br />
+    <h2>Moyens de paiement avec complément</h2><br />
+    Certains moyens de paiement peuvent nécessiter un moyen de paiement complémentaire pour permettre au consommateur de régler, sans perte, l'intégralité de sa commande.<br />
+    <ul><li><strong>&nbsp;:</strong>Le montant minimum d'une transaction Chèques-Vacances Connect est de 20 €. Pour toute transaction d'un montant supérieure à 20€ : Si un moyen de paiement complémentaire est paramétré, le bénéficiaire peut modifier le montant qu'il souhaite régler avec son portefeuille directement via l'application mobile ANCV. Le reste du paiement sera réalisé avec le moyen de paiement complémentaire. Si le montant de la transaction dépasse le solde du portefeuille du bénéficiaire, le surplus pourra être réglé avec le moyen de paiement complémentaire. Si aucun moyen de paiement complémentaire n'est configuré, le montant à régler avec le portefeuille Chèques-Vacances Connect ne peut pas être modifié via l'application ANCV et le paiement ne pourra pas aboutir. </li><li><strong>Resto Flash, Titres Restaurant Dématérialisés, Lunchr&nbsp;:</strong> ces moyens de paiement permettent de régler exlusivement des produits alimentaires (hors alcool notamment) pour un montant journalier maximum de 19&nbsp;€ (certaines cartes ne sont pas utilisables le week-end). L'excédent et les produits non éligibles doivent donc être réglés avec un autre moyen de paiement.</li></ul><br />
+    Lorsque le support PayGreen active l'un de ces moyens de paiement sur votre boutique, il définit également le ou les <strong>moyens de paiement complémentaires</strong> qui permettront à vos clients de régler leur achat en totalité. Si deux moyens de paiement complémentaires sont disponibles (exemple&nbsp;: CB/Visa/MasterCard et American Express), vos clients pourront <strong>choisir avec lequel ils souhaitent régler la part complémentaire</strong>.<br />
+    <br />
+    Ainsi, lors de la requête pour la création d'un paiement, le moyen de paiement à renseigner dans le paramètre <code>paymentType</code> est le <strong>moyen de paiement principal</strong> (exemple&nbsp;: <code>TRD</code> si vous proposez à vos clients de payer avec des Titres Restaurant Dématérialisés). Le moyen de paiement complémentaire est défini automatiquement en fonction des paramétrages de votre boutique.<br />
+    <br />
+    <br />
+    <h3>Montant éligible</h3><br />
+    Les moyens de paiement détaillés ci-dessus (<em>notamment les Chèque-Vacances Connect ou les Titres Restaurant Dématérialisés</em>) ne permettent de payer que certains types de produits ou services. Dans le cas d'un panier contenant à la fois des produits éligibles et des produits non-éligibles, il faudra donc distinguer le <strong>montant éligible</strong>, payable avec un e-Chèque-Vacances ou un Titre Restaurant Dématérialisé par exemple, du montant total du panier.<br />
+    <br />
+    Ainsi, si votre client doit régler un commande d'un montant total de 17&nbsp;€ dont 10&nbsp;€ sont éligibles aux Titres Restaurant Dématérialisés, la requête de création du paiement comptant devra comprendre les paramètres suivants&nbsp;:<br />
+    <br />
+    <pre><code>{<br />
+     "amount": 1700,<br />
+     "paymentType": "TRD",<br />
+     "eligibleAmount": {<br />
+     "TRD": "1000"<br />
+     },<br />
+    }</code></pre>
+- name: Les transactions
+  description: |-
+    Gérez vos transactions&nbsp;: créez un paiement, confirmez une transaction, remboursez totalement ou partiellement et accédez aux détails d'une transaction.<br />
+    <br />
+    Avant de vous intéresser aux transactions, consultez la section [Les moyens de paiement](#tag/Les-moyens-de-paiement) qui vous renseignera sur les paramètres `paymentType` et `currency`.<br />
+    <br />
+    *L'ordre des chapitres ci-dessous ne reflète absolument pas l'ordre dans lequel vous devez intégrer cette API&nbsp;: la **création du paiement** est la première étape.*<br />
+    <br />
+    ## IPN d'une transaction<br />
+    <br />
+    L'IPN (Instant Payment Notification) est la notification envoyée au serveur du e-commerce (paramètre `notified_url`) lorsque le statut d'un paiement change (*par exemple, lorsqu'un paiement est validé*). L'envoi de l'IPN peut parfois prendre plusieurs minutes.<br />
+    <br />
+    L'IPN d'une transaction permet ainsi de mettre à jour le **statut des commandes** côté e-commerce.<br />
+    <br />
+    **Attention&nbsp;:** l'IPN n'est envoyée que si les deux conditions suivantes sont remplies&nbsp;:<br />
+    - L'URL de callback (paramètre `notified_url`) doit être renseignée&nbsp;<br />
+    - Le statut de la transaction doit être **validé** (`SUCCESSED`), **refusé** (`REFUSED`) ou **en cours d'exécution** (`PENDING_EXEC`). Les IPN ne sont pas envoyées lorsqu'un paiement est remboursé ou annulé&nbsp;: en effet, il s'agit d'actions manuelles dont le e-commerce a donc nécessairement connaissance. Il est alors inutile de spammer les serveurs.<br />
+    <br />
+    <table><tbody><tr><th>Paramètres</th><th>Exemples de valeur</th><th>Commentaires</th></tr><tr><td><code>data</code></td><td><code>&hellip;</code></td><td>Chaîne de caractères encodée à partir des données compilées de la transaction. Ce champ est encore utilisé par certains modules. <strong>Attention&nbsp;: ce paramètre est déprécié, évitez de l'utiliser.</strong></td></tr><tr><td><code>pid</code></td><td><code>tr15acde62ecfc1b8a2a1706b3f17a714e</code></td><td>ID de la transaction</td></tr><tr><td><code>result</code></td><td><code>SUCCESSED</code></td><td>Statut de la transaction. Ne peut être que <code>SUCCESSED</code>, <code>REFUSED</code> ou <code>PENDING_EXEC</code>.</td></tr><tr><td><code>orderId</code></td><td><code>test-123</code></td><td>Renseigné dans l'<code>orderId</code> du <code>metadata</code></td></tr><tr><td><code>userId</code></td><td><code>123654789</code></td><td>ID du<code>buyer</code></td></tr><tr><td><code>shopId</code></td><td><code>ce642ce1613b47667dbd3785e5faf666</code></td><td>Votre identifiant unique <code>shop ID</code></td></tr><tr><td><code>amount</code></td><td><code>9900</code></td><td>Montant en centimes</td></tr><tr><td><code>createdAt</code></td><td><code>2018-12-27T11:07:59Z</code></td><td>Date et heure de la création de la transaction</td></tr><tr><td><code>valueAt</code></td><td><code>2018-12-27T11:07:59Z</code></td><td>Date et heure auxquelles PayGreen envoie la demande de transaction au partenaire bancaire</td></tr><tr><td><code>answeredAt</code></td><td><code>2018-12-27T11:07:59Z</code></td><td>Date et heure auxquelles le partenaire bancaire répond à la demande</td></tr></tbody></table>
+- name: L'empreinte de carte
+  description: |-
+    L'empreinte de carte bancaire est ce qui permet de prélever vos clients en différé&nbsp;: le consommateur renseigne ses informations de carte et vous permet de les utiliser pour un paiement ultérieur, sans qu'il ait à les renseigner à nouveau.<br />
+    <br />
+    Une empreinte de carte **n'est pas une transaction**&nbsp;: aucun prélèvement n'est effectué lors de l'empreinte. Pour prélever votre client, vous devez impérativement créer une transaction&nbsp;: vous renseignerez à ce moment-là l'`id` transmis lors de l'empreinte afin de débiter la carte bancaire (dans l'IPN, il s'agira du `pid`).<br />
+    <br />
+    Vous pouvez effectuer des empreintes de carte avec les moyens de paiement suivants : <br />
+    - CB : Disponible pour les **paiements comptants**, les **paiements par abonnements** et les **paiements en plusieurs fois**. Par défaut, l'empreinte de carte est réglés sur `CB`<br />
+    - SEPA : Il est possible de faire un empreinte de carte pour la signature d'un mandat. Dans ce cas, le paramètre `"paymentType" : "SEPA"` doit être ajouté dans la requête. Disponible pour les **paiements comptants**, les **paiements par abonnements** et les **paiements en plusieurs fois**.<br />
+    - TRD : Il est possible de faire une empreinte de carte sur une carte Conecs. Dans ce cas, le paramètre `"paymentType" : "TRD"` doit être ajouté dans la requête. Pour pouvoir utiliser les empreintes de carte TRD, vous devez obligatoirement avoir un délai de capture de renseigné dans votre moyen de paiement. Les empreintes de carte TRD sont utilisables uniquement pour du **paiement comptant**.<br />
+    <br />
+    > Dans le cas du mode d'intégration *MarketPlace*, l'empreinte de carte se fait sur le compte et non la boutique. L'empreinte de carte est donc utilisable sur toutes les boutiques d'un même compte.<br />
+    <br />
+    > Avec l'API de paiement PayGreen, l'empreinte de carte est gérée automatiquement lors de la création d'un paiement. **Vous n'avez donc pas besoin de réaliser une empreinte de carte ou de renseigner le paramètre `card` lorsque vous exécutez un paiement**.<br />
+    Néanmoins, dans le cas où vous souhaiteriez gérer vous-même l'empreinte de carte, les informations ci-dessous vous sont nécessaires.
+- name: Les dons
+  description: 'Créez, gérez et supprimer les dons effectués par les consommateurs
+    lors de leur achat, dans le cadre de nos options solidaires&nbsp;: l''**Arrondi**
+    et **Tree** (compensation carbone).'
+- name: Les virements
+  description: |-
+    Avec PayGreen, vous avez la possibilité de **gérer vos virements par API** (notamment pour programmer des virements automatiques). Vous pouvez effectuer un virement vers votre compte bancaire (grâce au paramètre `bankId`, qui correspond à l'id d'un RIB) ou bien vers une autre boutique PayGreen (en remplaçant le paramètre `bankId` par `shopId`, qui correspond à l'id d'une autre de vos boutiques.<br />
+    <br />
+    Par défaut, les virements sont exécutés immédiatement.
+schemes:
+- https
+paths:
+  "/api/{identifiant}/paymenttype":
+    get:
+      tags:
+      - Les moyens de paiement
+      summary: Liste des moyens de paiement
+      description: |-
+        Cette méthode permet de lister les moyens de paiement disponibles pour votre boutique.<br />
+        <br />
+        Notez que cette méthode ne retourne que les moyens de paiement activés&nbsp;: le `status` est donc toujours de `"2"`.<br />
+        Le champ `data` est alors un tableau de moyens de paiement à parcourir.<br />
+        <br />
+        Vous avez la possibilité d'affiner cette liste en ajoutant dans l'URL les deux paramètres suivants (optionnels)&nbsp;:<br />
+        - Affichage d'un seul type de moyen de paiement avec le paramètre `paymentType`&nbsp;: par exemple, `paymentType=CB` permettra de ne retourner que la liste des moyens de paiement **CB/Visa/Mastercard**.<br />
+        - Affichage des moyens de paiement par devise avec le paramètre `currency`&nbsp; par exemple, `currency=EUR` permet de ne retourner que les moyens de paiement permettant de régler en **euros**.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/PartnerConfig"
+        '404':
+          description: PartnerConfig Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payins/transaction/{id}":
+    get:
+      tags:
+      - Les transactions
+      summary: Détails
+      description: Cette requête vous permet d'obtenir tous les détails d'une transaction.
+        Le montant de la transaction est toujours en centimes.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: ID de la transaction
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+    put:
+      tags:
+      - Les transactions
+      summary: Confirmer une transaction
+      description: Cette requête vous permet de confirmer une transaction **e-caution**
+        ou **à la livraison**. Le montant de la transaction doit être en centimes.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: ID de la transaction
+        required: true
+        type: string
+      - in: body
+        name: ExecuteTransaction
+        description: Le montant de la transaction doit être en centimes.
+        required: true
+        schema:
+          "$ref": "#/definitions/ExecuteTransaction"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+    patch:
+      tags:
+      - Les transactions
+      summary: Modification du montant
+      description: Cette requête vous permet de modifier le montant d'un paiement
+        en cours. Vous pouvez uniquement modifier le montant d'un paiement en attente.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: ID de la transaction
+        required: true
+        type: string
+      - in: body
+        name: PatchAmount
+        description: Le montant de la transaction doit être en centimes.
+        required: true
+        schema:
+          "$ref": "#/definitions/PatchAmount"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+    delete:
+      tags:
+      - Les transactions
+      summary: Remboursement
+      description: 'Cette requête vous permet de rembourser totalement ou partiellement
+        une transaction. Si vous souhaitez effectuer un remboursement **partiel**,
+        indiquez le montant à rembourser dans le champ `amount`. Si le paramètre `amount`
+        n''est pas renseigné, la transaction sera **intégralement** remboursée. Le
+        body doit être ```{"amount" : 500 }``` pour effectuer un remboursement de
+        5€. Vous recevrez en réponse le détail de la transaction concerné. Si le remboursement
+        est intégral, la transaction passe au statut ```REFUNDED```.'
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: ID de la transaction
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payins/transaction/cash":
+    post:
+      tags:
+      - Les transactions
+      summary: Paiement comptant
+      description: |-
+        Cette requête vous permet de créer un paiement **comptant**. Le paramètre `returned_url` est optionnel&nbsp;: le renseigner vous permettra de rediriger automatiquement votre client vers la page de votre choix (sur votre e-commerce). S'il n'est pas renseigné, le client restera sur la page de confirmation de notre interface de paiement. *Voir le schéma de flux de paiement pour visualiser le parcours client*.<br />
+        <br />
+        Le paramètre `notified_url`, quant à lui, nous permet de vous envoyer [l'IPN de la transaction](#tag/Les-transactions). Dans le cas d'un paiement comptant, l'IPN est envoyée à partir du moment où le consommateur a réglé son achat. Cela peut parfois prendre plusieurs minutes.<br />
+        <br />
+        Si vous ne proposez pas la compensation carbone à vos clients (l'option **Tree**), il est inutile de renseigner le paramètre `idFingerprint`.<br />
+        <br />
+        Le paramètre `eligibleAmount` est optionnel&nbsp;: vous n'avez à le renseigner que si vous proposez à vos clients de payer avec un moyen de paiement nécessitant la gestion du montant éligible. Pour plus de détails, consultez la section [Les moyens de paiement](#tag/Les-moyens-de-paiement).<br />
+        <br />
+        Le paramètre `card` est optionnel&nbsp;: à moins de vouloir exécuter une [empreinte de carte](#tag/L'empreinte-de-carte), ce paramètre **ne doit donc pas être envoyé** dans la requête.<br />
+        <br />
+        > **Qu'est-ce que l'option OneClick&nbsp;?** Le OneClick permet au consommateur d'enregistrer sa carte bancaire lors d'un achat sur votre plateforme afin de la réutiliser ultérieurement, sans avoir à renseigner ses codes à nouveau. Si vous souhaitez proposer cette option à vos clients, il vous suffit de demander l'activation du module OneClick sur votre boutique PayGreen à notre support.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: body
+        name: Payins
+        description: Transaction comptant ou à la livraison
+        required: true
+        schema:
+          "$ref": "#/definitions/Payins"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payins/transaction/subscription":
+    post:
+      tags:
+      - Les transactions
+      summary: Paiement abonnement
+      description: |-
+        Cette requête vous permet de créer un **abonnement**. <br />
+        <br />
+        Le paramètre `returned_url` est optionnel&nbsp;: le renseigner vous permettra de rediriger automatiquement votre client vers la page de votre choix (sur votre e-commerce). S'il n'est pas renseigné, le client restera sur la page de confirmation de notre interface de paiement. *Voir le schéma de flux de paiement pour visualiser le parcours client*.<br />
+        <br />
+        Le paramètre `notified_url`, quant à lui, nous permet de vous envoyer [l'IPN de la transaction](#tag/Les-transactions). Dans le cas d'un abonnement, l'IPN est envoyée à chaque échéance (la première est immédiate). Cela peut parfois prendre plusieurs minutes.<br />
+        <br />
+        Si vous ne proposez pas la compensation carbone à vos clients (l'option **Tree**), il est inutile de renseigner le paramètre `idFingerprint`.<br />
+        <br />
+        Le paramètre `card` est optionnel&nbsp;: à moins de vouloir exécuter une [empreinte de carte](#tag/L'empreinte-de-carte), ce paramètre **ne doit donc pas être envoyé** dans la requête.<br />
+        <br />
+        Le paramètre `eligibleAmount` est inutile et ne doit pas être renseigné pour ce mode de paiement.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: body
+        name: PayinsRecc
+        description: Transaction abonnement ou N fois
+        required: true
+        schema:
+          "$ref": "#/definitions/PayinsRecc"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payins/transaction/xtime":
+    post:
+      tags:
+      - Les transactions
+      summary: Paiement en plusieurs fois
+      description: |-
+        Cette requête vous permet de créer un **paiement de type récurrent ou X fois sans frais**. Le paramètre `returned_url` est optionnel&nbsp;: le renseigner vous permettra de rediriger automatiquement votre client vers la page de votre choix (sur votre e-commerce). S'il n'est pas renseigné, le client restera sur la page de confirmation de notre interface de paiement. *Voir le schéma de flux de paiement pour visualiser le parcours client*.<br />
+        <br />
+        Le paramètre `notified_url`, quant à lui, nous permet de vous envoyer [l'IPN de la transaction](#tag/Les-transactions). Dans le cas d'un paiement en plusieurs fois, l'IPN est envoyée à chaque échéance (la première est immédiate). Cela peut parfois prendre plusieurs minutes.<br />
+        <br />
+        Si vous ne proposez pas la compensation carbone à vos clients (l'option **Tree**), il est inutile de renseigner le paramètre `idFingerprint`.<br />
+        <br />
+        Le paramètre `card` est optionnel&nbsp;: à moins de vouloir exécuter une [empreinte de carte](#tag/L'empreinte-de-carte), ce paramètre **ne doit donc pas être envoyé** dans la requête.<br />
+        <br />
+        Le paramètre `eligibleAmount` est inutile et ne doit pas être renseigné pour ce mode de paiement.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: body
+        name: PayinsRecc
+        description: Transaction abonnement ou N fois
+        required: true
+        schema:
+          "$ref": "#/definitions/PayinsRecc"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payins/transaction/tokenize":
+    post:
+      tags:
+      - Les transactions
+      summary: Paiement avec confirmation
+      description: |-
+        Cette requête vous permet de créer un **paiement de type comptant à la livraison**. Le paramètre `returned_url` est optionnel&nbsp;: le renseigner vous permettra de rediriger automatiquement votre client vers la page de votre choix (sur votre e-commerce). S'il n'est pas renseigné, le client restera sur la page de confirmation de notre interface de paiement. *Voir le schéma de flux de paiement pour visualiser le parcours client*.<br />
+        <br />
+        Le paramètre `notified_url`, quant à lui, nous permet de vous envoyer [l'IPN de la transaction](#tag/Les-transactions). Dans le cas d'un paiement avec confirmation, l'IPN est envoyée à la confirmation du paiement. Cela peut parfois prendre plusieurs minutes.<br />
+        <br />
+        Si vous ne proposez pas la compensation carbone à vos clients (l'option **Tree**), il est inutile de renseigner le paramètre `idFingerprint`.<br />
+        <br />
+        Le paramètre `eligibleAmount` est inutile et ne doit pas être renseigné pour ce mode de paiement.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: body
+        name: Payins
+        description: Transaction comptant ou à la livraison
+        required: true
+        schema:
+          "$ref": "#/definitions/Payins"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payins/transaction/cancel":
+    post:
+      tags:
+      - Les transactions
+      summary: Annulation
+      description: Cette requête vous permet d'annuler un paiement comptant, à la
+        livraison, par abonnement ou en plusieurs fois. Vous devez indiquer l'id du
+        paiement à annuler dans le champ `id`.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: ID de la transaction
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transaction"
+        '404':
+          description: Transaction Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payins/cardprint":
+    post:
+      tags:
+      - L'empreinte de carte
+      summary: Création d'une empreinte de carte
+      description: |-
+        La création de l'empreinte de carte se traduit pour le consommateur par l'affichage d'une interface de paiement PayGreen, dans laquelle il va renseigner ses informations de carte. Le consommateur **n'est pas débité** lors de l'empreinte.<br />
+        <br />
+        Dans le cas d'une empreinte de carte de type `SEPA`, l'interface PayGreen demande des informations sur le consommateur (nom, prénom, date de naissance, mail) ainsi qu'un Iban valide. Une fois ces données confirmées, le consommateur est redirigé chez notre partenaire bancaire pour signer son mandat.<br />
+        <br />
+        Pour obtenir cette interface, vous devez envoyer une requête contenant notamment l'identifiant de la commande (`orderId`) et les informations sur l'acheteur (nom, prénom&hellip; dans le `buyer`). <br />
+        <br />
+        Le client peut ensuite renseigner ses informations de carte bancaire et valider.<br />
+        <br />
+        Dans le cas du TRD Conecs, lors de l'utilisation d'une empreinte de carte, si le montant disponible sur la carte est inférieur au montant demandé, une transaction avec le montant disponible sera créé. Par exemple, si vous demandez 19€ mais que la carte n`a que 10€ de disponible, notre API vous retournera un paiement validé avec un `amount` à 1000 et un `originalAmount` à 1900. C'est à vous de gérer le complément si besoin.<br />
+        <br />
+        Une fois l'empreinte de carte effectuée, vous recevez une réponse contenant notamment un `id` (dans le `data`). Vous pourrez alors renseigner cet `id` dans le paramètre `token` de l'objet `card` lors de la création d'un **paiement comptant** ou **paiement par abonnement** ou **paiement en plusieurs fois**.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: body
+        name: CardPrint
+        description: Modèle d'une empreinte de carte.
+        required: true
+        schema:
+          "$ref": "#/definitions/CardPrint"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/CardPrint"
+        '404':
+          description: CardPrint Not Found
+        '400':
+          description: Invalid ID
+    get:
+      tags:
+      - L'empreinte de carte
+      summary: Liste des empreintes de carte
+      description: Cette requête vous permet d'obtenir la liste des empreintes de
+        carte de votre boutique
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/CardPrint"
+        '404':
+          description: CardPrint Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payins/cardprint/{id}":
+    get:
+      tags:
+      - L'empreinte de carte
+      summary: Détails
+      description: Cette requête vous permet d'obtenir tous les détails d'une empreinte
+        de carte.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: Api.Model.CardPrint.id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/CardPrint"
+        '404':
+          description: CardPrint Not Found
+        '400':
+          description: Invalid ID
+    delete:
+      tags:
+      - L'empreinte de carte
+      summary: Supprimer une empreinte
+      description: Cette requête permet de supprimer une empreinte de don à partir
+        de son `id`.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: Api.Model.CardPrint.id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: " Not Found"
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/solidarity/{id}":
+    patch:
+      tags:
+      - Les dons
+      summary: Créer un don
+      description: Cette requête vous permet de créer un don lié à une transaction.
+        Pour cela, il suffit de renseigner dans l'URL, après `/solidarity/`, l'`id`
+        de la transaction à laquelle on souhaite ajouter un don.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: ID de la transaction
+        required: true
+        type: string
+      - in: body
+        name: Solidarity
+        description: Modèle de données d'un don.
+        required: true
+        schema:
+          "$ref": "#/definitions/Solidarity"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Solidarity"
+        '404':
+          description: Solidarity Not Found
+        '400':
+          description: Invalid ID
+    get:
+      tags:
+      - Les dons
+      summary: Afficher un don
+      description: Cette requête permet d'obtenir les détails d'un don à partir de
+        son `id`.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: ID du don
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Solidarity"
+        '404':
+          description: Solidarity Not Found
+        '400':
+          description: Invalid ID
+    delete:
+      tags:
+      - Les dons
+      summary: Supprimer un don
+      description: Cette requête permet de supprimer un don à partir de son `id`.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: ID du don
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: " Not Found"
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payout/transfer/{id}":
+    get:
+      tags:
+      - Les virements
+      summary: Détails
+      description: Cette requête vous permet d'obtenir tous les détails d'un virement
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: Api.Model.Transfer.id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transfer"
+        '404':
+          description: Transfer Not Found
+        '400':
+          description: Invalid ID
+  "/api/{identifiant}/payout/transfer":
+    post:
+      tags:
+      - Les virements
+      summary: Créer un virement
+      description: |-
+        Cette méthode permet de créer un virement. Si vous créez un virement vers un compte bancaire (objet `bank`), votre RIB doit nécessairement être **valide**.<br />
+        <br />
+        ### IPN d'un virement<br />
+        <br />
+        Le paramètre `callbackUrl` vous permet, s'il est renseigné, d'envoyer une notification (**IPN**) à vos serveurs lors du changement de statut d'un virement (afin de savoir précisément si et quand le virement que vous avez créé a bien été effectué). L'envoi de l'IPN peut parfois prendre plusieurs minutes.<br />
+        <br />
+        Il existe 4 statuts de virement&nbsp;:<br />
+        - `WAITING`&nbsp;: statut d'un virement en attente. Statut par défaut.<br />
+        - `SUCCESS`&nbsp;: virement effectué avec succès.<br />
+        - `ERROR`&nbsp;: une erreur est survenue lors du virement (il n'a donc pas pu être effectué).<br />
+        - `CANCEL`&nbsp;: virement annulé par notre équipe.<br />
+        <br />
+        > Dès lors que le statut du virement change (qu'il passe en `SUCCESS`, `ERROR` ou plus rarement, `CANCEL`), l'IPN est envoyée à l'URL renseignée dans le paramètre `callbackUrl`). *Voir le tableau ci-dessous pour le détails des informations renvoyées dans l'IPN*.<br />
+        <table><tbody><tr><th>Paramètres</th><th>Exemples de valeur</th><th>Commentaires</th></tr><tr><td><code>pid</code></td><td><code>37330ff88bd7f7b0082d031d6eb59bb4</code></td><td>ID du virement</td></tr><tr><td><code>result</code></td><td><code>SUCCESS</code></td><td>Statut du virement. Ne peut être que <code>SUCCESS</code>, <code>ERROR</code> ou <code>CANCEL</code>.</td></tr><tr><td><code>orderId</code></td><td><code>&hellip;</code></td><td>Chaîne de caractère créée par le partenaire bancaire</td></tr><tr><td><code>shopId</code></td><td><code>ce642ce1613b47667dbd3785e5faf666</code></td><td>Votre identifiant unique <code>shop ID</code></td></tr><tr><td><code>amount</code></td><td><code>9900</code></td><td>Montant en centimes</td></tr><tr><td><code>createdAt</code></td><td><code>2018-12-27T11:07:59Z</code></td><td>Date et heure de la création du virement</td></tr><tr><td><code>scheduledAt</code></td><td><code>2018-12-27T11:07:59Z</code></td><td>Date et heure de la planification du virement</td></tr><tr><td><code>answeredAt</code></td><td><code>2018-12-27T11:07:59Z</code></td><td>Date et heure auxquelles le virement a été effectué</td></tr></tbody></table>
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      - in: body
+        name: Transfer
+        description: Modèle de données d'un virement.
+        required: true
+        schema:
+          "$ref": "#/definitions/Transfer"
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transfer"
+        '404':
+          description: Transfer Not Found
+        '400':
+          description: Invalid ID
+    get:
+      tags:
+      - Les virements
+      summary: Liste des virements
+      description: Cette requête vous permet d'obtenir la liste des virements de votre
+        boutique
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: Identifiant
+        description: Votre identifiant PayGreen
+        required: true
+        type: string
+      - in: header
+        name: Authorization
+        description: 'Votre clé privée PayGreen (Bearer : votre-clé-privée)'
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: ''
+              code:
+                type: integer
+                example: 0
+              data:
+                "$ref": "#/definitions/Transfer"
+        '404':
+          description: Transfer Not Found
+        '400':
+          description: Invalid ID
+host: paygreen.fr
+definitions:
+  PartnerConfig:
+    type: object
+    properties:
+      currency:
+        type: string
+        example: EUR
+      paymentType:
+        type: string
+        example: CB
+      status:
+        type: string
+        example: '2'
+      mode:
+        type: string
+      availablePaymentMode:
+        type: array
+        example:
+        - CASH
+        - TOKENIZE
+        readOnly: true
+      iframe:
+        type: array
+        example:
+          CASH:
+            minHeight: 430
+            minWidth: 350
+        readOnly: true
+      isLimited:
+        type: boolean
+        example: true
+        readOnly: true
+      soldAvailable:
+        type: integer
+        format: int64
+        example: 1000
+        readOnly: true
+    required:
+    - mode
+  Transaction:
+    type: object
+    properties:
+      id:
+        type: string
+        example: tr15acde62ecfc1b8a2a1706b3f17a714e
+      paymentToken:
+        type: string
+        example: 1NUytzyEgkdowJdwI1751555436136710
+        readOnly: true
+      paymentFolder:
+        type: string
+        example: prabcdef1234567890
+        readOnly: true
+      orderId:
+        type: string
+        example: test-123
+        readOnly: true
+      amount:
+        type: integer
+        format: int64
+        example: 9900
+        readOnly: true
+        description: Le montant est en centimes.
+      originalAmount:
+        type: integer
+        format: int64
+        example: 9900
+        readOnly: true
+      currency:
+        type: string
+        example: EUR
+        readOnly: true
+      type:
+        type: string
+        example: CASH
+        readOnly: true
+      paymentType:
+        type: string
+        example: CB
+      url:
+        type: string
+        example: http://paygreen.fr/payment/execute/
+        readOnly: true
+        description: Pour effectuer une transaction en utilisant le module Insite,
+          il faut ajouter "display=insite" dans l'URL de paiement.
+      testMode:
+        type: integer
+        format: int64
+        readOnly: true
+      result:
+        type: object
+        properties:
+          status:
+            type: string
+            readOnly: true
+            example: SUCCESSED
+          threeDSecureStatus:
+            type: string
+            readOnly: true
+            example: 3DS_SUCCESSED
+          paymentErrorStatus:
+            type: string
+            readOnly: true
+        readOnly: true
+      card:
+        type: object
+        properties:
+          number:
+            type: string
+            readOnly: true
+            example: 800025XXXXXX0004
+          expiration:
+            type: string
+            readOnly: true
+            example: '0121'
+          bank:
+            type: string
+            readOnly: true
+            example: BP
+          country:
+            type: string
+            readOnly: true
+            example: FR
+        readOnly: true
+      buyer:
+        type: object
+        properties:
+          id:
+            type: string
+            readOnly: true
+            example: '123654789'
+          lastName:
+            type: string
+            readOnly: true
+            example: Pay
+          firstName:
+            type: string
+            readOnly: true
+            example: Green
+          email:
+            type: string
+            readOnly: true
+            example: contact@paygreen.fr
+          country:
+            type: string
+            readOnly: true
+            example: FR
+          ipAddress:
+            type: string
+            readOnly: true
+            example: 127.0.0.1
+          companyName:
+            type: string
+            example: PayGreen
+      shippingAddress:
+        type: object
+        properties:
+          lastName:
+            type: string
+            readOnly: true
+            example: Last Name
+          firstName:
+            type: string
+            readOnly: true
+            example: First Name
+          address:
+            type: string
+            readOnly: true
+            example: Place Saint Marc
+          address2:
+            type: string
+            readOnly: true
+            example: Building's name
+          company:
+            type: string
+            readOnly: true
+            example: Company name
+          zipCode:
+            type: string
+            readOnly: true
+            example: '30124'
+          city:
+            type: string
+            readOnly: true
+            example: Venise
+          country:
+            type: string
+            readOnly: true
+            example: ITA
+          type:
+            type: string
+            readOnly: true
+            example: NEW
+        readOnly: true
+      billingAddress:
+        type: object
+        properties:
+          lastName:
+            type: string
+            readOnly: true
+            example: Last Name
+          firstName:
+            type: string
+            readOnly: true
+            example: First Name
+          address:
+            type: string
+            readOnly: true
+            example: Place Saint Marc
+          address2:
+            type: string
+            readOnly: true
+            example: Building's name
+          company:
+            type: string
+            readOnly: true
+            example: Company name
+          zipCode:
+            type: string
+            readOnly: true
+            example: '30124'
+          city:
+            type: string
+            readOnly: true
+            example: Venise
+          country:
+            type: string
+            readOnly: true
+            example: ITA
+        readOnly: true
+      schedules:
+        type: object
+        properties:
+          rank:
+            type: integer
+            format: int64
+            readOnly: true
+            example: 129
+          amount:
+            type: integer
+            format: int64
+            readOnly: true
+            example: 101
+          currency:
+            type: string
+            readOnly: true
+            example: EUR
+          status:
+            type: string
+            readOnly: true
+            example: EUR
+          valueAt:
+            type: string
+            format: date-time
+            readOnly: true
+            example: '101'
+          id:
+            type: string
+            readOnly: true
+            example: EUR
+        readOnly: true
+      donation:
+        type: object
+        properties:
+          associationId:
+            type: integer
+            format: int64
+            readOnly: true
+            example: 129
+          status:
+            type: string
+            readOnly: true
+            example: PENDING
+          type:
+            type: string
+            readOnly: true
+            example: ROUNDING
+          amount:
+            type: integer
+            format: int64
+            readOnly: true
+            example: 101
+          currency:
+            type: string
+            readOnly: true
+            example: EUR
+          refundable:
+            type: boolean
+            readOnly: true
+            example: true
+        readOnly: true
+      metadata:
+        type: array
+        items:
+          type: string
+        example:
+          orderId: test-123
+          display: '0'
+      eligibleAmount:
+        type: array
+        items:
+          type: string
+        example:
+          ANCV: '1000'
+          RESTOFLASH: '0'
+      explanation:
+        type: string
+        example: Insufficient provision or exceeded credit
+        readOnly: true
+      idFingerprint:
+        type: integer
+        format: int64
+      createdAt:
+        type: string
+        format: date-time
+        readOnly: true
+      valueAt:
+        type: string
+        format: date-time
+        readOnly: true
+      answeredAt:
+        type: string
+        format: date-time
+        readOnly: true
+      ttl:
+        type: string
+        example: PT10M
+    required:
+    - paymentType
+    - lastName
+    - firstName
+    - address
+    - zipCode
+    - city
+    - country
+    - associationId
+    - amount
+    - currency
+    - valueAt
+  ExecuteTransaction:
+    type: object
+    properties:
+      amount:
+        type: integer
+        format: int64
+        example: 9900
+        description: Le montant est en centimes.
+      message:
+        type: string
+    required:
+    - amount
+    - message
+  PatchAmount:
+    type: object
+    properties:
+      amount:
+        type: integer
+        format: int64
+        example: 9900
+        description: Le montant est en centimes.
+    required:
+    - amount
+  Payins:
+    type: object
+    properties:
+      orderId:
+        type: string
+        example: '123456'
+      amount:
+        type: integer
+        format: int64
+        example: 9000
+        description: Le montant est en centimes.
+      currency:
+        type: string
+        example: EUR
+      paymentType:
+        type: string
+        example: CB
+      returned_url:
+        type: string
+        example: http://example.com/retour-client
+        description: Adresse sur laquelle il faut rediriger le client après que l'action
+          a été effectuée.
+      notified_url:
+        type: string
+        example: http://example.com/retour-server
+        description: Adresse sur laquelle PayGreen peut faire des appels pour mettre
+          à jour le statut.
+      idFingerprint:
+        type: integer
+        format: int64
+      buyer:
+        type: object
+        properties:
+          id:
+            type: string
+            example: '123654789'
+          lastName:
+            type: string
+            example: Pay
+          firstName:
+            type: string
+            example: Green
+          email:
+            type: string
+            example: contact@paygreen.fr
+          country:
+            type: string
+            example: FR
+          companyName:
+            type: string
+            example: PayGreen
+      shippingAddress:
+        type: object
+        properties:
+          lastName:
+            type: string
+            example: Doe
+          firstName:
+            type: string
+            example: John
+          address:
+            type: string
+            example: 69 rue longpaon
+          zipCode:
+            type: string
+            example: '76000'
+          city:
+            type: string
+            example: Rouen
+          country:
+            type: string
+            example: FR
+      billingAddress:
+        type: object
+        properties:
+          lastName:
+            type: string
+            example: Doe
+          firstName:
+            type: string
+            example: John
+          address:
+            type: string
+            example: 69 rue longpaon
+          zipCode:
+            type: string
+            example: '76000'
+          city:
+            type: string
+            example: Rouen
+          country:
+            type: string
+            example: FR
+      metadata:
+        type: array
+        items:
+          type: string
+        example:
+          orderId: test-123
+          display: '0'
+      eligibleAmount:
+        type: array
+        items:
+          type: string
+        example:
+          ANCV: '1000'
+          RESTOFLASH: '0'
+      card:
+        type: object
+        properties:
+          token:
+            type: string
+            example: abcdef1234567890
+      withPaymentLink:
+        type: boolean
+        example: true
+        readOnly: true
+      emails:
+        type: array
+        example:
+        - support@paygreen.fr
+        - test@test.fr
+        readOnly: true
+      contentMail:
+        type: string
+        example:
+        - Voici ce le lien de paiement !
+        readOnly: true
+      ttl:
+        type: string
+        example: PT10M
+    required:
+    - orderId
+    - amount
+    - currency
+  PayinsRecc:
+    type: object
+    properties:
+      orderId:
+        type: string
+        example: '123456'
+      amount:
+        type: integer
+        format: int64
+        example: 9000
+        description: Le montant est en centimes.
+      currency:
+        type: string
+        example: EUR
+      paymentType:
+        type: string
+        example: CB
+      returned_url:
+        type: string
+        example: http://example.com/retour-client
+        description: Adresse sur laquelle il faut rediriger le client après que l'action
+          a été effectuée.
+      notified_url:
+        type: string
+        example: http://example.com/retour-server
+        description: Adresse sur laquelle PayGreen peut faire des appels pour mettre
+          à jour le statut.
+      idFingerprint:
+        type: integer
+        format: int64
+      orderDetails:
+        type: object
+        properties:
+          cycle:
+            type: integer
+            format: int64
+            example: 40
+          count:
+            type: integer
+            format: int64
+            example: 3
+          day:
+            type: integer
+            format: int64
+          startAt:
+            type: string
+            format: date-time
+          firstAmount:
+            type: integer
+            format: int64
+      shippingAddress:
+        type: object
+        properties:
+          lastName:
+            type: string
+            example: Doe
+          firstName:
+            type: string
+            example: John
+          address:
+            type: string
+            example: 69 rue longpaon
+          zipCode:
+            type: string
+            example: '76000'
+          city:
+            type: string
+            example: Rouen
+          country:
+            type: string
+            example: FR
+      billingAddress:
+        type: object
+        properties:
+          lastName:
+            type: string
+            example: Doe
+          firstName:
+            type: string
+            example: John
+          address:
+            type: string
+            example: 69 rue longpaon
+          zipCode:
+            type: string
+            example: '76000'
+          city:
+            type: string
+            example: Rouen
+          country:
+            type: string
+            example: FR
+      card:
+        type: object
+        properties:
+          token:
+            type: string
+            example: abcdef1234567890
+      metadata:
+        type: array
+        items:
+          type: string
+        example:
+          orderId: test-123
+          display: '0'
+      eligibleAmount:
+        type: array
+        items:
+          type: string
+        example:
+          ANCV: '1000'
+          RESTOFLASH: '0'
+      withPaymentLink:
+        type: boolean
+        example: true
+        readOnly: true
+      emails:
+        type: array
+        example:
+        - support@paygreen.fr
+        - test@test.fr
+        readOnly: true
+      contentMail:
+        type: string
+        example:
+        - Voici ce le lien de paiement !
+        readOnly: true
+      ttl:
+        type: string
+        example: PT10M
+    required:
+    - orderId
+    - amount
+    - currency
+  CardPrint:
+    type: object
+    properties:
+      id:
+        type: string
+        example: abcdef1234567890
+        readOnly: true
+      orderId:
+        type: string
+        example: test-123
+        description: Il s'agit du token lié à votre empreinte de carte.
+      paymentType:
+        type: string
+        example: CB
+      returned_url:
+        type: string
+        example: http://example.com/retour-client
+        description: Adresse sur laquelle il faut rediriger le client après que l'action
+          a été effectuée.
+      notified_url:
+        type: string
+        example: http://example.com/retour-server
+        description: Adresse sur laquelle PayGreen peut faire des appels pour mettre
+          à jour le statut.
+      url:
+        type: string
+        example: http://paygreen.fr/payment/execute/
+        readOnly: true
+      testMode:
+        type: integer
+        format: int64
+        readOnly: true
+      result:
+        type: object
+        properties:
+          status:
+            type: string
+            readOnly: true
+            example: SUCCESSED
+          threeDSecureStatus:
+            type: string
+            readOnly: true
+            example: 3DS_SUCCESSED
+          paymentErrorStatus:
+            type: string
+            readOnly: true
+        readOnly: true
+      card:
+        type: object
+        properties:
+          number:
+            type: string
+            readOnly: true
+            example: 800025XXXXXX0004
+          expiration:
+            type: string
+            readOnly: true
+            example: '0121'
+          bank:
+            type: string
+            readOnly: true
+            example: BP
+          country:
+            type: string
+            readOnly: true
+            example: FR
+        readOnly: true
+      buyer:
+        type: object
+        properties:
+          id:
+            type: string
+            example: '123654789'
+          lastName:
+            type: string
+            example: Pay
+          firstName:
+            type: string
+            example: Green
+          email:
+            type: string
+            example: contact@paygreen.fr
+          country:
+            type: string
+            example: FR
+          companyName:
+            type: string
+            example: PayGreen
+      shippingAddress:
+        type: object
+        properties:
+          lastName:
+            type: string
+            example: Doe
+          firstName:
+            type: string
+            example: John
+          address:
+            type: string
+            example: 69 rue courtpoussin
+          zipCode:
+            type: string
+            example: '76000'
+          city:
+            type: string
+            example: Rouen
+          country:
+            type: string
+            example: FR
+      billingAddress:
+        type: object
+        properties:
+          lastName:
+            type: string
+            example: Doe
+          firstName:
+            type: string
+            example: John
+          address:
+            type: string
+            example: 69 rue courtpoussin
+          zipCode:
+            type: string
+            example: '76000'
+          city:
+            type: string
+            example: Rouen
+          country:
+            type: string
+            example: FR
+      metadata:
+        type: array
+        items:
+          type: string
+        example:
+          orderId: test-123
+          display: '0'
+        readOnly: true
+      explanation:
+        type: string
+        example: Insufficient provision or exceeded credit
+        readOnly: true
+      createdAt:
+        type: string
+        format: date-time
+        readOnly: true
+      valueAt:
+        type: string
+        format: date-time
+        readOnly: true
+      answeredAt:
+        type: string
+        format: date-time
+        readOnly: true
+      ttl:
+        type: string
+        example: PT10M
+    required:
+    - orderId
+  Solidarity:
+    type: object
+    properties:
+      associationId:
+        type: integer
+        format: int64
+        example: 129
+      status:
+        type: string
+        enum:
+        - PENDING
+        - SUCCESS
+        - REFUND
+        example: PENDING
+        readOnly: true
+      type:
+        type: string
+        example: ROUNDING
+        readOnly: true
+      amount:
+        type: integer
+        format: int64
+        example: 101
+        description: Le montant est en centimes.
+      currency:
+        type: string
+        example: EUR
+      refundable:
+        type: boolean
+        example: true
+        readOnly: true
+    required:
+    - associationId
+    - amount
+    - currency
+  Transfer:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 37330ff88bd7f7b0082d031d6eb59bb4
+        readOnly: true
+      externalReference:
+        type: string
+        example: 37330ff88bd7f7b0082d031d6eb59bb4
+        readOnly: true
+      publicReference:
+        type: string
+        example: 37330ff88bd7f7b0082d031d6eb59bb4
+        readOnly: true
+      amount:
+        type: string
+        example: 9900
+        description: Le montant est en centimes.
+      currency:
+        type: string
+        example: EUR
+      bankId:
+        type: integer
+        format: int64
+        example: 123
+      status:
+        type: string
+        enum:
+        - CANCEL
+        - ERROR
+        - SUCCESS
+        - WAITING
+        readOnly: true
+      callbackUrl:
+        type: string
+        example: http://example.com/retour-server
+      createdAt:
+        type: string
+        format: date-time
+        example: '2004-02-12T15:19:21'
+        readOnly: true
+      scheduledAt:
+        type: string
+        format: date-time
+        example: '2004-02-12T23:00:00'
+        readOnly: true
+      executedAt:
+        type: string
+        format: date-time
+        example: '2004-02-12T23:00:05'
+        readOnly: true
+    required:
+    - amount
+    - currency
+    - bankId

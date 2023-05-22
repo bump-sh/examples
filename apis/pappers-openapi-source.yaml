@@ -1,0 +1,4361 @@
+openapi: 3.0.0
+info:
+  description: |
+    L'API de Pappers vous permet de récupérer des informations et documents sur les entreprises françaises à partir de leur numéro SIREN ou SIRET.
+
+    Vous devez indiquer votre clé d'API dans les requêtes, en utilisant le paramètre `api_token`.
+
+    L'URL d'accès à l'API est https://api.pappers.fr/v2/
+
+    Lien vers la documentation de la V1 : https://www.pappers.fr/api/documentation/v1
+
+    L'historique des modifications (changelog) est accessible à l'url suivante : https://www.pappers.fr/api/changelog
+  version: 2.7.0
+  title: Pappers API
+  contact:
+    name: "Support technique Pappers"
+    email: support@pappers.fr
+servers:
+  - url: https://api.pappers.fr/v2
+paths:
+  /entreprise:
+    get:
+      tags:
+        - Fiche entreprise
+      summary: "Récupère l'ensemble des informations disponibles sur une entreprise."
+      description: "Vous devez fournir soit le SIREN, soit le SIRET. Si vous indiquez le SIREN, tous les établissements associés à ce SIREN seront renvoyés dans la clé `etablissements`. Si vous indiquez le SIRET, seul l'établissement associé sera renvoyé dans la clé `etablissement`."
+      operationId: entreprise
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: votre_clé_ici
+        - name: siren
+          in: query
+          description: "SIREN de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 443061841
+        - name: siret
+          in: query
+          description: "SIRET de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 44306184100047
+        - name: format_publications_bodacc
+          in: query
+          description: "Format attendu pour les publications BODACC. Valeur par défaut : `\"objet\"`."
+          required: false
+          schema:
+            type: string
+            enum: [objet, texte]
+            example: objet
+        - name: marques
+          in: query
+          description: "Si vrai, le retour inclura les marques éventuelles de l'entreprise. Valeur par défaut : `false`."
+          required: false
+          schema:
+            type: boolean
+        - name: validite_tva_intracommunautaire
+          in: query
+          description: "Si vrai, le champ validite_tva_intracommunautaire du retour indiquera si le numéro de tva est valide auprès de la Commission européenne. Valeur par défaut : `false`."
+          required: false
+          schema:
+            type: boolean
+        - name: publications_bodacc_brutes
+          in: query
+          description: "Pappers traite les publications BODACC afin de supprimer les publications périmée. Si vrai, le retour inclura les publications bodacc sans traitement. Valeur par défaut : `false`."
+          required: false
+          schema:
+            type: boolean
+
+      responses:
+        "200":
+          description: Entreprise trouvée. Le retour contient un objet décrivant l'entreprise.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntrepriseFiche"
+        "206":
+          description: "Entreprise trouvée. Le retour est cependant partiel : au moins une source de données n'a pas répondu dans le temps imparti."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntrepriseFiche"
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Entreprise inexistante.
+  /association:
+    get:
+      tags:
+        - Fiche association
+      summary: "Récupère l'ensemble des informations disponibles sur une association."
+      description: "Vous devez fournir soit l'identifiant de l'association, soit le SIREN, soit le SIRET."
+      operationId: association
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: votre_clé_ici
+        - name: id_association
+          in: query
+          description: "Identifiant de l'association"
+          required: false
+          schema:
+            type: string
+            example: W142005389
+        - name: siret
+          in: query
+          description: "SIRET de l'association"
+          required: false
+          schema:
+            type: string
+            example: 95037097300014
+        - name: siren
+          in: query
+          description: "SIREN de l'association"
+          required: false
+          schema:
+            type: string
+            example: 950370973
+
+      responses:
+        "200":
+          description: Association trouvée. Le retour contient un objet décrivant l'association.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Association"
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Association inexistante.
+        "503":
+          description: Service momentanément indisponible.
+  /recherche:
+    get:
+      tags:
+        - Recherche
+      summary: "Recherche les entreprises qui correspondent à des critères."
+      description: |
+        Tous les paramètres sont optionnels et servent à filtrer la recherche. Les différentes entreprises seront renvoyées dans un tableau `resultats`, et le nombre total de résultats sera renvoyé dans le champ `total`.
+
+        Pour parcourir l'ensemble des résultats, deux solutions sont possibles :
+
+        - La pagination (paramètres `page` et `par_page`), limitée aux 400 premiers résultats ;
+        - Les curseurs (paramètres `curseur` et `par_curseur`).
+
+        Cette route permet également le téléchargement d'un export des résultats de recherche au format xlsx, csv ou json. Il faut pour cela utiliser le paramètre `export`.
+      operationId: recherche
+      parameters:
+        - $ref: '#/components/parameters/api_token'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/par_page'
+        - $ref: '#/components/parameters/curseur'
+        - $ref: '#/components/parameters/par_curseur'
+        - $ref: '#/components/parameters/bases'
+        - $ref: '#/components/parameters/precision'
+        - $ref: '#/components/parameters/export'
+        - name: q
+          in: query
+          description: "Texte à rechercher. Dénomination pour une personne morale, nom et prénom pour une personne physique.\nSi vous recherchez dans plusieurs bases, ce paramètre sera utilisé pour rechercher dans toutes les bases."
+          required: false
+          schema:
+            type: string
+            example: Google France
+        - name: siege
+          in: query
+          description: "Défini si la requête se base sur le siège"
+          required: false
+          schema:
+            type: string
+            example: 'true'
+        - $ref: '#/components/parameters/code_naf'
+        - $ref: '#/components/parameters/departement'
+        - $ref: '#/components/parameters/region'
+        - $ref: '#/components/parameters/code_postal'
+        - $ref: '#/components/parameters/convention_collective'
+        - $ref: '#/components/parameters/categorie_juridique'
+        - $ref: '#/components/parameters/entreprise_cessee'
+        - $ref: '#/components/parameters/statut_rcs'
+        - $ref: '#/components/parameters/objet_social'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_min'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_max'
+        - $ref: '#/components/parameters/date_radiation_rcs_min'
+        - $ref: '#/components/parameters/date_radiation_rcs_max'
+        - $ref: '#/components/parameters/capital_min'
+        - $ref: '#/components/parameters/capital_max'
+        - $ref: '#/components/parameters/chiffre_affaires_min'
+        - $ref: '#/components/parameters/chiffre_affaires_max'
+        - $ref: '#/components/parameters/resultat_min'
+        - $ref: '#/components/parameters/resultat_max'
+        - $ref: '#/components/parameters/date_creation_min'
+        - $ref: '#/components/parameters/date_creation_max'
+        - $ref: '#/components/parameters/tranche_effectif_min'
+        - $ref: '#/components/parameters/tranche_effectif_max'
+        - $ref: '#/components/parameters/type_dirigeant'
+        - $ref: '#/components/parameters/qualite_dirigeant'
+        - $ref: '#/components/parameters/nationalite_dirigeant'
+        - $ref: '#/components/parameters/prenom_dirigeant'
+        - $ref: '#/components/parameters/age_dirigeant_min'
+        - $ref: '#/components/parameters/age_dirigeant_max'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_min'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_max'
+        - $ref: '#/components/parameters/age_beneficiaire_min'
+        - $ref: '#/components/parameters/age_beneficiaire_max'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_min'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_max'
+        - $ref: '#/components/parameters/nationalite_beneficiaire'
+        - $ref: '#/components/parameters/date_depot_document_min'
+        - $ref: '#/components/parameters/date_depot_document_max'
+        - $ref: '#/components/parameters/type_publication'
+        - $ref: '#/components/parameters/date_publication_min'
+        - $ref: '#/components/parameters/date_publication_max'
+        - $ref: '#/components/parameters/siren'
+      responses:
+        "200":
+          description: Recherche réussie. Le retour contient la liste des entreprises qui répondent aux critères indiqués.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultats:
+                    type: array
+                    description: Liste des entreprises qui correspondent à la recherche.
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/EntrepriseRecherche'
+                        - type: object
+                          properties:
+                            dirigeants:
+                              type: array
+                              description: Dirigeants de l'entreprise qui correspondent à la recherche (si vous recherchez dans la base dirigeants).
+                              items:
+                                $ref: '#/components/schemas/RepresentantRecherche'
+                            beneficiaires:
+                              type: array
+                              description: Bénéficiaires effectifs de l'entreprise qui correspondent à la recherche (si vous recherchez dans la base bénéficiaires effectifs).
+                              items:
+                                $ref: '#/components/schemas/Beneficiaire'
+                            documents:
+                              type: array
+                              description: Documents de l'entreprise qui correspondent à la recherche (si vous recherchez dans la base documents).
+                              items:
+                                $ref: '#/components/schemas/Document'
+                            publications:
+                              type: array
+                              description: Publications de l'entreprise qui correspondent à la recherche (si vous recherchez dans la base publications).
+                              items:
+                                allOf:
+                                  - $ref: '#/components/schemas/Publication'
+                                  - type: object
+                                    properties:
+                                      mentions:
+                                        type: array
+                                        description: Mentions de la recherche dans la publication.
+                                        items:
+                                          type: string
+                            nb_dirigeants_total:
+                              type: integer
+                              description: Nombre de dirigeants total de l'entreprise.
+                            nb_beneficiaires_total:
+                              type: integer
+                              description: Nombre de bénéficiaires effectifs total de l'entreprise.
+                            nb_documents_avec_mentions:
+                              type: integer
+                              description: Nombre de documents de l'entreprise qui correspondent à la recherche.
+                            nb_documents_total:
+                              type: integer
+                              description: Nombre de documents total de l'entreprise.
+                            nb_publications_avec_mentions:
+                              type: integer
+                              description: Nombre de publications de l'entreprise qui correspondent à la recherche.
+                            nb_publications_total:
+                              type: integer
+                              description: Nombre de publications total de l'entreprise.
+                  total:
+                    type: integer
+                    description: Nombre d'entreprises qui correspondent à la recherche.
+                    example: 100
+                  page:
+                    type: integer
+                    description: Page actuelle.
+                    example: 1
+                  curseurSuivant:
+                    type: string
+                    description: "Présent uniquement en cas d'utilisation du paramètre `curseur`. Contient le curseur courant à envoyer en paramètre `curseur` de la requête suivantes."
+                    example: QxNRrqKiBFDQq54SpHsrw8r5Z3yWZMDAAzcvwywX
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Aucune entreprise ne correspond aux critères indiqués.
+        "503":
+          description: Service momentanément indisponible.
+  /recherche-dirigeants:
+    get:
+      tags:
+        - Recherche
+      summary: "Recherche les dirigeants qui correspondent à des critères."
+      description: "Tous les paramètres sont optionnels et servent à filtrer la recherche. Les différents dirigeants seront renvoyées dans un tableau `resultats`."
+      operationId: recherche-dirigeants
+      parameters:
+        - $ref: '#/components/parameters/api_token'
+        - $ref: '#/components/parameters/par_page'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/precision'
+        - name: q
+          in: query
+          description: Texte à rechercher. Nom et prénom du dirigeant pour une personne physique, dénomination pour une personne morale.
+          required: false
+          schema:
+            type: string
+            example: Google France
+        - $ref: '#/components/parameters/type_dirigeant'
+        - $ref: '#/components/parameters/qualite_dirigeant'
+        - $ref: '#/components/parameters/nationalite_dirigeant'
+        - $ref: '#/components/parameters/prenom_dirigeant'
+        - $ref: '#/components/parameters/age_dirigeant_min'
+        - $ref: '#/components/parameters/age_dirigeant_max'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_min'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_max'
+        - $ref: '#/components/parameters/code_naf'
+        - $ref: '#/components/parameters/departement'
+        - $ref: '#/components/parameters/region'
+        - $ref: '#/components/parameters/code_postal'
+        - $ref: '#/components/parameters/convention_collective'
+        - $ref: '#/components/parameters/categorie_juridique'
+        - $ref: '#/components/parameters/entreprise_cessee'
+        - $ref: '#/components/parameters/statut_rcs'
+        - $ref: '#/components/parameters/objet_social'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_min'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_max'
+        - $ref: '#/components/parameters/date_radiation_rcs_min'
+        - $ref: '#/components/parameters/date_radiation_rcs_max'
+        - $ref: '#/components/parameters/capital_min'
+        - $ref: '#/components/parameters/capital_max'
+        - $ref: '#/components/parameters/chiffre_affaires_min'
+        - $ref: '#/components/parameters/chiffre_affaires_max'
+        - $ref: '#/components/parameters/resultat_min'
+        - $ref: '#/components/parameters/resultat_max'
+        - $ref: '#/components/parameters/date_creation_min'
+        - $ref: '#/components/parameters/date_creation_max'
+        - $ref: '#/components/parameters/tranche_effectif_min'
+        - $ref: '#/components/parameters/tranche_effectif_max'
+        - $ref: '#/components/parameters/age_beneficiaire_min'
+        - $ref: '#/components/parameters/age_beneficiaire_max'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_min'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_max'
+        - $ref: '#/components/parameters/nationalite_beneficiaire'
+        - $ref: '#/components/parameters/date_depot_document_min'
+        - $ref: '#/components/parameters/date_depot_document_max'
+        - $ref: '#/components/parameters/type_publication'
+        - $ref: '#/components/parameters/date_publication_min'
+        - $ref: '#/components/parameters/date_publication_max'
+        - $ref: '#/components/parameters/siren'
+      responses:
+        "200":
+          description: Recherche réussie. Le retour contient la liste des dirigeants qui répondent aux critères indiqués.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultats:
+                    type: array
+                    description: Liste des dirigeants qui correspondent à la recherche.
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/RepresentantRecherche'
+                        - type: object
+                          properties:
+                            entreprises:
+                              type: array
+                              description: Liste des entreprises du dirigeant, dans la limite de 100 entreprises.
+                              items:
+                                  $ref: '#/components/schemas/EntrepriseRecherche'
+                            nb_entreprises_total:
+                              type: integer
+                              description: Nombre d'entreprises du dirigeant au total
+                  total:
+                    type: integer
+                    description: Nombre de dirigeants qui correspondent à la recherche.
+                    example: 100
+                  page:
+                    type: integer
+                    description: Page actuelle.
+                    example: 1
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Aucun dirigeant ne correspond aux critères indiqués.
+        "503":
+          description: Service momentanément indisponible.
+  /recherche-beneficiaires:
+    get:
+      tags:
+        - Recherche
+      summary: "Recherche les bénéficiaires effectifs qui correspondent à des critères."
+      description: "Tous les paramètres sont optionnels et servent à filtrer la recherche. Les différents bénéficiaires effectifs seront renvoyées dans un tableau `resultats`."
+      operationId: recherche-beneficiaires
+      parameters:
+        - $ref: '#/components/parameters/api_token'
+        - $ref: '#/components/parameters/par_page'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/precision'
+        - name: q
+          in: query
+          description: Nom et/ou prénom du bénéficiaire effectif.
+          required: false
+          schema:
+            type: string
+            example: Xavier Niel
+        - $ref: '#/components/parameters/age_beneficiaire_min'
+        - $ref: '#/components/parameters/age_beneficiaire_max'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_min'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_max'
+        - $ref: '#/components/parameters/nationalite_beneficiaire'
+        - $ref: '#/components/parameters/code_naf'
+        - $ref: '#/components/parameters/departement'
+        - $ref: '#/components/parameters/region'
+        - $ref: '#/components/parameters/code_postal'
+        - $ref: '#/components/parameters/convention_collective'
+        - $ref: '#/components/parameters/categorie_juridique'
+        - $ref: '#/components/parameters/entreprise_cessee'
+        - $ref: '#/components/parameters/statut_rcs'
+        - $ref: '#/components/parameters/objet_social'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_min'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_max'
+        - $ref: '#/components/parameters/date_radiation_rcs_min'
+        - $ref: '#/components/parameters/date_radiation_rcs_max'
+        - $ref: '#/components/parameters/capital_min'
+        - $ref: '#/components/parameters/capital_max'
+        - $ref: '#/components/parameters/chiffre_affaires_min'
+        - $ref: '#/components/parameters/chiffre_affaires_max'
+        - $ref: '#/components/parameters/resultat_min'
+        - $ref: '#/components/parameters/resultat_max'
+        - $ref: '#/components/parameters/date_creation_min'
+        - $ref: '#/components/parameters/date_creation_max'
+        - $ref: '#/components/parameters/tranche_effectif_min'
+        - $ref: '#/components/parameters/tranche_effectif_max'
+        - $ref: '#/components/parameters/type_dirigeant'
+        - $ref: '#/components/parameters/qualite_dirigeant'
+        - $ref: '#/components/parameters/nationalite_dirigeant'
+        - $ref: '#/components/parameters/prenom_dirigeant'
+        - $ref: '#/components/parameters/age_dirigeant_min'
+        - $ref: '#/components/parameters/age_dirigeant_max'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_min'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_max'
+        - $ref: '#/components/parameters/date_depot_document_min'
+        - $ref: '#/components/parameters/date_depot_document_max'
+        - $ref: '#/components/parameters/type_publication'
+        - $ref: '#/components/parameters/date_publication_min'
+        - $ref: '#/components/parameters/date_publication_max'
+        - $ref: '#/components/parameters/siren'
+      responses:
+        "200":
+          description: Recherche réussie. Le retour contient la liste des bénéficiaires effectifs qui répondent aux critères indiqués.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultats:
+                    type: array
+                    description: Liste des bénéficiaires effectifs qui correspondent à la recherche.
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Beneficiaire'
+                        - type: object
+                          properties:
+                            entreprises:
+                              type: array
+                              description: Liste des entreprises dont le bénéficiaire effectif est bénéficiaire effectif, dans la limite de 100 entreprises.
+                              items:
+                                  $ref: '#/components/schemas/EntrepriseRecherche'
+                            nb_entreprises_total:
+                              type: integer
+                              description: Nombre d'entreprises du bénéficiaire effectif au total.
+                            entreprises_dirigeant:
+                              type: array
+                              description: Liste des entreprises dont le bénéficiaire effectif est dirigeant (sans forcément en être bénéficiaire effectif), dans la limite de 100 entreprises.
+                              items:
+                                  $ref: '#/components/schemas/EntrepriseRecherche'
+                            nb_entreprises_dirigeant_total:
+                              type: integer
+                              description: Nombre d'entreprises dont le bénéficiaire effectif est dirigeant au total.
+                  total:
+                    type: integer
+                    description: Nombre de bénéficiaires effectifs qui correspondent à la recherche.
+                    example: 100
+                  page:
+                    type: integer
+                    description: Page actuelle.
+                    example: 1
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Aucun bénéficiaire effectif ne correspond aux critères indiqués.
+        "503":
+          description: Service momentanément indisponible.
+  /recherche-documents:
+    get:
+      tags:
+        - Recherche
+      summary: "Recherche les documents qui correspondent à des critères."
+      description: "Tous les paramètres sont optionnels et servent à filtrer la recherche. Les différents documents seront renvoyées dans un tableau `resultats`."
+      operationId: recherche-documents
+      parameters:
+        - $ref: '#/components/parameters/api_token'
+        - $ref: '#/components/parameters/par_page'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/precision'
+        - name: q
+          in: query
+          description: Mot-clé à rechercher dans le contenu du document.
+          required: false
+          schema:
+            type: string
+            example: Rémunération
+        - $ref: '#/components/parameters/date_depot_document_min'
+        - $ref: '#/components/parameters/date_depot_document_max'
+        - $ref: '#/components/parameters/code_naf'
+        - $ref: '#/components/parameters/departement'
+        - $ref: '#/components/parameters/region'
+        - $ref: '#/components/parameters/code_postal'
+        - $ref: '#/components/parameters/convention_collective'
+        - $ref: '#/components/parameters/categorie_juridique'
+        - $ref: '#/components/parameters/entreprise_cessee'
+        - $ref: '#/components/parameters/statut_rcs'
+        - $ref: '#/components/parameters/objet_social'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_min'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_max'
+        - $ref: '#/components/parameters/date_radiation_rcs_min'
+        - $ref: '#/components/parameters/date_radiation_rcs_max'
+        - $ref: '#/components/parameters/capital_min'
+        - $ref: '#/components/parameters/capital_max'
+        - $ref: '#/components/parameters/chiffre_affaires_min'
+        - $ref: '#/components/parameters/chiffre_affaires_max'
+        - $ref: '#/components/parameters/resultat_min'
+        - $ref: '#/components/parameters/resultat_max'
+        - $ref: '#/components/parameters/date_creation_min'
+        - $ref: '#/components/parameters/date_creation_max'
+        - $ref: '#/components/parameters/tranche_effectif_min'
+        - $ref: '#/components/parameters/tranche_effectif_max'
+        - $ref: '#/components/parameters/type_dirigeant'
+        - $ref: '#/components/parameters/qualite_dirigeant'
+        - $ref: '#/components/parameters/nationalite_dirigeant'
+        - $ref: '#/components/parameters/prenom_dirigeant'
+        - $ref: '#/components/parameters/age_dirigeant_min'
+        - $ref: '#/components/parameters/age_dirigeant_max'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_min'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_max'
+        - $ref: '#/components/parameters/age_beneficiaire_min'
+        - $ref: '#/components/parameters/age_beneficiaire_max'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_min'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_max'
+        - $ref: '#/components/parameters/nationalite_beneficiaire'
+        - $ref: '#/components/parameters/type_publication'
+        - $ref: '#/components/parameters/date_publication_min'
+        - $ref: '#/components/parameters/date_publication_max'
+        - $ref: '#/components/parameters/siren'
+      responses:
+        "200":
+          description: Recherche réussie. Le retour contient la liste des documents qui répondent aux critères indiqués.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultats:
+                    type: array
+                    description: Liste des documents qui correspondent à la recherche.
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Document'
+                        - type: object
+                          properties:
+                            entreprise:
+                              $ref: '#/components/schemas/EntrepriseRecherche'
+                  total:
+                    type: integer
+                    description: Nombre de documents qui correspondent à la recherche.
+                    example: 100
+                  page:
+                    type: integer
+                    description: Page actuelle.
+                    example: 1
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Aucun document ne correspond aux critères indiqués.
+        "503":
+          description: Service momentanément indisponible.
+  /recherche-publications:
+    get:
+      tags:
+        - Recherche
+      summary: "Recherche les publications BODACC qui correspondent à des critères."
+      description: "Tous les paramètres sont optionnels et servent à filtrer la recherche. Les différentes publications seront renvoyées dans un tableau `resultats`."
+      operationId: recherche-publications
+      parameters:
+        - $ref: '#/components/parameters/api_token'
+        - $ref: '#/components/parameters/par_page'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/precision'
+        - name: q
+          in: query
+          description: Mot-clé à rechercher dans le contenu de la publication.
+          required: false
+          schema:
+            type: string
+            example: Liquidation
+        - $ref: '#/components/parameters/code_naf'
+        - $ref: '#/components/parameters/departement'
+        - $ref: '#/components/parameters/region'
+        - $ref: '#/components/parameters/code_postal'
+        - $ref: '#/components/parameters/convention_collective'
+        - $ref: '#/components/parameters/categorie_juridique'
+        - $ref: '#/components/parameters/entreprise_cessee'
+        - $ref: '#/components/parameters/statut_rcs'
+        - $ref: '#/components/parameters/objet_social'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_min'
+        - $ref: '#/components/parameters/date_immatriculation_rcs_max'
+        - $ref: '#/components/parameters/date_radiation_rcs_min'
+        - $ref: '#/components/parameters/date_radiation_rcs_max'
+        - $ref: '#/components/parameters/capital_min'
+        - $ref: '#/components/parameters/capital_max'
+        - $ref: '#/components/parameters/chiffre_affaires_min'
+        - $ref: '#/components/parameters/chiffre_affaires_max'
+        - $ref: '#/components/parameters/resultat_min'
+        - $ref: '#/components/parameters/resultat_max'
+        - $ref: '#/components/parameters/date_creation_min'
+        - $ref: '#/components/parameters/date_creation_max'
+        - $ref: '#/components/parameters/tranche_effectif_min'
+        - $ref: '#/components/parameters/tranche_effectif_max'
+        - $ref: '#/components/parameters/type_dirigeant'
+        - $ref: '#/components/parameters/qualite_dirigeant'
+        - $ref: '#/components/parameters/nationalite_dirigeant'
+        - $ref: '#/components/parameters/prenom_dirigeant'
+        - $ref: '#/components/parameters/age_dirigeant_min'
+        - $ref: '#/components/parameters/age_dirigeant_max'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_min'
+        - $ref: '#/components/parameters/date_de_naissance_dirigeant_max'
+        - $ref: '#/components/parameters/age_beneficiaire_min'
+        - $ref: '#/components/parameters/age_beneficiaire_max'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_min'
+        - $ref: '#/components/parameters/date_de_naissance_beneficiaire_max'
+        - $ref: '#/components/parameters/nationalite_beneficiaire'
+        - $ref: '#/components/parameters/date_depot_document_min'
+        - $ref: '#/components/parameters/date_depot_document_max'
+        - $ref: '#/components/parameters/type_publication'
+        - $ref: '#/components/parameters/date_publication_min'
+        - $ref: '#/components/parameters/date_publication_max'
+        - $ref: '#/components/parameters/siren'
+      responses:
+        "200":
+          description: Recherche réussie. Le retour contient la liste des publications qui répondent aux critères indiqués.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultats:
+                    type: array
+                    description: Liste des publications qui correspondent à la recherche.
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Publication'
+                        - type: object
+                          properties:
+                            entreprise:
+                              $ref: '#/components/schemas/EntrepriseRecherche'
+                  total:
+                    type: integer
+                    description: Nombre de publications qui correspondent à la recherche.
+                    example: 100
+                  page:
+                    type: integer
+                    description: Page actuelle.
+                    example: 1
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Aucune publication ne correspond aux critères indiqués.
+        "503":
+          description: Service momentanément indisponible.
+  /suggestions:
+    get:
+      tags:
+        - Suggestions / Autocomplete
+      summary: "Recherche les entreprises qui correspondent à un début de recherche textuelle (type autocomplete)."
+      description: "Cette route nécessite généralement d'avoir un temps de réponse très faible. Une URL avec un temps de réponse plus faible a été mise en place : `https://suggestions.pappers.fr/v2?q=googl`. D'autre part, afin de permettre une intégration en front-end la plus directe, cette route ne nécessite pas de token d'authentification."
+      operationId: suggestions
+      parameters:
+        - name: q
+          in: query
+          description: "Début de recherche textuelle"
+          required: true
+          schema:
+            type: string
+            example: googl
+        - name: longueur
+          in: query
+          description: "Nombre de résultats. Maximum 100. Valeur par défaut : `10`."
+          required: false
+          schema:
+            type: integer
+            example: 20
+        - name: cibles
+          in: query
+          description: "Cibles de la recherche, séparées par des virgules. Valeur par défaut : `\"nom_entreprise\"`."
+          required: false
+          schema:
+            type: string
+            enum: [nom_entreprise, denomination, nom_complet, representant, siren, siret]
+            example: nom_entreprise,siren,siret
+      responses:
+        "200":
+          description: Requête correctement exécutée. Le retour contient une ou plusieurs listes d'entreprises en fonction du paramètre `cibles` de la requête.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultats_nom_entreprise:
+                    type: array
+                    format: optional
+                    description: Liste des entreprises dont le nom (dénomination ou nom/prénom) peut compléter la recherche textuelle. Uniquement présent si le paramètre `cibles` contient `nom_entreprise`.
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            mention:
+                              type: string
+                              description: Nom de l'entreprise, avec le texte recherché encerclé d'une balise HTML `<em>`.
+                        - $ref: '#/components/schemas/EntrepriseRecherche'
+                  resultats_denomination:
+                    type: array
+                    format: optional
+                    description: Liste des entreprises dont la dénomination peut compléter la recherche textuelle (concerne les personnes morales seulement). Uniquement présent si le paramètre `cibles` contient `denomination`.
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            mention:
+                              type: string
+                              description: Dénomination de l'entreprise, avec le texte recherché encerclé d'une balise HTML `<em>`.
+                        - $ref: '#/components/schemas/EntrepriseRecherche'
+                  resultats_nom_complet:
+                    type: array
+                    format: optional
+                    description: Liste des entreprises dont le nom complet (nom + prénom ou prénom + nom) peut compléter la recherche textuelle (concerne les personnes physiques seulement). Uniquement présent si le paramètre `cibles` contient `nom_complet`.
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            mention:
+                              type: string
+                              description: Nom complet de l'entreprise, avec le texte recherché encerclé d'une balise HTML `<em>`.
+                        - $ref: '#/components/schemas/EntrepriseRecherche'
+                  resultats_representant:
+                    type: array
+                    format: optional
+                    description: Liste des représentants dont le nom complet (nom + prénom ou prénom + nom) peut compléter la recherche textuelle. Uniquement présent si le paramètre `cibles` contient `representant`.
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            mention:
+                              type: string
+                              description: Nom du dirigeant, avec le texte recherché encerclé d'une balise HTML `<em>`.
+                        - $ref: '#/components/schemas/Representant'
+                  resultats_siren:
+                    type: array
+                    format: optional
+                    description: Liste des entreprises dont le numéro SIREN peut compléter la recherche textuelle. Uniquement présent si le paramètre `cibles` contient `siren`.
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            mention:
+                              type: string
+                              description: SIREN de l'entreprise, avec le texte recherché encerclé d'une balise HTML `<em>`.
+                        - $ref: '#/components/schemas/EntrepriseRecherche'
+                  resultats_siret:
+                    type: array
+                    format: optional
+                    description: Liste des entreprises dont le numéro SIRET peut compléter la recherche textuelle. Uniquement présent si le paramètre `cibles` contient `siret`.
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            mention:
+                              type: string
+                              description: SIRET de l'entreprise, avec le texte recherché encerclé d'une balise HTML `<em>`.
+                        - $ref: '#/components/schemas/EntrepriseRecherche'
+        "400":
+          description: Paramètres de la requête incorrects.
+  /entreprise/comptes:
+    get:
+      tags:
+        - Comptes annuels
+      summary: Récupère les comptes annuels publiés d'une entreprise.
+      description: Vous devez fournir le SIREN de l'entreprise pour laquelle vous souhaitez obtenir les comptes annuels.
+      operationId: comptes-annuels
+      parameters:
+        - $ref: '#/components/parameters/api_token'
+        - name: siren
+          in: query
+          description: SIREN de l'entreprise
+          required: false
+          schema:
+            type: string
+            example: 443061841
+        - name: annee
+          in: query
+          description: Année de cloture des comptes souhaités. Il est possible d'indiquer plusieurs années en les séparant par des virgules. Si le paramètre n'est pas fourni, toutes les années disponibles seront retournées.
+          required: false
+          schema:
+            type: string
+            example: 2016,2017,2018
+      responses:
+        "200":
+          description: Comptes annuels disponibles. Le retour contient les comptes détaillés, ainsi que les ratios associés.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  description: Comptes disponibles pour l'année correspondant à la clé.
+                  items:
+                    type: object
+                    description: Année
+                    properties:
+                      date_depot:
+                        type: string
+                        description: Date de dépôt des comptes, au format AAAA-MM-JJ.
+                        example: 2021-04-23
+                      code_greffe:
+                        type: string
+                        description: Code du greffe de dépôt des comptes.
+                        example: 7501
+                      numero_depot:
+                        type: string
+                        description: Numéro de dépôt des comptes au greffe.
+                        example: 75548
+                      numero_gestion:
+                        type: string
+                        description: Numéro de gestion au greffe.
+                        example: 2003B09427
+                      date_cloture:
+                        type: string
+                        description: Date de cloture des comptes, au format AAAA-MM-JJ.
+                        example: 2020-12-31
+                      date_cloture_n-1:
+                        type: string
+                        format: nullable
+                        description: Date de cloture des comptes n-1, lorsque présents, au format AAAA-MM-JJ.
+                      duree_exercice_n:
+                        type: integer
+                        description: Durée de l'exercice déposé, en mois.
+                        example: 12
+                      duree_exercice_n-1:
+                        type: integer
+                        format: nullable
+                        description: Durée de l'exercice précédent, lorsque présent, en mois.
+                      type_comptes:
+                        type: string
+                        enum: [C,S,K,CS,B,A]
+                        description: Type de comptes (C = complets ; S = simplifiés ; K = consolidés ; CS = mélange complets/simplifiés ; B = banques ; A = assurances).
+                        example: C
+                      libelle_type_comptes:
+                        type: string
+                        enum: [Complets,Simplifiés,Consolidés,Complets/Simplifiés,Banques,Assurances]
+                        description: Libellé du type de comptes.
+                        example: Complets
+                      devise:
+                        type: string
+                        description: Devise des comptes.
+                        example: EUR
+                      devise_origine:
+                        type: string
+                        format: nullable
+                        description: Devise d'origine en cas de conversion.
+                      confidentialite:
+                        type: boolean
+                        description: Confidentialité totale des comptes.
+                      confidentialite_compte_de_resultat:
+                        type: boolean
+                        description: Confidentialité partielle des comptes (seul le compte de résultat est confidentiel, le reste des comptes sont disponibles).
+                      type_saisie:
+                        type: string
+                        description: Description du type de saisie des comptes.
+                      informations_traitement:
+                        type: array
+                        format: nullable
+                        description: Informations complémentaires sur le traitement des comptes.
+                        items:
+                          type: string
+                      sections:
+                        type: array
+                        description: Liste des sections de liasses fiscales.
+                        items:
+                          type: object
+                          properties:
+                            libelle:
+                              type: string
+                              description: Libellé de la section.
+                              example: Actif (bilan)
+                            liasses:
+                              type: array
+                              description: Liste des liasses fiscales de la section.
+                              items:
+                                type: object
+                                properties:
+                                  code:
+                                    type: string
+                                    description: Code de la liasse.
+                                    example: AN
+                                  libelle:
+                                    type: string
+                                    description: Libellé de la liasse.
+                                    example: Terrains
+                                  colonnes:
+                                    type: array
+                                    description: Colonnes de la liasse.
+                                    items:
+                                      type: object
+                                      properties:
+                                        libelle:
+                                          type: string
+                                          description: Libellé de la colonne.
+                                          example: Montant brut année N
+                                        valeur:
+                                          type: integer
+                                          description: Valeur de la colonne.
+                                          example: 60067444
+                      ratios:
+                        $ref: '#/components/schemas/Ratios'
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Comptes annuels indisponibles.
+        "503":
+          description: Service momentanément indisponible.
+  /document/telechargement:
+    get:
+      tags:
+        - Documents
+      summary: Télécharge un document PDF ou XLSX à partir de son token.
+      description: "Vous devez fournir le token du document. Le document vous sera envoyé au format PDF ou XLSX."
+      operationId: document-telechargement
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: token
+          in: query
+          description: "Token du document"
+          required: true
+          schema:
+            type: string
+            example: QTQ0MzA2MTg0MTIwMjAwNDA3RMOpY2lzaW9uKHMpIGRlIGwnYXNzb2Npw6kgdW5pcXVl
+      responses:
+        "200":
+          description: Document disponible. Le retour contient le document au format PDF ou XLSX.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Document indisponible.
+        "503":
+          description: Service momentanément indisponible.
+  /document/extrait_pappers:
+    get:
+      tags:
+        - Documents
+      summary: Télécharge l'extrait Pappers d'une entreprise à partir de son SIREN ou SIRET.
+      description: "Vous devez fournir soit le SIREN, soit le SIRET. Le document vous sera envoyé au format PDF."
+      operationId: document-extrait-pappers
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: siren
+          in: query
+          description: "SIREN de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 443061841
+        - name: siret
+          in: query
+          description: "SIRET de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 44306184100047
+      responses:
+        "200":
+          description: Document disponible. Le retour contient l'extrait Pappers au format PDF.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Document indisponible.
+        "503":
+          description: Service momentanément indisponible.
+  /document/extrait_inpi:
+    get:
+      tags:
+        - Documents
+      summary: Télécharge l'extrait INPI d'une entreprise à partir de son SIREN ou SIRET.
+      description: "Vous devez fournir soit le SIREN, soit le SIRET. Le document vous sera envoyé au format PDF."
+      operationId: document-extrait-inpi
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: siren
+          in: query
+          description: "SIREN de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 443061841
+        - name: siret
+          in: query
+          description: "SIRET de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 44306184100047
+      responses:
+        "200":
+          description: Document disponible. Le retour contient l'extrait INPI au format PDF.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Document indisponible.
+        "503":
+          description: Service momentanément indisponible.
+  /document/avis_situation_insee:
+    get:
+      tags:
+        - Documents
+      summary: Télécharge l'avis de situation INSEE d'une entreprise à partir de son SIREN ou SIRET.
+      description: "Vous devez fournir soit le SIREN, soit le SIRET. Le document vous sera envoyé au format PDF."
+      operationId: document-avis-situation-insee
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: siren
+          in: query
+          description: "SIREN de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 443061841
+        - name: siret
+          in: query
+          description: "SIRET de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 44306184100047
+      responses:
+        "200":
+          description: Document disponible. Le retour contient l'avis de situation au format PDF.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Document indisponible.
+        "503":
+          description: Service momentanément indisponible.
+  /document/statuts:
+    get:
+      tags:
+        - Documents
+      summary: Télécharge les derniers statuts disponibles d'une entreprise à partir de son SIREN ou SIRET.
+      description: "Vous devez fournir soit le SIREN, soit le SIRET. Le document vous sera envoyé au format PDF."
+      operationId: document-status
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: siren
+          in: query
+          description: "SIREN de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 443061841
+        - name: siret
+          in: query
+          description: "SIRET de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 44306184100047
+      responses:
+        "200":
+          description: Document disponible. Le retour contient les statuts au format PDF.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Document indisponible.
+        "503":
+          description: Service momentanément indisponible.
+  /document/declaration_beneficiaires_effectifs:
+    get:
+      tags:
+        - Documents
+      summary: Télécharge la déclaration des bénéficiaires effectifs d'une entreprise à partir de son SIREN.
+      description: "Vous devez fournir le SIREN. Le document vous sera envoyé au format PDF.\n\nSeules les autorités de contrôle (<a rel='noreferrer noopener' target='_blank' href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000041578272/'>article R. 561-57 du Code monétaire et financier en dénombre 18</a>) et les personnes assujetties à la lutte contre le blanchiment des capitaux et le financement du terrorisme (<a rel='noreferrer noopener' target='_blank' href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042648575/'>article L. 561-2 du code monétaire et financier</a>) peuvent accéder à ces informations.\n\nPour pouvoir utiliser cette route veuillez nous contacter au préalable à api@pappers.fr"
+      operationId: document-beneficiaires-effectifs
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: siren
+          in: query
+          description: "SIREN de l'entreprise"
+          required: false
+          schema:
+            type: string
+            example: 443061841
+      responses:
+        "200":
+          description: Document disponible. Le retour contient la déclaration des bénéficiaires effectifs au format PDF.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "403":
+          description: Vous n'avez pas les droits pour exécuter cette requête.
+        "404":
+          description: Document indisponible.
+        "503":
+          description: Service momentanément indisponible.
+  /suivi-jetons:
+    get:
+      tags:
+        - Suivi utilisation
+      summary: Récupère le suivi d'utilisation des jetons.
+      description: "Vous devez fournir la clé d'utilisation de l'API."
+      operationId: suivi-jetons
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+      responses:
+        "200":
+          description: Succès
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Suivi d'utilisation des jetons.
+                properties:
+                  jetons_abonnement:
+                    type: number
+                    example: 10000
+                    description: Le nombre de jetons mensuels initiaux de votre abonnement.
+                  jetons_abonnement_utilises:
+                    type: number
+                    example: 650
+                    description: Le nombre de jetons mensuels de votre abonnement que vous avez utilisés
+                  jetons_pay_as_you_go_restants:
+                    type: number
+                    example: 0
+                    description: Le nombre de jetons pay as you go qu'il vous reste.
+        "401":
+          description: Clé API incorrecte.
+        "503":
+          description: Service momentanément indisponible.
+  /liste:
+    post:
+      tags:
+        - Surveillance
+      summary: Ajoute une (ou plusieurs) entreprise(s) à une liste d'entreprises.
+      description: "Vous devez fournir la clé d'utilisation de l'API ainsi que l'identifiant de votre liste."
+      operationId: surveillance-entreprise
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: id_liste
+          in: query
+          description: Identifiant unique de votre liste de surveillance d'entreprises
+          required: true
+          schema:
+            type: string
+            example: 'votre_identifiant_ici'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                  - siren
+                properties:
+                  siren:
+                    type: string
+                    example: '443061841'
+                    description: SIREN de l'entreprise
+
+      responses:
+        "200":
+          description: Aucun changement, les données étaient déjà présentes.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Nombre de notifications ajoutées.
+                properties:
+                  notifications_ajoutees:
+                    type: number
+                    example: 0
+                    default: 0
+                    description: Le nombre d'entreprises ajoutées à votre liste de surveillance d'entreprises.
+        "201":
+          description: Créés, liste mise à jour.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Nombre de notifications ajoutées.
+                properties:
+                  notifications_ajoutees:
+                    type: number
+                    example: 10
+                    description: Le nombre d'entreprises ajoutées à votre liste de surveillance d'entreprises.
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "403":
+          description: Offre dépassée.
+        "404":
+          description: Liste non trouvée.
+        "503":
+          description: Service momentanément indisponible.
+  /liste/:
+    post:
+      tags:
+        - Surveillance
+      summary: Ajoute un (ou plusieurs) dirigeant(s) à une liste de dirigeants.
+      description: "Vous devez fournir la clé d'utilisation de l'API ainsi que l'identifiant de votre liste. Les informations à renseigner sont différentes selon le type de personne à ajouter (morale ou physique)"
+      operationId: surveillance-dirigeant
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: id_liste
+          in: query
+          description: Identifiant unique de votre liste de surveillance de dirigeants
+          required: true
+          schema:
+            type: string
+            example: 'votre_identifiant_ici'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                  - siren
+                properties:
+                  siren:
+                    type: string
+                    description: SIREN de la personne morale (si ajout d'une personne morale)
+                  denomination:
+                    type: string
+                    description: Dénomination de la personne morale (si ajout d'une personne morale)
+                  nom:
+                    type: string
+                    description: Nom de la personne physique (si ajout d'une personne physique)
+                  prenom:
+                    type: string
+                    description: Prénom de la personne physique (si ajout d'une personne physique)
+                  date_de_naissance:
+                    type: string
+                    description: Date de naissance de la personne physique au format AAAA-MM-JJ (si ajout d'une personne physique)
+                  recherche_elargie:
+                    type: boolean
+                    default: false
+                    description: "Active la recherche élargie du dirigeant : <ul><li>Pour une personne physique : c'est un cas rare mais la date de naissance du dirigeant n'est pas toujours connue de Pappers. Si vous activer ce filtre et que la date de naissance est inconnue, l'alerte sera générée uniquement sur la base du nom et prénom.</li><li>Pour une personne morale : c'est un cas rare mais le SIREN du dirigeant n'est pas toujours connu de Pappers. Si vous activer ce filtre et que le SIREN est inconnu, l'alerte sera générée uniquement sur la base de la dénomination. Activable uniquement si le champ denomination est présent.</li></ul>"
+              example: [
+                {
+                  "siren": '443061841',
+                  "denomination": 'Google FRANCE'
+                },
+                {
+                  "nom": 'Yi',
+                  "prenom": 'Kenneth H.',
+                  "date_de_naissance": "1970-01-06",
+                  "recherche_elargie": true
+                }
+              ]
+
+      responses:
+        "200":
+          description: Aucun changement, les données étaient déjà présentes.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Nombre de notifications ajoutées.
+                properties:
+                  notifications_ajoutees:
+                    type: number
+                    example: 0
+                    default: 0
+                    description: Le nombre de dirigeants ajoutées à votre liste de surveillance de dirigeants.
+        "201":
+          description: Créés, liste mise à jour.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Nombre de notifications ajoutées.
+                properties:
+                  notifications_ajoutees:
+                    type: number
+                    example: 10
+                    description: Le nombre de dirigeants ajoutées à votre liste de surveillance de dirigeants.
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "403":
+          description: Offre dépassée.
+        "404":
+          description: Liste non trouvée.
+        "503":
+          description: Service momentanément indisponible.
+    delete:
+      tags:
+        - Surveillance
+      summary: Supprime une (ou plusieurs) notification(s) d'une liste.
+      description: "Vous devez fournir la clé d'utilisation de l'API ainsi que l'identifiant de votre liste."
+      operationId: surveillance-notifications-delete
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: id_liste
+          in: query
+          description: Identifiant unique de votre liste de surveillance
+          required: true
+          schema:
+            type: string
+            example: 'votre_identifiant_ici'
+        - name: siren
+          in: query
+          description: Liste des sirens des notifications à supprimer, séparés par une virgule
+          required: false
+          schema:
+            type: string
+            example: '443061841,950370973'
+        - name: id
+          in: query
+          description: Liste des ids des notifications à supprimer, séparés par une virgule
+          required: false
+          schema:
+            type: string
+            example: 'ecfca3e5fb1ce07bb3fdfe8760a28df5aa617ed4951b7f61,a67b9de66189ba98eb4aede09f4b2b565b0f18fe694da7bc'
+        - name: supprimer_totalite
+          in: query
+          description: Suppression de toutes les notifications de la liste
+          required: false
+          schema:
+            type: boolean
+            example: true
+      responses:
+        "200":
+          description: Succés.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Nombre de notifications supprimées.
+                properties:
+                  notifications_supprimees:
+                    type: number
+                    example: 10
+                    description: Le nombre de notifications supprimées de votre liste de surveillance.
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Liste non trouvée.
+        "503":
+          description: Service momentanément indisponible.
+  /liste-informations:
+    post:
+      tags:
+        - Surveillance
+      summary: Ajoute des informations à une (ou plusieurs) notification(s).
+      description: "Vous devez fournir la clé d'utilisation de l'API ainsi que l'identifiant de votre liste."
+      operationId: surveillance-liste-informations
+      parameters:
+        - name: api_token
+          in: query
+          description: Clé d'utilisation de l'API
+          required: true
+          schema:
+            type: string
+            example: 'votre_clé_ici'
+        - name: id_liste
+          in: query
+          description: Identifiant unique de votre liste de surveillance d'entreprises
+          required: true
+          schema:
+            type: string
+            example: 'votre_identifiant_ici'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notifications:
+                  type: array
+                  description: Tableau d'identifiant de notifications
+                  items:
+                    type: string
+                    example: ecfca3e5fb1ce07bb3fdfe8760a28df5aa617ed4951b7f61
+                informations:
+                  type: string
+                  example: 'Information quelconque'
+                  description: Information à rajouter sur les notifications
+                  maxLength: 255
+      responses:
+        "200":
+          description: Succés.
+        "400":
+          description: Paramètres de la requête incorrects.
+        "401":
+          description: Clé API incorrecte.
+        "404":
+          description: Liste non trouvée.
+        "503":
+          description: Service momentanément indisponible.
+components:
+  parameters:
+    api_token:
+      name: api_token
+      in: query
+      description: Clé d'utilisation de l'API
+      required: true
+      schema:
+        type: string
+        example: 'votre_clé_ici'
+    par_page:
+      name: par_page
+      in: query
+      description: "Nombre de résultats affichés sur une page. Valeur par défaut : `10`."
+      required: false
+      schema:
+        type: integer
+        example: 20
+    page:
+      name: page
+      in: query
+      description: "Page de résultats. Valeur par défaut : `1`."
+      required: false
+      schema:
+        type: integer
+        example: 1
+    bases:
+      name: bases
+      in: query
+      description: "Bases de données dans lesquelles rechercher. Il est possible d'indiquer plusieurs bases en les séparant par des virgules. Valeur par défaut : `\"entreprises\"`."
+      required: false
+      schema:
+        type: string
+        enum: [entreprises, dirigeants, beneficiaires, documents, publications]
+        example: entreprises
+    precision:
+      name: precision
+      in: query
+      description: "Niveau de précision de la recherche. Valeur par défaut : `\"standard\"`."
+      required: false
+      schema:
+        type: string
+        enum: [approximative, standard, exacte]
+        example: standard
+    curseur:
+      name: curseur
+      in: query
+      description: "Curseur servant à parcourir l'ensemble des résultats (alternativement à la pagination qui est limitée à 400 résultats maximum). Doit valoir `*` pour la première requête, et doit pour les requêtes suivantes reprendre la valeur `curseurSuivant` retournée par la dernière réponse."
+      required: false
+      schema:
+        type: string
+        example: "*"
+    par_curseur:
+      name: par_curseur
+      in: query
+      description: "Nombre de résultats affichés par curseur. Valeur par défaut : `50`. Valeur minimale: `1`. Valeur maximale : `1000`."
+      required: false
+      schema:
+        type: integer
+        example: 20
+    export:
+      name: export
+      in: query
+      description: Si ce champ est renseigné, la requête renverra directement un export de l'ensemble des résultats de la recherche.
+      required: false
+      schema:
+        type: string
+        enum: [xlsx, csv, json]
+        example: xlsx
+    code_naf:
+      name: code_naf
+      in: query
+      description: Code NAF de l'entreprise. Il est possible d'indiquer plusieurs codes NAF en les séparant par des virgules.
+      required: false
+      schema:
+        type: string
+        example: 70.10Z
+    departement:
+      name: departement
+      in: query
+      description: Numéro de département de l'un des établissements de l'entreprise. Il est possible d'indiquer plusieurs départements en les séparant par des virgules.
+      required: false
+      schema:
+        type: string
+        example: 75
+    region:
+      name: region
+      in: query
+      description: Code de la région de l'un des établissements de l'entreprise, selon la [nomenclature Insee](https://www.insee.fr/fr/information/4316069#titre-bloc-18). Il est possible d'indiquer plusieurs codes régions en les séparant par des virgules.
+      required: false
+      schema:
+        type: string
+        example: 11
+    code_postal:
+      name: code_postal
+      in: query
+      description: Code postal de l'un des établissements de l'entreprise. Il est possible d'indiquer plusieurs codes postaux en les séparant par des virgules.
+      required: false
+      schema:
+        type: string
+        example: 75009
+    convention_collective:
+      name: convention_collective
+      in: query
+      description: Convention collective de l'entreprise.
+      required: false
+      schema:
+        type: string
+        example: 1486
+    categorie_juridique:
+      name: categorie_juridique
+      in: query
+      description: "Catégorie juridique de l'entreprise, selon la [nomenclature Insee](https://www.insee.fr/fr/information/2028129). \n\n**Note** : Le code correspond à celui de l'INSEE, à l'exception des SASU qui auront comme code 5720 et les EURL qui auront comme code 5498."
+      required: false
+      schema:
+        type: string
+        example: 5499
+    entreprise_cessee:
+      name: entreprise_cessee
+      in: query
+      description: Activité de l'entreprise cessée ou non.
+      required: false
+      schema:
+        type: boolean
+        example: false
+    statut_rcs:
+      name: statut_rcs
+      in: query
+      description: Statut au RCS
+      required: false
+      schema:
+        type: string
+        enum: [inscrit, radie, non inscrit]
+        example: inscrit
+    objet_social:
+      name: objet_social
+      in: query
+      description: Objet social de l'entreprise déclaré au RCS.
+      required: false
+      schema:
+        type: string
+        example: La conception de moteurs de recherche sur internet.
+    date_immatriculation_rcs_min:
+      name: date_immatriculation_rcs_min
+      in: query
+      description: Date d'immatriculation au RCS minimale de l'entreprise, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        example: 15-05-2002
+    date_immatriculation_rcs_max:
+      name: date_immatriculation_rcs_max
+      in: query
+      description: d'immatriculation au RCS minimale de l'entreprise, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        example: 15-05-2002
+    date_radiation_rcs_min:
+      name: date_radiation_rcs_min
+      in: query
+      description: Date de radiation au RCS minimale de l'entreprise, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        example: 15-05-2002
+    date_radiation_rcs_max:
+      name: date_radiation_rcs_max
+      in: query
+      description: Date de radiation au RCS maximale de l'entreprise, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        example: 17-05-2002
+    capital_min:
+      name: capital_min
+      in: query
+      description: Capital minimum de l'entreprise.
+      required: false
+      schema:
+        type: string
+        example: 411016200
+    capital_max:
+      name: capital_max
+      in: query
+      description: Capital maximum de l'entreprise.
+      required: false
+      schema:
+        type: string
+        example: 411016400
+    chiffre_affaires_min:
+      name: chiffre_affaires_min
+      in: query
+      description: "Chiffre d'affaires minimum de l'entreprise.\n\n**Note** : Filtrer sur ce critère restreint énormément les entreprises retournées car cela élimine d'office toutes les entreprises dont les comptes ne sont pas publiés."
+      required: false
+      schema:
+        type: string
+        example: 411016200
+    chiffre_affaires_max:
+      name: chiffre_affaires_max
+      in: query
+      description: "Chiffre d'affaires maximum de l'entreprise.\n\n**Note** : Filtrer sur ce critère restreint énormément les entreprises retournées car cela élimine d'office toutes les entreprises dont les comptes ne sont pas publiés."
+      required: false
+      schema:
+        type: string
+        example: 411016400
+    resultat_min:
+      name: resultat_min
+      in: query
+      description: "Résultat minimum de l'entreprise.\n\n**Note** : Filtrer sur ce critère restreint énormément les entreprises retournées car cela élimine d'office toutes les entreprises dont les comptes ne sont pas publiés."
+      required: false
+      schema:
+        type: string
+        example: 29327000
+    resultat_max:
+      name: resultat_max
+      in: query
+      description: "Résultat maximum de l'entreprise.\n\n**Note** : Filtrer sur ce critère restreint énormément les entreprises retournées car cela élimine d'office toutes les entreprises dont les comptes ne sont pas publiés."
+      required: false
+      schema:
+        type: string
+        example: 29327100
+    date_creation_min:
+      name: date_creation_min
+      in: query
+      description: Date de création minimale de l'entreprise, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        example: 15-05-2002
+    date_creation_max:
+      name: date_creation_max
+      in: query
+      description: Date de création maximale de l'entreprise, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        example: 17-05-2002
+    tranche_effectif_min:
+      name: tranche_effectif_min
+      in: query
+      description: "Tranche d'effectifs minimale de l'entreprise, selon la [nomenclature Sirene](https://www.sirene.fr/sirene/public/variable/tefen).\n\n**Note** : 00 ou NN donneront les mêmes résultats et veulent dire non employeur"
+      required: false
+      schema:
+        type: string
+        example: 40
+    tranche_effectif_max:
+      name: tranche_effectif_max
+      in: query
+      description: "Tranche d'effectifs maximale de l'entreprise, selon la [nomenclature Sirene](https://www.sirene.fr/sirene/public/variable/tefen).\n\n**Note** : 00 ou NN donneront les mêmes résultats et veulent dire non employeur"
+      required: false
+      schema:
+        type: string
+        example: 42
+    type_dirigeant:
+      name: type_dirigeant
+      in: query
+      description: Type du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: string
+        enum: [personne physique, personne morale]
+        example: physique
+    qualite_dirigeant:
+      name: qualite_dirigeant
+      in: query
+      description: Qualité du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: string
+        example: Administrateur
+    nationalite_dirigeant:
+      name: nationalite_dirigeant
+      in: query
+      description: Nationalité du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: string
+        example: Française
+    nom_dirigeant:
+      name: nom_dirigeant
+      in: query
+      description: Nom du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: string
+        example: Yi
+    prenom_dirigeant:
+      name: prenom_dirigeant
+      in: query
+      description: Prénom du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: string
+        example: Kenneth H.
+    age_dirigeant_min:
+      name: age_dirigeant_min
+      in: query
+      description: Âge minimal du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: integer
+        example: 40
+    age_dirigeant_max:
+      name: age_dirigeant_max
+      in: query
+      description: Âge maximal du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: integer
+        example: 42
+    date_de_naissance_dirigeant_min:
+      name: date_de_naissance_dirigeant_min
+      in: query
+      description: Date de naissance minimale du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises), au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        format: date
+        example: 1970-01-01
+    date_de_naissance_dirigeant_max:
+      name: date_de_naissance_dirigeant_max
+      in: query
+      description: Date de naissance maximale du dirigeant (ou de l'un des dirigeants de l'entreprise pour une recherche d'entreprises) de l'entreprise, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        format: date
+        example: 1970-12-31
+    age_beneficiaire_min:
+      name: age_beneficiaire_min
+      in: query
+      description: Âge minimal du bénéficiaire effectif (ou de l'un des bénéficiaires effectifs de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: integer
+        example: 40
+    age_beneficiaire_max:
+      name: age_beneficiaire_max
+      in: query
+      description: Âge maximal du bénéficiaire effectif (ou de l'un des bénéficiaires effectifs de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: integer
+        example: 42
+    date_de_naissance_beneficiaire_min:
+      name: date_de_naissance_beneficiaire_min
+      in: query
+      description: Date de naissance minimale du bénéficiaire effectif (ou de l'un des bénéficiaires effectifs de l'entreprise pour une recherche d'entreprises), au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        format: date
+        example: 1970-01-01
+    date_de_naissance_beneficiaire_max:
+      name: date_de_naissance_beneficiaire_max
+      in: query
+      description: Date de naissance maximale du bénéficiaire effectif (ou de l'un des bénéficiaires effectifs de l'entreprise pour une recherche d'entreprises) de l'entreprise, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        format: date
+        example: 1970-12-31
+    nationalite_beneficiaire:
+      name: nationalite_beneficiaire
+      in: query
+      description: Nationalité du bénéficiaire effectif (ou de l'un des bénéficiaires effectifs de l'entreprise pour une recherche d'entreprises).
+      required: false
+      schema:
+        type: string
+        example: Française
+    date_depot_document_min:
+      name: date_depot_document_min
+      in: query
+      description: Date de dépôt minimale du document, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        format: date
+        example: 2000-01-01
+    date_depot_document_max:
+      name: date_depot_document_max
+      in: query
+      description: Date de dépôt maximale du document, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        format: date
+        example: 2000-12-31
+    type_publication:
+      name: type_publication
+      in: query
+      description: Type de publication
+      required: false
+      schema:
+        type: string
+        enum: [Création, Immatriculation, Modification, Vente, Radiation, Procédure collective, Dépôt des comptes]
+        example: Procédure collective
+    date_publication_min:
+      name: date_publication_min
+      in: query
+      description: Date publication minimale de la publication, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        format: date
+        example: 2000-01-01
+    date_publication_max:
+      name: date_publication_max
+      in: query
+      description: Date de publication maximale de la publication, au format JJ-MM-AAAA.
+      required: false
+      schema:
+        type: string
+        format: date
+        example: 2000-12-31
+    siren:
+      name: siren
+      in: query
+      description: SIREN de l'entreprise.
+      required: false
+      schema:
+        type: string
+        example:
+  schemas:
+    EntrepriseBase:
+      type: object
+      properties:
+        siren:
+          type: string
+          example: "443061841"
+          description: Le numéro SIREN de l'entreprise au format xxxxxxxxx.
+        siren_formate:
+          type: string
+          example: 443 061 841
+          description: Le numéro SIREN de l'entreprise au format xxx xxx xxx.
+        nom_entreprise:
+          type: string
+          example: GOOGLE FRANCE
+          description: Le nom de l'entreprise. Il est égal à sigle + dénomination en cas de personne morale, ou à nom + prénom en cas de personne physique.
+        personne_morale:
+          type: boolean
+          description: Vrai en cas de personne morale, faux en cas de personne physique.
+        denomination:
+          type: string
+          format: nullable
+          description: Dénomination de l'entreprise si personne morale.
+          example: GOOGLE FRANCE
+        nom:
+          type: string
+          format: nullable
+          description: Nom si personne physique.
+          example:
+        prenom:
+          type: string
+          format: nullable
+          description: Prénom si personne physique.
+          example:
+        sexe:
+          type: string
+          format: nullable
+          description: Sexe si personne physique. F pour féminin, M pour masculin.
+          example:
+        code_naf:
+          type: string
+          description: Code NAF de l'entreprise.
+          example: 70.10Z
+        libelle_code_naf:
+          type: string
+          description: Libellé du code NAF de l'entreprise.
+          example: Activités des sièges sociaux
+        domaine_activite:
+          type: string
+          description: Domaine d'activité de l'entreprise.
+          example: Activités des sièges sociaux ; conseil de gestion
+        conventions_collectives:
+          description: Liste des conventions collectives de l'entreprise.
+          type: array
+          items:
+            type: object
+            properties:
+              nom:
+                type: string
+                description: Nom de la convention collective.
+                example: Convention collective nationale applicable au personnel des bureaux d'études techniques des cabinets d'ingénieurs-conseils et des sociétés de conseils(BET SYNTEC)
+              idcc:
+                type: integer
+                description: Code IDCC de l'entreprise.
+                example: 1486
+              confirmee:
+                type: boolean
+                description: Si confirmée, l'information est issue de la DSN de l'entreprise et fournie par le ministère du Travail. Si non confirmée, ce n'est qu'une estimation à partir du code NAF de l'entreprise.
+        date_creation:
+          type: string
+          format: date
+          description: Date de création de l'entreprise au format AAAA-MM-JJ.
+          example: "2002-05-16"
+        date_creation_formate:
+          type: string
+          description: Date de création de l'entreprise au format JJ/MM/AAAA.
+          example: 16/05/2002
+        entreprise_cessee:
+          type: boolean
+          description: Si vrai, l'entreprise n'est plus en activité. Sinon, elle est toujours en activité.
+        date_cessation:
+          type: string
+          format: nullable
+          description: Date de cessation de l'entreprise au format AAAA-MM-JJ.
+          example: "2002-05-16"
+        entreprise_employeuse:
+          type: boolean
+          description: Si vrai, l'entreprise a au moins un employé.
+        categorie_juridique:
+          type: string
+          description: "Catégorie juridique de l'entreprise, selon la [nomenclature Insee](https://www.insee.fr/fr/information/2028129). \n\n**Note** : Le code correspond à celui de l'INSEE, à l'exception des SASU qui auront comme code 5720 et les EURL qui auront comme code 5498."
+          example: '5499'
+        forme_juridique:
+          type: string
+          description: Forme juridique de l'entreprise.
+          example: Société à responsabilité limitée (SARL)
+        effectif:
+          type: string
+          description: Tranche d'effectif de l'entreprise.
+          example: Entre 500 et 999 salariés
+        effectif_min:
+          type: integer
+          description: Effectif minimal de l'entreprise.
+          example: 500
+        effectif_max:
+          type: integer
+          description: Effectif maximal de l'entreprise.
+          example: 999
+        tranche_effectif:
+          type: string
+          format: nullable
+          description: Tranche d'effectif de l'entreprise, selon la [nomenclature Sirene](https://www.sirene.fr/sirene/public/variable/tefen#:~:text=Cette%20variable%20correspond%20%C3%A0%20la,effectif%20salari%C3%A9%20de%20l'entreprise.).
+          example: "41"
+        annee_effectif:
+          type: integer
+          format: nullable
+          description: Année de validité des variables effectif, effectif_min et effectif_max.
+          example: 2017
+        capital:
+          type: number
+          format: nullable
+          description: Capital de l'entreprise.
+          example: 464884017
+        statut_rcs:
+          type: string
+          format: nullable
+          description: Statut de l'entreprise au RCS
+          example: "Inscrit"
+    EntrepriseFiche:
+      allOf:
+        - $ref: '#/components/schemas/EntrepriseBase'
+        - type: object
+          properties:
+            siege:
+              $ref: '#/components/schemas/EtablissementFiche'
+            diffusable:
+              type: boolean
+              description: Le statut de diffusion de l'entreprise. Non diffusable correspond à une personne physique ayant demandé à être exclue de la diffusion. Aucune information n'est alors disponible. Cette modalité n'est visible que pour les organismes habilités au titre de l'article R. 123-224 ou les administrations.
+            sigle:
+              type: string
+              format: nullable
+              description: Sigle de l'entreprise si personne morale.
+              example:
+            objet_social:
+              type: string
+              format: nullable
+              description: Objet social de l'entreprise.
+              example: Fourniture de services et/ou conseils relatifs aux logiciels au réseau internet aux réseaux télématiques ou en ligne notamment L'intermediation en matière de vente de publicité en ligne la promotion sous toutes ses formes de la publicité en ligne la promotion directe de produits et services et la mise en oeuvre de centres de traitement de l'information
+            capital_formate:
+              type: string
+              description: Capital l'entreprise au format xx xxx €.
+              example: 464 884 017,00 €
+            capital_actuel_si_variable:
+              type: string
+              format: nullable
+              description: Capital actuel de l'entreprise si variable.
+              example:
+            devise_capital:
+              type: string
+              format: nullable
+              description: Devise de capital_formate et capital_actuel_si_variable.
+              example: Euros
+            numero_rcs:
+              type: string
+              format: nullable
+              description: Numéro RCS de l'entreprise.
+              example: 464884017 R.C.S. Paris
+            date_cloture_exercice:
+              type: string
+              format: nullable
+              description: Date de clôture d'exercice de l'entreprise.
+              example:
+            date_cloture_exercice_exceptionnelle:
+              type: string
+              format: nullable
+              description: Date de clôture d'exercice exceptionnel de l'entreprise.
+              example:
+            date_cloture_exercice_exceptionnelle_formate:
+              type: string
+              format: nullable
+              description: Date de clôture d'exercice exceptionnel formatée de l'entreprise.
+              example:
+            prochaine_date_cloture_exercice:
+              type: string
+              format: nullable
+              description: Prochaine date de clôture d'exercice de l'entreprise.
+              example:
+            prochaine_date_cloture_exercice_formate:
+              type: string
+              format: nullable
+              description: Prochaine date de clôture d'exercice formatée de l'entreprise.
+              example:
+            economie_sociale_solidaire:
+              type: boolean
+              description: Vrai si l'entreprise est une entreprise de l'économie sociale et solidaire.
+            duree_personne_morale:
+              type: string
+              format: nullable
+              description: Durée de la personne morale.
+              example:
+            dernier_traitement:
+              type: string
+              format: date
+              description: Date de dernier traitement de l'entreprise.
+              example: "2020-07-09"
+            derniere_mise_a_jour_sirene:
+              type: string
+              format: date
+              description: Dernière mise à jour de la base de donnée sirène au format AAAA-MM-JJ.
+              example: "2020-08-13"
+            derniere_mise_a_jour_rcs:
+              type: string
+              format: date
+              description: Dernière mise à jour de la base de donnée RCS au format AAAA-MM-JJ.
+              example: "2020-06-25"
+            statut_rcs:
+              type: string
+              description: Statut de l'entreprise au RCS. Peut valoir "Inscrit", "Non inscrit" ou "Radié".
+              example: Inscrit
+            greffe:
+              type: string
+              format: nullable
+              description: Greffe RCS de l'entreprise.
+              example: Paris
+            code_greffe:
+              type: string
+              format: nullable
+              description: Code greffe RCS de l'entreprise.
+              example: '7501'
+            date_immatriculation_rcs:
+              type: string
+              format: nullable
+              description: Date d'immatriculation de l'entreprise au RCS.
+              example:
+            date_premiere_immatriculation_rcs:
+              type: string
+              format: nullable
+              description: Date de la première immatriculation de l'entreprise au RCS.
+              example:
+            date_debut_activite:
+              type: string
+              format: nullable
+              description: Date de début d'activité de l'entreprise.
+              example: "2002-08-14"
+            date_debut_premiere_activite:
+              type: string
+              format: nullable
+              description: Date de début d'activité de l'entreprise.
+              example:
+            date_radiation_rcs:
+              type: string
+              format: nullable
+              description: Date de radiation de l'entreprise au RCS.
+              example:
+            numero_tva_intracommunautaire:
+              type: string
+              description: Numéro de TVA intracommunautaire de l'entreprise.
+              example: FR64443061841
+            validite_tva_intracommunautaire:
+              type: boolean
+              format: optional, nullable
+              description: "Présent uniquement si le paramètre validite_tva_intracommunautaire a été mis à vrai.\n\nSi vrai, le numéro de TVA intracommunautaire est valide. Si faux, il est invalide. Si null, la validité n'a pas pu être vérifiée."
+              example: true
+            associe_unique:
+              type: boolean
+              description: Si vrai, l'entreprise est à associé unique (notamment pour les SASU et les EURL).
+            etablissements:
+              type: array
+              description: Liste des établissements de l'entreprise.
+              items:
+                $ref: '#/components/schemas/EtablissementFiche'
+            finances:
+              type: array
+              description: Liste des finances de l'entreprise.
+              items:
+                allOf:
+                  - type: object
+                    properties:
+                      annee:
+                        type: integer
+                        description: Année de cloture d'exercice.
+                        example: 2018
+                      date_de_cloture_exercice:
+                        type: string
+                        format: date
+                        description: Date de cloture de l'exercice des finances de l'entreprise.
+                        example: "2018-12-31"
+                      duree_exercice:
+                        type: integer
+                        description: Durée de l'exercice de l'entreprise."
+                        example: 12
+                  - $ref: '#/components/schemas/Ratios'
+            representants:
+              type: array
+              description: Liste des représentants de l'entreprise.
+              items:
+                $ref: '#/components/schemas/Representant'
+            beneficiaires_effectifs:
+              type: array
+              description: Liste des bénéficiaires effectifs de l'entreprise (si disponibles).
+              items:
+                type: object
+                properties:
+                  date_greffe:
+                    type: string
+                    format: date
+                    description: Date de génération des bénéficiaires effectifs, au format AAAA-MM-JJ.
+                    example: '2021-01-06'
+                  type:
+                    type: string
+                    format: nullable
+                    description: Type du bénéficiaire effectif
+                    example: BE_SOC
+                  nom:
+                    type: string
+                    format: nullable
+                    description: Nom du bénéficiaire effectif.
+                    example: McCourt JR
+                  nom_usage:
+                    type: string
+                    format: nullable
+                    description: Nom d'usage du bénéficiaire effectif.
+                    example:
+                  prenom:
+                    type: string
+                    format: nullable
+                    description: Prénom du bénéficiaire effectif.
+                    example: Frank
+                  pseudonyme:
+                    type: string
+                    format: nullable
+                    example:
+                  date_de_naissance_formatee:
+                    type: string
+                    description: Mois et année de naissance du bénéficiaire effectif, au format MM/AAAA.
+                    example: "08/1953"
+                  date_de_naissance_complete_formatee:
+                    type: string
+                    format: date
+                    description: Date de naissance complète du bénéficiaire effectif, au format JJ/MM/AAAA.
+                    example: 14/08/1953
+                  nationalite:
+                    type: string
+                    format: nullable
+                    description: Nationalité du bénéficiaire effectif.
+                    example: Américaine (Etats Unis)
+                  code_nationalite:
+                    type: string
+                    format: nullable
+                    description: Code de la nationalité du bénéficiaire effectif.
+                    example: US
+                  ville_de_naissance:
+                    type: string
+                    format: nullable
+                    description: Ville de naissance du bénéficiaire effectif.
+                    example: Massachusetts
+                  pays_de_naissance:
+                    type: string
+                    format: nullable
+                    description: Pays de naissance du bénéficiaire effectif.
+                    example: ETATS-UNIS D'AMERIQUE
+                  code_pays_de_naissance:
+                    type: string
+                    format: nullable
+                    description: Code du pays de naissance du bénéficiaire effectif.
+                    example: US
+                  adresse_ligne_1:
+                    type: string
+                    format: nullable
+                    description: Première ligne de l'adresse du bénéficiaire effectif.
+                    example:
+                  adresse_ligne_2:
+                    type: string
+                    format: nullable
+                    description: Deuxième ligne de l'adresse du bénéficiaire effectif.
+                    example: "888 Seventh Avenue 43rd Floor New York (Etat de New York)"
+                  adresse_ligne_3:
+                    type: string
+                    format: nullable
+                    description: Troisième ligne de l'adresse du bénéficiaire effectif.
+                    example:
+                  code_postal:
+                    type: string
+                    format: nullable
+                    description: Code postal du bénéficiaire effectif.
+                    example:
+                  ville:
+                    type: string
+                    format: nullable
+                    description: Ville du bénéficiaire effectif.
+                    example:
+                  pays:
+                    type: string
+                    format: nullable
+                    description: Pays du bénéficiaire effectif.
+                    example: ETATS-UNIS D'AMERIQUE
+                  code_pays:
+                    type: string
+                    format: nullable
+                    description: Code du pays du bénéficiaire effectif.
+                    example: US
+                  pourcentage_parts:
+                    type: number
+                    description: Parts détenues par le bénéficiaire effectif, en pourcentage des parts totales.
+                  pourcentage_parts_directes:
+                    type: number
+                    description: Parts détenues de façon directe par le bénéficiaire effectif, en pourcentage des parts totales.
+                  pourcentage_parts_indirectes:
+                    type: number
+                    description: Parts détenues de façon indirecte par le bénéficiaire effectif, en pourcentage des parts totales.
+                  pourcentage_parts_vocation_titulaire:
+                    type: number
+                    description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire par l'effet d'un acte juridique, en pourcentage des parts totales.
+                  details_parts_directes:
+                    type: object
+                    format: nullable
+                    description: Détails des parts détenues de façon directe par le bénéficiaire effectif.
+                    properties:
+                      pourcentage_pleine_propriete:
+                        type: number
+                        description: Parts détenues de façon directe en pleine propriété par le bénéficiaire effectif, en pourcentage des parts totales.
+                      pourcentage_nue_propriete:
+                        type: number
+                        description: Parts détenues de façon directe en nue propriété par le bénéficiaire effectif, en pourcentage des parts totales.
+                  details_parts_indirectes:
+                    type: object
+                    format: nullable
+                    description: Détails des parts détenues de façon indirecte par le bénéficiaire effectif.
+                    properties:
+                      pourcentage_en_indivision:
+                        type: number
+                        description: Parts détenues de façon indirecte par le biais d'une indivision par le bénéficiaire effectif, en pourcentage des parts totales.
+                      pourcentage_en_personne_morale:
+                        type: number
+                        description: Parts détenues de façon indirecte par le biais d'une personne morale par le bénéficiaire effectif, en pourcentage des parts totales.
+                      details_en_indivision:
+                        type: object
+                        format: nullable
+                        description: Détails des parts détenues de façon indirecte par le biais d'une indivision par le bénéficiaire effectif.
+                        properties:
+                          pourcentage_pleine_propriete:
+                            type: number
+                            description: Parts détenues de façon indirecte par le biais d'une indivision en pleine propriété par le bénéficiaire effectif, en pourcentage des parts totales.
+                          pourcentage_nue_propriete:
+                            type: number
+                            description: Parts détenues de façon indirecte par le biais d'une indivision en nue propriété par le bénéficiaire effectif, en pourcentage des parts totales.
+                      details_en_personne_morale:
+                        type: object
+                        format: nullable
+                        description: Détails des parts détenues de façon indirecte par le biais d'une personne morale par le bénéficiaire effectif.
+                        properties:
+                          pourcentage_pleine_propriete:
+                            type: number
+                            description: Parts détenues de façon indirecte par le biais d'une personne morale en pleine propriété par le bénéficiaire effectif, en pourcentage des parts totales.
+                          pourcentage_nue_propriete:
+                            type: number
+                            description: Parts détenues de façon indirecte par le biais d'une personne morale en nue propriété par le bénéficiaire effectif, en pourcentage des parts totales.
+                  details_parts_vocation_titulaire:
+                    type: object
+                    format: nullable
+                    description: Détails des parts dont le bénéficiaire effectif a vocation à devenir titulaire.
+                    properties:
+                      pourcentage_directes:
+                        type: number
+                        description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon directe, en pourcentage des parts totales.
+                      pourcentage_indirectes:
+                        type: number
+                        description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte, en pourcentage des parts totales.
+                      details_directes:
+                        type: object
+                        format: nullable
+                        description: Détails des parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon directe.
+                        properties:
+                          pourcentage_pleine_propriete:
+                            type: number
+                            description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon directe en pleine propriété, en pourcentage des parts totales.
+                          pourcentage_nue_propriete:
+                            type: number
+                            description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon directe en nue propriété, en pourcentage des parts totales.
+                      details_indirectes:
+                        type: object
+                        format: nullable
+                        description: Détails des parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte.
+                        properties:
+                          pourcentage_en_indivision:
+                            type: number
+                            description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte par le biais d'une indivision, en pourcentage des parts totales.
+                          pourcentage_en_personne_morale:
+                            type: number
+                            description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte par le biais d'une personne morale, en pourcentage des parts totales.
+                          details_en_indivision:
+                            type: object
+                            format: nullable
+                            description: Détails des parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte par le biais d'une indivision.
+                            properties:
+                              pourcentage_pleine_propriete:
+                                type: number
+                                description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte par le biais d'une indivision en pleine propriété, en pourcentage des parts totales.
+                              pourcentage_nue_propriete:
+                                type: number
+                                description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte par le biais d'une indivision en nue propriété, en pourcentage des parts totales.
+                          details_en_personne_morale:
+                            type: object
+                            format: nullable
+                            description: Détails des parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte par le biais d'une personne morale.
+                            properties:
+                              pourcentage_pleine_propriete:
+                                type: number
+                                description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte par le biais d'une personne morale en pleine propriété, en pourcentage des parts totales.
+                              pourcentage_nue_propriete:
+                                type: number
+                                description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire de façon indirecte par le biais d'une personne morale en nue propriété, en pourcentage des parts totales.
+                  pourcentage_votes:
+                    type: number
+                    description: Droits de vote détenus par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                  pourcentage_votes_directs:
+                    type: number
+                    description: Droits de vote détenus de façon directe par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                  pourcentage_votes_indirect:
+                    type: number
+                    description: Droits de vote détenus de façon indirecte par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                  details_votes_directs:
+                    type: object
+                    format: nullable
+                    description: Détails des droits de vote détenus de façon directe par le bénéficiaire effectif.
+                    properties:
+                      pourcentage_pleine_propriete:
+                        type: number
+                        description: Droits de vote détenus de façon directe en pleine propriété par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                      pourcentage_nue_propriete:
+                        type: number
+                        description: Droits de vote détenus de façon directe en nue propriété par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                      pourcentage_usufruit:
+                        type: number
+                        description: Droits de vote détenus de façon directe en usufruit par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                  details_votes_indirects:
+                    type: object
+                    format: nullable
+                    description: Détails des droits de vote détenus de façon indirecte par le bénéficiaire effectif.
+                    properties:
+                      pourcentage_en_indivision:
+                        type: number
+                        description: Droits de vote détenus de façon indirecte par le biais d'une indivision par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                      pourcentage_en_personne_morale:
+                        type: number
+                        description: Droits de vote détenus de façon indirecte par le biais d'une personne morale par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                      details_en_indivision:
+                        type: object
+                        format: nullable
+                        description: Détails des droits de vote détenus de façon indirecte par le biais d'une indivision par le bénéficiaire effectif.
+                        properties:
+                          pourcentage_pleine_propriete:
+                            type: number
+                            description: Droits de vote détenus de façon indirecte par le biais d'une indivision en pleine propriété par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                          pourcentage_nue_propriete:
+                            type: number
+                            description: Droits de vote détenus de façon indirecte par le biais d'une indivision en nue propriété par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                          pourcentage_usufruit:
+                            type: number
+                            description: Droits de vote détenus de façon indirecte par le biais d'une indivision en usufruit par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                      details_en_personne_morale:
+                        type: object
+                        format: nullable
+                        description: Détails des droits de vote détenus de façon indirecte par le biais d'une personne morale par le bénéficiaire effectif.
+                        properties:
+                          pourcentage_pleine_propriete:
+                            type: number
+                            description: Droits de vote détenus de façon indirecte par le biais d'une personne morale en pleine propriété par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                          pourcentage_nue_propriete:
+                            type: number
+                            description: Droits de vote détenus de façon indirecte par le biais d'une personne morale en nue propriété par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                          pourcentage_usufruit:
+                            type: number
+                            description: Droits de vote détenus de façon indirecte par le biais d'une personne morale en usufruit par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+                  details_societe_de_gestion:
+                    type: object
+                    format: nullable
+                    description: Détails sur la société de gestion, le cas échéant.
+                    properties:
+                      nom:
+                        type: string
+                        format: nullable
+                        description: Nom de la société de gestion.
+                      siren:
+                        type: string
+                        format: nullable
+                        description: SIREN de la société de gestion.
+                      greffe:
+                        type: string
+                        format: nullable
+                        description: Greffe de la société de gestion.
+                      adresse:
+                        type: string
+                        format: nullable
+                        description: Adresse de la société de gestion.
+                      code_postal:
+                        type: string
+                        format: nullable
+                        description: Code postal de la société de gestion.
+                      ville:
+                        type: string
+                        format: nullable
+                        description: Ville de la société de gestion.
+                  detention_pouvoir_decision_ag:
+                    type: boolean
+                    description: Vaut vrai pour les moyens de contrôle sur les organes d'administration, de gestion, de direction ou de surveillance de la personne morale autre que le pouvoir de nommer ou de révoquer la majorité des membres.
+                  detention_pouvoir_nom_membre_conseil_administration:
+                    type: boolean
+                    description:  Vaut vrai si le moyen de contrôle est le pouvoir de nommer ou de révoquer la majorité des membres des organes d'administration, de gestion, de direction ou de surveillance de la personne morale.
+                  detention_autres_moyens_controle:
+                    type: boolean
+                    description: Vaut vrai s'il existe d'autres moyens de contrôle.
+                  beneficiaire_representant_legal:
+                    type: boolean
+                    description: Vaut vrai dans le cas où le bénéficiaire effectif a été défini comme le représentant légal par défaut.
+                  representant_legal_placement_sans_gestion_delegation:
+                    type: boolean
+                    description: Vaut vrai dans le cas où le bénéficiaire effectif est le représentant légal du placement collectif (cas où le placement collectif n'a pas délégué sa gestion à une société de gestion).
+            depots_actes:
+              type: array
+              description: Liste des actes de l'entreprise.
+              items:
+                type: object
+                properties:
+                  date_depot:
+                    type: string
+                    format: date
+                    description: Date de dépôt de l'acte, au format AAAA-MM-JJ.
+                    example: '2020-04-07'
+                  date_depot_formate:
+                    type: string
+                    description: Date de dépôt formatée de l'acte, au format JJ/MM/AAAA.
+                    example: 07/04/2020
+                  disponible:
+                    type: boolean
+                    description: Disponibilité de l'acte. Un acte peut être indisponible car il a été publié avant le 1er janvier 1993 ou bien car il est confidentiel.
+                  nom_fichier_pdf:
+                    type: string
+                    description: Nom du fichier pdf de l'acte.
+                    example: GOOGLE FRANCE - Actes du 07-04-2020.pdf
+                  token:
+                    type: string
+                    description: Token de l'acte.
+                    example: QTQ0MzA2MTg0MTIwMjAwNDA3RMOpY2lzaW9uKHMpIGRlIGwnYXNzb2Npw6kgdW5pcXVl
+                  actes:
+                    type: array
+                    description: Détails de l'acte.
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: Type de l'acte.
+                          example: Décision(s) de l'associé unique
+                        decision:
+                          type: string
+                          description: Décision de l'acte.
+                          example: Augmentation du capital social
+                        date_acte:
+                          type: string
+                          format: date
+                          description: Date de l'acte, au format AAAA-MM-JJ.
+                          example: '2020-03-04'
+                        date_acte_formate:
+                          type: string
+                          description: Date formatée de l'acte, au format JJ/MM/AAAA.
+                          example: 04/03/2020
+            comptes:
+              type: array
+              description: Liste des comptes de l'entreprise.
+              items:
+                type: object
+                properties:
+                  date_depot:
+                    type: string
+                    format: date
+                    description: Date de dépôt des comptes.
+                    example: '2020-07-16'
+                  date_depot_formate:
+                    type: string
+                    description: Date de dépôt formatée des comptes.
+                    example: 16/07/2020
+                  date_cloture:
+                    type: string
+                    format: date
+                    description: Date de clôture des comptes, au format AAAA-MM-JJ.
+                    example: '2019-12-31'
+                  annee_cloture:
+                    type: integer
+                    description: Année de clôture des comptes.
+                    example: 2019
+                  confidentialite:
+                    description: Confidentialité totale des comptes.
+                    type: boolean
+                  confidentialite_compte_de_resultat:
+                    description: Confidentialité partielle des comptes (seul le compte de résultat est confidentiel, le reste des comptes sont disponibles).
+                    type: boolean
+                  disponible:
+                    description: Disponibilité des comptes au format PDF.
+                    type: boolean
+                  nom_fichier_pdf:
+                    type: string
+                    format: optional
+                    description: Nom du fichier PDF des comptes.
+                    example: GOOGLE FRANCE - Comptes 2019.pdf
+                  token:
+                    type: string
+                    format: optional
+                    description: Token des comptes.
+                    example: QzQ0MzA2MTg0MTIwMjAwNzE2
+                  disponible_xlsx:
+                    description: Disponibilité des comptes au format XLSX.
+                    type: boolean
+                  nom_fichier_xlsx:
+                    type: string
+                    format: optional
+                    description: Nom du fichier XLSX des comptes.
+                    example: GOOGLE FRANCE - Comptes 2019.xlsx
+                  token_xlsx:
+                    type: string
+                    format: optional
+                    description: Token des comptes XLSX.
+                    example: ASQSMAA2MTg8MTIwMjAwNz2s
+            publications_bodacc:
+              type: array
+              description: Liste des publications au Bodacc de l'entreprise.
+              items:
+                $ref: '#/components/schemas/Bodacc'
+            procedures_collectives:
+              type: array
+              description: Liste des procédures collectives de l'entreprise.
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    description: Type de la procédure collective.
+                    example: Redressement judiciaire
+                    enum: [Redressement judiciaire, Liquidation judiciaire ou Procédure de sauvegarde]
+                  date_debut:
+                    type: string
+                    description: Date de début de la procédure collective, au format AAAA-MM-JJ.
+                    example: 2020-04-16
+                  date_fin:
+                    type: string
+                    description: Date de fin de la procédure collective, au format AAAA-MM-JJ.
+                    example: 2020-08-27
+                  publications_bodacc:
+                    type: array
+                    description: Liste des publications relatives à la procédure collective.
+                    items:
+                      $ref: '#/components/schemas/Bodacc'
+            procedure_collective_existe:
+              description: Vrai si l'entreprise a des procédures collectives (en cours ou terminées), faux sinon.
+              type: boolean
+            procedure_collective_en_cours:
+              description: Vrai si l'entreprise a des procédures collectives en cours, faux sinon.
+              type: boolean
+            derniers_statuts:
+              type: object
+              description: Liste des statuts de l'entreprise.
+              properties:
+                date_depot:
+                  type: string
+                  format: date
+                  description: Date de dépôt des statuts, au format AAAA-MM-JJ.
+                  example: '2020-04-07'
+                date_depot_formate:
+                  type: string
+                  description: Date de dépôt formaté des statuts, au format JJ/MM/AAAA.
+                  example: 07/04/2020
+                disponible:
+                  description: Disponibilité des statuts.
+                  type: boolean
+                nom_fichier_pdf:
+                  type: string
+                  description: Nom du fichier pdf des statuts.
+                  example: GOOGLE FRANCE - Actes du 07-04-2020.pdf
+                token:
+                  type: string
+                  description: Token des statuts.
+                  example: QTQ0MzA2MTg0MTIwMjAwNDA3RMOpY2lzaW9uKHMpIGRlIGwnYXNzb2Npw6kgdW5pcXVl
+                type:
+                  type: string
+                  description: Champ "type" du document contenant les statuts.
+                  example: Statuts mis à jour
+                decision:
+                  type: string
+                  description: Champ "decision" du document contenant les statuts.
+                  example:
+                date_acte:
+                  type: string
+                  format: date
+                  description: Date de publication des statuts, au format AAAA-MM-JJ.
+                  example: '2020-03-04'
+                date_acte_formate:
+                  type: string
+                  description: Date de publication des statuts, au format JJ/MM/AAAA.
+                  example: 04/03/2020
+            extrait_immatriculation:
+              type: object
+              description: Extrait d'immatriculation de l'entreprise.
+              properties:
+                token:
+                  type: string
+                  description: Token
+                  example: SzQ0MzA2MTg0MQ
+            rnm:
+              type: object
+              format: nullable
+              description: Informations sur l'immatriculation de l'entreprise au Répertoire des Métiers.
+              properties:
+                date_immatriculation:
+                  type: string
+                  description: Date d'immatriculation au Répertoire des Métiers, au format AAAA-MM-JJ.
+                  example: 2021-02-16
+                date_radiation:
+                  type: string
+                  format: nullable
+                  description: Date de radiation du Répertoire des Métiers, le cas échéant, au format AAAA-MM-JJ.
+                  example:
+                date_debut_activite:
+                  type: string
+                  description: Date de début d'activé déclarée au Répertoire des Métiers, au format AAAA-MM-JJ.
+                  example: 2021-01-01
+                date_cessation_activite:
+                  type: string
+                  format: nullable
+                  description: Date de cessation d'activité déclarée au Répertoire des Métiers, le cas échéant, au format AAAA-MM-JJ.
+                  example:
+                chambre_des_metiers:
+                  type: string
+                  description: Chambre des métiers où l'entreprise est immatriculée.
+                  example: TARN-ET-GARONNE
+                qualification:
+                  type: string
+                  description: Qualification retenue par le Répertoire des Métiers.
+                  example: ARTISAN
+                derniere_mise_a_jour:
+                  type: string
+                  description: Date de dernière mise à jour de l'entreprise au Répertoire des Métiers, au format AAAA-MM-JJ.
+                  example: 2021-02-22
+            marques:
+              type: array
+              description: Liste des marques françaises déposées par l'entreprise. Uniquement présent si le paramètre "marques" a été mis à vrai.
+              items:
+                type: object
+                properties:
+                  numero:
+                    type: string
+                    description: Numéro de la marque.
+                    example: FR7103728
+                  date_enregistrement:
+                    type: string
+                    description: Date d'enregistrement de la marque, au format AAAA-MM-JJ.
+                    example: 2008-12-04
+                  date_expiration:
+                    type: string
+                    description: Date d'expiration de la marque au format AAAA-MM-JJ.
+                    example: 2018-12-04
+                  lieu_enregistrement:
+                    type: string
+                    description: Lieu d'enregistrement de la marque.
+                    example: 92 INPI - Dépôt électronique
+                  statut:
+                    type: string
+                    description: "Statut de la marque. La description des différents types est disponible en page 14 du document suivant : https://www.inpi.fr/sites/default/files/doctech_marques_v1.6.pdf."
+                    enum: [Demande déposée, Demande publiée, Demande non publiée, Demande irrecevable après publication, Marque enregistrée, Renouvellement demandé, Marque renouvelée, Demande totalement rejetée, Marque ayant fait l'objet d'une renonciation totale, Marque ayant fait l'objet d'un retrait total, Marque annulée, Marque expirée]
+                    example: Marque enregistrée
+                  texte:
+                    type: string
+                    format: nullable
+                    description: Texte de la marque.
+                    example: Google
+                  type:
+                    type: string
+                    description: Type de la marque.
+                    enum: [Mixte, Figuratif, Hologramme, Son, Texte, 3D, Position, Mouvement, Multimedia, Motifs, Couleur, Forme, Autre]
+                    example: Figurative
+                  lien_image:
+                    type: string
+                    format: nullable
+                    description: Lien vers l'image déposée.
+                    example: https://data.inpi.fr/image/marques/FRXXXXXXXX
+                  descriptions:
+                    type: array
+                    description: Liste des descriptions de la marque.
+                    items:
+                      type: string
+                      description: Description
+                      example: "Demande d’extension : Polynésie française"
+                  classes:
+                    type: array
+                    description: "Liste des classes (produits et services) de la marque. La liste des classes est disponible sur le document suivant : https://www.inpi.fr/sites/default/files/classification_nice_2021_0.pdf."
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          description: Code de la classe.
+                          example: 35
+                        description:
+                          type: string
+                          description: Description de la classe.
+                          example: Publicité ;  gestion des affaires commerciales ;  administration commerciale ;  travaux de bureau.
+                  deposant:
+                    $ref: '#/components/schemas/PersonneMarque'
+                  mandataire:
+                    $ref: '#/components/schemas/PersonneMarque'
+                  evenements:
+                    type: array
+                    description: Liste des événements associés à la marque.
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: Type d'événement.
+                          example: Publication
+                        identifiant_evenement:
+                          type: string
+                          format: nullable
+                          description: Identifiant de l'événement.
+                        reference:
+                          type: string
+                          format: nullable
+                          description: Référence de l'événement.
+                        date:
+                          type: string
+                          description: Date de l'événement, au format AAAA-MM-JJ.
+                          example: 2008-12-04
+                        numero_bopi:
+                          type: string
+                          description: Numéro du BOPI dans lequel l'événement a été publié.
+                          example: 2008-12
+                        date_bopi:
+                          type: string
+                          description: Date de publication du BOPI au format AAAA-MM-JJ.
+                          example: 2008-12-04
+                        beneficiaire:
+                          type: string
+                          format: nullable
+                          description: Bénéficiaire associé à l'événement.
+            association:
+              $ref: '#/components/schemas/Association'
+    EntrepriseRecherche:
+      allOf:
+        - $ref: '#/components/schemas/EntrepriseBase'
+        - type: object
+          properties:
+            siege:
+              $ref: '#/components/schemas/EtablissementRecherche'
+            villes:
+              type: array
+              description: Liste des villes où l'entreprise a au moins un établissement.
+              items:
+                  type: string
+                  example: MONTPELLIER
+            chiffre_affaires:
+              type: integer
+              format: nullable
+              description: Chiffre d'affaires de l'entreprise.
+              example: 411016329
+            resultat:
+              type: integer
+              format: nullable
+              description: Résultat de l'entreprise.
+              example: 29327087
+            effectifs_finances:
+              type: integer
+              format: nullable
+              description: Effectif de l'entreprise.
+              example: 723
+            annee_finances:
+              type: string
+              format: nullable
+              description: Année de correspondance des variables financières (chiffre_affaires, resultat, effectifs_finances).
+              example: "2018"
+    EtablissementFiche:
+      type: object
+      properties:
+        siret:
+          type: string
+          description: Numéro siret de l'établissement au format xxxxxxxxxxxxxx.
+          example: "44306184100047"
+        siret_formate:
+          type: string
+          description: Numéro siret de l'établissement au format xxx xxx xxx xxxxx.
+          example: 443 061 841 00047
+        nic:
+          type: string
+          description: Numéro NIC de l'établissement.
+          example: "00047"
+        code_postal:
+          type: string
+          format: nullable
+          description: Code postal de l'établissement.
+          example: "75009"
+        ville:
+          type: string
+          format: nullable
+          description: Ville de l'établissement.
+          example: PARIS 9
+        pays:
+          type: string
+          format: nullable
+          description: Pays de l'établissement
+          example: France
+        code_pays:
+          type: string
+          format: nullable
+          description: Code du pays de l'établissement
+          example: FR
+        latitude:
+          type: number
+          format: nullable
+          description: Latitude de l'établissement.
+          example: 48.876947
+        longitude:
+          type: number
+          format: nullable
+          description: Longitude de l'établissement.
+          example: 2.329981
+        etablissement_cesse:
+          type: boolean
+          format: nullable
+          description: Vrai si l'établissement est cessé, faux si il est en activité.
+        siege:
+          type: boolean
+          format: nullable
+          description: Vrai si l'établissement est siège, faux s'il ne l'est pas.
+        etablissement_employeur:
+          type: boolean
+          format: nullable
+          description: Si vrai, l'établissement a au moins un employé.
+        effectif:
+          type: string
+          format: nullable
+          description: Tranche d'effectif de l'établissement.
+          example: Entre 500 et 999 salariés
+        effectif_min:
+          type: integer
+          format: nullable
+          description: Effectif minimal de l'établissement.
+          example: 500
+        effectif_max:
+          type: integer
+          format: nullable
+          description: Effectif maximal de l'établissement.
+          example: 999
+        tranche_effectif:
+          type: string
+          format: nullable
+          description: Tranche d'effectif de l'établissement, selon la [nomenclature Sirene](https://www.sirene.fr/sirene/public/variable/tefen#:~:text=Cette%20variable%20correspond%20%C3%A0%20la,effectif%20salari%C3%A9%20de%20l'entreprise.).
+          example: "41"
+        annee_effectif:
+          type: integer
+          format: nullable
+          description: Année correspondante à la tranche d'effectif de l'établissement.
+          example: 2017
+        code_naf:
+          type: string
+          format: nullable
+          description: Code NAF de l'établissement.
+          example: 70.10Z
+        libelle_code_naf:
+          type: string
+          format: nullable
+          description: Libellé du code NAF de l'établissement.
+          example: Activités des sièges sociaux
+        date_de_creation:
+          type: string
+          format: nullable
+          example: '2011-05-12T22:00:00.000Z'
+        numero_voie:
+          type: integer
+          format: nullable
+          description: Numéro de voie de l'établissement.
+          example: 8
+        indice_repetition:
+          type: string
+          format: nullable
+          description: Indice de répétition de l'établissement.
+          example:
+        type_voie:
+          type: string
+          format: nullable
+          description: Type de voie de l'établissement.
+          example: RUE
+        libelle_voie:
+          type: string
+          format: nullable
+          description: Libellé de la voie de l'établissement.
+          example: DE LONDRES
+        complement_adresse:
+          type: string
+          format: nullable
+          description: Complément d'adresse de l'établissement.
+          example:
+        adresse_ligne_1:
+          type: string
+          format: nullable
+          description: Première ligne de l'adresse de l'établissement. Correspond à l'ensemble des données numero_voie, indice_repetition, type_voie et libelle_voie.
+          example: 8 RUE DE LONDRES
+        adresse_ligne_2:
+          type: string
+          format: nullable
+          description: Seconde ligne de l'adresse de l'établissement. Est égal à complement_adresse
+          example:
+        date_cessation:
+          type: string
+          format: nullable
+          description: Date de fermeture de l'établissement
+          example: '2014-05-12'
+        enseigne:
+          type: string
+          format: nullable
+          description: Enseigne de l'établissement
+          example: FROOGLE
+        nom_commercial:
+          type: string
+          format: nullable
+          description: Nom commercial de l'établissement
+          example: Froogle
+        domiciliation:
+          type: object
+          format: nullable
+          properties:
+            nom:
+              type: string
+              format: nullable
+              description: Nom de l'entreprise de domiciliation
+              example: WORK & SHARE
+            siren:
+              type: string
+              format: nullable
+              description: Siren de l'entreprise de domiciliation
+              example: '828053546'
+        predecesseurs:
+          type: array
+          format: optional
+          description: Liste des prédécesseurs de l'établissement.
+          items:
+            $ref: '#/components/schemas/LienSuccession'
+        successeurs:
+          type: array
+          format: optional
+          description: Liste des successeurs de l'établissement.
+          items:
+            $ref: '#/components/schemas/LienSuccession'
+    EtablissementRecherche:
+      type: object
+      properties:
+        siret:
+          type: string
+          description: Numéro siret de l'établissement au format xxxxxxxxxxxxxx.
+          example: "44306184100047"
+        siret_formate:
+          type: string
+          description: Numéro siret de l'établissement au format xxx xxx xxx xxxxx.
+          example: 443 061 841 00047
+        nic:
+          type: string
+          description: Numéro NIC de l'établissement.
+          example: "00047"
+        numero_voie:
+          type: integer
+          format: nullable
+          description: Numéro de voie de l'établissement.
+          example: 8
+        indice_repetition:
+          type: string
+          format: nullable
+          description: Indice de répétition de l'établissement.
+          example:
+        type_voie:
+          type: string
+          format: nullable
+          description: Type de voie de l'établissement.
+          example: RUE
+        libelle_voie:
+          type: string
+          format: nullable
+          description: Libellé de la voie de l'établissement.
+          example: DE LONDRES
+        complement_adresse:
+          type: string
+          format: nullable
+          description: Complément d'adresse de l'établissement.
+          example:
+        adresse_ligne_1:
+          type: string
+          format: nullable
+          description: Première ligne de l'adresse de l'établissement. Correspond à l'ensemble des données numero_voie, indice_repetition, type_voie et libelle_voie.
+          example: 8 RUE DE LONDRES
+        adresse_ligne_2:
+          type: string
+          format: nullable
+          description: Seconde ligne de l'adresse de l'établissement. Est égal à complement_adresse
+          example:
+        code_postal:
+          type: string
+          format: nullable
+          description: Code postal de l'établissement.
+          example: "75009"
+        ville:
+          type: string
+          format: nullable
+          description: Ville de l'établissement.
+          example: PARIS 9
+        latitude:
+          type: number
+          format: nullable
+          description: Latitude de l'établissement.
+          example: 48.876947
+        longitude:
+          type: number
+          format: nullable
+          description: Longitude de l'établissement.
+          example: 2.329981
+    Representant:
+      type: object
+      properties:
+        qualite:
+          type: string
+          description: Qualité du représentant.
+          example: Gérant
+        personne_morale:
+          description: Vrai si le représentant est une personne morale, faux si personne physique.
+          type: boolean
+          example: false
+        date_prise_de_poste:
+          type: string
+          description: Date de prise de poste du représentant.
+          example: "2017-08-03"
+        sexe:
+          type: string
+          description: Sexe supposé du dirigeant si personne physique. F pour féminin, M pour masculin. Ce champ est estimé à partir du prénom du dirigeant.
+          format: nullable
+          example: "M"
+        nom:
+          type: string
+          description: Nom du représentant.
+          example: Yi
+        prenom:
+          type: string
+          description: Prénoms du représentant.
+          example: Kenneth H.
+        prenom_usuel:
+          type: string
+          description: Prénom usuel du représentant.
+          example: Kenneth
+        nom_complet:
+          type: string
+          description: Nom complet du représentant.
+          example: Kenneth H. Yi
+        date_de_naissance:
+          type: string
+          description: Date de naissance du représentant.
+          example: "1970-01-06"
+        date_de_naissance_formate:
+          type: string
+          description: Date de naissance formatée du représentant.
+          example: 06/01/1970
+        age:
+          type: integer
+          description: Age du représentant.
+          example: 50
+        nationalite:
+          type: string
+          description: Nationalité du représentant.
+          example: Américaine (Etats Unis)
+        code_nationalite:
+          type: string
+          description: Code nationalité du représentant
+          example: US
+        ville_de_naissance:
+          type: string
+          description: Ville de naissance du représentant.
+          example: Séoul
+        pays_de_naissance:
+          type: string
+          description: Pays de naissance du représentant.
+          example: COREE DU SUD
+        code_pays_de_naissance:
+          type: string
+          description: Code du pays de naissance du représentant.
+          example: KR
+        adresse_ligne_1:
+          type: string
+          description: Première ligne de l'adresse du représentant.
+          example: 1600 Amphitheatre Parkway Mountain View CA 94043
+        adresse_ligne_2:
+          type: string
+          description: Deuxième ligne de l'adresse du représentant.
+          format: nullable
+          example:
+        adresse_ligne_3:
+          type: string
+          description: Troisième ligne de l'adresse du représentant.
+          format: nullable
+          example:
+        code_postal:
+          type: string
+          description: Code postal du représentant.
+          format: nullable
+          example:
+        ville:
+          type: string
+          description: Ville du représentant.
+          format: nullable
+          example:
+        pays:
+          type: string
+          description: Pays du représentant.
+          example: Etats-Unis
+        code_pays:
+          type: string
+          description: Code du pays du représentant
+          example: US
+    RepresentantRecherche:
+      allOf:
+        - $ref: '#/components/schemas/Representant'
+        - type: object
+          properties:
+            actuel:
+              type: boolean
+              description: Vaut vrai si le représentant est toujours à son poste.
+            date_depart_de_poste:
+              type: string
+              description: Date de départ de poste dans le cas où le représentant n'est plus un représentant actuel, au format AAAA-MM-JJ.
+              example:
+            forme_juridique:
+              type: string
+              format: nullable
+              description: Forme juridique du représentant dans le cas d'une personne morale.
+              example:
+    Beneficiaire:
+      type: object
+      properties:
+        nom:
+          type: string
+          format: nullable
+          description: Nom du bénéficiaire effectif.
+          example: Yi
+        nom_usage:
+          type: string
+          format: nullable
+          description: Nom d'usage du bénéficiaire effectif.
+          example:
+        prenom:
+          type: string
+          description: Prénom du bénéficiaire effectif.
+          example: Kenneth H.
+        pseudonyme:
+          type: string
+          format: nullable
+          description: Pseudonyme du bénéficiaire effectif.
+          example:
+        nom_complet:
+          type: string
+          description: Nom complet du bénéficiaire effectif.
+          example: Kenneth H. Yi
+        date_de_naissance_formate:
+          type: string
+          description: Mois et année de naissance du bénéficiaire effectif, au format MM/AAAA.
+          example: 01/1970
+        nationalite:
+          type: string
+          description: Nationalité du bénéficiaire effectif.
+          example: Française
+        pourcentage_parts:
+          type: number
+          description: Parts détenues par le bénéficiaire effectif, en pourcentage des parts totales.
+        pourcentage_votes:
+          type: number
+          description: Droits de vote détenus par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+        pourcentage_votes_indirect:
+          type: number
+          description: Droits de vote détenus de façon indirecte par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+        pourcentage_votes_directs:
+          type: number
+          description: Droits de vote détenus de façon directe par le bénéficiaire effectif, en pourcentage des droits de vote totaux.
+        detention_autres_moyens_controle:
+          type: boolean
+          description: Vaut vrai s'il existe d'autres moyens de contrôle.
+        beneficiaire_representant_legal:
+          type: boolean
+          description: Vaut vrai dans le cas où le bénéficiaire effectif a été défini comme le représentant légal par défaut.
+        adresse_ligne_1:
+          type: string
+          format: nullable
+          description: Première ligne de l'adresse du bénéficiaire effectif.
+          example:
+        adresse_ligne_2:
+          type: string
+          format: nullable
+          description: Deuxième ligne de l'adresse du bénéficiaire effectif.
+          example:
+        adresse_ligne_3:
+          type: string
+          format: nullable
+          description: Troisième ligne de l'adresse du bénéficiaire effectif.
+          example:
+        pourcentage_parts_vocation_titulaire:
+          type: number
+          description: Parts dont le bénéficiaire effectif a vocation à devenir titulaire par l'effet d'un acte juridique, en pourcentage des parts totales.
+        representant_legal_placement_sans_gestion_delegation:
+          type: boolean
+          format: nullable
+          description: Vaut vrai dans le cas où le bénéficiaire effectif est le représentant légal du placement collectif (cas où le placement collectif n'a pas délégué sa gestion à une société de gestion).
+        code_postal:
+          type: string
+          format: nullable
+          description: Code postal du bénéficiaire effectif.
+          example:
+        detention_pouvoir_nom_membre_conseil_administration:
+          type: boolean
+          description:  Vaut vrai si le moyen de contrôle est le pouvoir de nommer ou de révoquer la majorité des membres des organes d'administration, de gestion, de direction ou de surveillance de la personne morale.
+        ville:
+          type: string
+          format: nullable
+          description: Ville du bénéficiaire effectif.
+          example:
+        date_de_naissance_complete_formatee:
+          type: string
+          format: date
+          description: Date de naissance complète du bénéficiaire effectif, au format JJ/MM/AAAA.
+          example: 14/08/1953
+        pourcentage_parts_directes:
+          type: number
+          description: Parts détenues de façon directe par le bénéficiaire effectif, en pourcentage des parts totales.
+        pourcentage_parts_indirectes:
+          type: number
+          description: Parts détenues de façon indirecte par le bénéficiaire effectif, en pourcentage des parts totales.
+        pays_de_naissance:
+          type: string
+          format: nullable
+          description: Pays de naissance du bénéficiaire effectif.
+          example:
+        code_pays_de_naissance:
+          type: string
+          format: nullable
+          description: Code du pays de naissance du bénéficiaire effectif.
+          example:
+        ville_de_naissance:
+          type: string
+          format: nullable
+          description: Ville de naissance du bénéficiaire effectif.
+          example:
+        detention_pouvoir_decision_ag:
+          type: boolean
+          description: Vaut vrai pour les moyens de contrôle sur les organes d'administration, de gestion, de direction ou de surveillance de la personne morale autre que le pouvoir de nommer ou de révoquer la majorité des membres.
+        pays:
+          type: string
+          format: nullable
+          description: Pays du bénéficiaire effectif.
+          example:
+        date_de_naissance_formatee:
+          type: string
+          format: nullable
+          description: Mois et année de naissance du bénéficiaire effectif, au format MM/AAAA.
+          example:
+        code_pays:
+          type: string
+          format: nullable
+          description: Code pays du bénéficiaire effectif.
+          example:
+    Document:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [acte, comptes]
+          description: Type de document
+          example: acte
+        date_depot:
+          description: Date de dépôt du document
+          type: string
+          format: date
+          example: 2020-08-04
+        mentions:
+          type: array
+          description: Mentions de la recherche dans le document.
+          items:
+            type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          acte: '#/components/schemas/DocumentActe'
+          comptes: '#/components/schemas/DocumentComptes'
+    DocumentActe:
+      allOf:
+      - $ref: '#/components/schemas/Document'
+      - type: object
+        properties:
+          titres:
+            type: array
+            description: Titres des actes associés au document
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: Type de l'acte
+                  example: Décision(s) de l'associé unique
+                decision:
+                  type: string
+                  format: nullable
+                  description: Décision de l'acte
+                  example: Augmentation du capital social
+    DocumentComptes:
+      allOf:
+      - $ref: '#/components/schemas/Document'
+      - type: object
+        properties:
+          date_cloture:
+            type: string
+            format: date
+            description: Date de clôture des comptes, au format AAAA-MM-JJ.
+            example: '2019-12-31'
+    Publication:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [Création, Immatriculation, Modification, Vente, Radiation, Procédure collective, Dépôt des comptes]
+          description: Type de publication
+          example: acte
+        date:
+          description: Date de publication, au format AAAA-MM-JJ.
+          type: string
+          format: date
+          example: 2020-08-04
+        contenu:
+          type: string
+          description: Contenu de la publication, avec les mentions correspondant à la recherche encerclée par une balise HTML <em>.
+    Bodacc:
+      type: object
+      properties:
+        numero_parution:
+          type: string
+          description: Numéro de parution de la publication.
+          example: '20200075'
+        date:
+          type: string
+          description: Date de la publication, au format AAAA-MM-JJ.
+          example: 2020-04-16
+        numero_annonce:
+          type: string
+          description: Numéro d'annonce de la publication.
+          example: '670'
+        bodacc:
+          type: string
+          description: Bodacc de la publication (A, B ou C).
+          example: B
+        type:
+          type: string
+          description: "Type de la publication parmi la liste suivante : Création, Immatriculation, Modification, Vente, Achat, Radiation, Procédure collective, Dépôt des comptes."
+          example: Modification
+        greffe:
+          type: string
+          description: Greffe de publication.
+          example: Paris
+      discriminator:
+        propertyName: type
+        mapping:
+          Création: '#/components/schemas/BodaccCreation'
+          Immatriculation: '#/components/schemas/BodaccImmatriculation'
+          Modification: '#/components/schemas/BodaccModification'
+          Vente: '#/components/schemas/BodaccVente'
+          Achat: '#/components/schemas/BodaccAchat'
+          Radiation: '#/components/schemas/BodaccRadiation'
+          Procédure collective: '#/components/schemas/BodaccProcedureCollective'
+          Dépôt des comptes: '#/components/schemas/BodaccDepotDesComptes'
+    BodaccCreation:
+      allOf:
+      - $ref: '#/components/schemas/Bodacc'
+      - type: object
+        properties:
+          nom_entreprise:
+            type: string
+            format: nullable
+            description: Nom de l'entreprise concernée par la publication. Correspond à la dénomination en cas de personne morale et à nom + prenom en cas de personne physique.
+            example: GOOGLE FRANCE
+          personne_morale:
+            type: boolean
+            format: nullable
+            description: Vrai si l'entreprise concernée par la publication est une personne morale, faux si c'est une personne physique.
+            example: GOOGLE FRANCE
+          denomination:
+            type: string
+            format: nullable
+            description: Dénomination de l'entreprise concernée par la publication (uniquement en cas de personne morale).
+            example: GOOGLE FRANCE
+          nom:
+            type: string
+            format: nullable
+            description: Nom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          prenom:
+            type: string
+            format: nullable
+            description: Prénom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          administration:
+            type: string
+            format: nullable
+            description: Administration (dans le cas d'une personne morale).
+            example: "Président : xxxx ; Commissaire aux comptes titulaire : xxxx"
+          adresse:
+            type: string
+            format: nullable
+            description: Adresse de l'entreprise concernée par la publication.
+            example: 8 rue de Londres 75009 Paris
+          capital:
+            type: integer
+            format: nullable
+            description: Capital de l'entreprise concernée par la publication.
+            example: '464884017'
+          activite:
+            type: string
+            format: nullable
+            description: Activité de l'entreprise concernée par la publication.
+            example: Fourniture de services et/ou conseils relatifs aux logiciels, au réseau internet.
+          date_debut_activite:
+            type: string
+            format: nullable
+            description: Date de début d'activité de l'entreprise concernée par la publication, au format AAAA-MM-JJ.
+            example: 2020-08-02
+    BodaccImmatriculation:
+      allOf:
+      - $ref: '#/components/schemas/Bodacc'
+      - type: object
+        properties:
+          nom_entreprise:
+            type: string
+            format: nullable
+            description: Nom de l'entreprise concernée par la publication. Correspond à la dénomination en cas de personne morale et à nom + prenom en cas de personne physique.
+            example: GOOGLE FRANCE
+          personne_morale:
+            type: boolean
+            format: nullable
+            description: Vrai si l'entreprise concernée par la publication est une personne morale, faux si c'est une personne physique.
+            example: GOOGLE FRANCE
+          denomination:
+            type: string
+            format: nullable
+            description: Dénomination de l'entreprise concernée par la publication (uniquement en cas de personne morale).
+            example: GOOGLE FRANCE
+          nom:
+            type: string
+            format: nullable
+            description: Nom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          prenom:
+            type: string
+            format: nullable
+            description: Prénom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          administration:
+            type: string
+            format: nullable
+            description: Administration (dans le cas d'une personne morale).
+            example: "Président : xxxx ; Commissaire aux comptes titulaire : xxxx"
+          adresse:
+            type: string
+            format: nullable
+            description: Adresse de l'entreprise concernée par la publication.
+            example: 8 rue de Londres 75009 Paris
+    BodaccModification:
+      allOf:
+      - $ref: '#/components/schemas/Bodacc'
+      - type: object
+        properties:
+          nom_entreprise:
+            type: string
+            format: nullable
+            description: Nom de l'entreprise concernée par la publication. Correspond à la dénomination en cas de personne morale et à nom + prenom en cas de personne physique.
+            example: GOOGLE FRANCE
+          personne_morale:
+            type: boolean
+            format: nullable
+            description: Vrai si l'entreprise concernée par la publication est une personne morale, faux si c'est une personne physique.
+            example: GOOGLE FRANCE
+          denomination:
+            type: string
+            format: nullable
+            description: Dénomination de l'entreprise concernée par la publication (uniquement en cas de personne morale).
+            example: GOOGLE FRANCE
+          nom:
+            type: string
+            format: nullable
+            description: Nom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          prenom:
+            type: string
+            format: nullable
+            description: Prénom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          administration:
+            type: string
+            format: nullable
+            description: Administration (dans le cas d'une personne morale).
+            example: "Président : xxxx ; Commissaire aux comptes titulaire : xxxx"
+          adresse:
+            type: string
+            format: nullable
+            description: Adresse de l'entreprise concernée par la publication.
+            example: 8 rue de Londres 75009 Paris
+          capital:
+            type: integer
+            format: nullable
+            description: Capital de l'entreprise concernée par la publication.
+            example: '464884017'
+          activite:
+            type: string
+            format: nullable
+            description: Activité de l'entreprise concernée par la publication.
+            example: Fourniture de services et/ou conseils relatifs aux logiciels, au réseau internet.
+          description:
+            type: string
+            format: nullable
+            description: Description de la modification.
+            example: modification survenue sur le capital (augmentation)
+    BodaccAchat:
+      allOf:
+      - $ref: '#/components/schemas/Bodacc'
+      - type: object
+        properties:
+          nom_entreprise:
+            type: string
+            format: nullable
+            description: Nom de l'entreprise concernée par la publication. Correspond à la dénomination en cas de personne morale et à nom + prenom en cas de personne physique.
+            example: GOOGLE FRANCE
+          personne_morale:
+            type: boolean
+            format: nullable
+            description: Vrai si l'entreprise concernée par la publication est une personne morale, faux si c'est une personne physique.
+            example: GOOGLE FRANCE
+          denomination:
+            type: string
+            format: nullable
+            description: Dénomination de l'entreprise concernée par la publication (uniquement en cas de personne morale).
+            example: GOOGLE FRANCE
+          nom:
+            type: string
+            format: nullable
+            description: Nom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          prenom:
+            type: string
+            format: nullable
+            description: Prénom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          administration:
+            type: string
+            format: nullable
+            description: Administration (dans le cas d'une personne morale).
+            example: "Président : xxxx ; Commissaire aux comptes titulaire : xxxx"
+          adresse:
+            type: string
+            format: nullable
+            description: Adresse de l'entreprise concernée par la publication.
+            example: 8 rue de Londres 75009 Paris
+          commentaires:
+            type: string
+            format: nullable
+            description: Commentaires sur la publication.
+          oppositions:
+            type: string
+            format: nullable
+            description: Détails sur les oppositions.
+          declaration_creance:
+            type: string
+            format: nullable
+            description: Détails sur la déclaration de créance.
+          publication_legale:
+            type: string
+            format: nullable
+            description: Journal où a été publiée la publication légale.
+          denomination_ancien_proprietaire:
+            type: string
+            format: optional
+            description: Dénomination de l'ancien propriétaire de l'établisement.
+          siren_ancien_proprietaire:
+            type: string
+            format: optional
+            description: Siren de l'ancien propriétaire de l'établisement.
+          denomination_ancien_exploitant:
+            type: string
+            format: optional
+            description: Dénomination de l'ancien exploitant de l'établisement.
+          siren_ancien_exploitant:
+            type: string
+            format: optional
+            description: Siren de l'ancien exploitant de l'établisement.
+    BodaccVente:
+      allOf:
+      - $ref: '#/components/schemas/Bodacc'
+      - type: object
+        properties:
+          nom_entreprise:
+            type: string
+            format: nullable
+            description: Nom de l'entreprise concernée par la publication. Correspond à la dénomination en cas de personne morale et à nom + prenom en cas de personne physique.
+            example: GOOGLE FRANCE
+          personne_morale:
+            type: boolean
+            format: nullable
+            description: Vrai si l'entreprise concernée par la publication est une personne morale, faux si c'est une personne physique.
+            example: GOOGLE FRANCE
+          denomination:
+            type: string
+            format: nullable
+            description: Dénomination de l'entreprise concernée par la publication (uniquement en cas de personne morale).
+            example: GOOGLE FRANCE
+          nom:
+            type: string
+            format: nullable
+            description: Nom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          prenom:
+            type: string
+            format: nullable
+            description: Prénom de la personne physique concernée par la publication (uniquement en cas de personne physique).
+          administration:
+            type: string
+            format: nullable
+            description: Administration (dans le cas d'une personne morale).
+            example: "Président : xxxx ; Commissaire aux comptes titulaire : xxxx"
+          adresse:
+            type: string
+            format: nullable
+            description: Adresse de l'entreprise concernée par la publication.
+            example: 8 rue de Londres 75009 Paris
+          commentaires:
+            type: string
+            format: nullable
+            description: Commentaires sur la publication.
+          oppositions:
+            type: string
+            format: nullable
+            description: Détails sur les oppositions.
+          declaration_creance:
+            type: string
+            format: nullable
+            description: Détails sur la déclaration de créance.
+          publication_legale:
+            type: string
+            format: nullable
+            description: Journal où a été publiée la publication légale.
+          denomination_nouveau_proprietaire:
+            type: string
+            format: nullable
+            description: Dénomination du nouveau propriétaire de l'établisement.
+          siren_nouveau_proprietaire:
+            type: string
+            format: nullable
+            description: Siren du nouveau propriétaire de l'établisement.
+          denomination_nouvel_exploitant:
+            type: string
+            format: nullable
+            description: Dénomination du nouvel exploitant de l'établisement.
+          siren_nouvel_exploitant:
+            type: string
+            format: nullable
+            description: Siren du nouvel exploitant de l'établisement.
+    BodaccRadiation:
+      allOf:
+      - $ref: '#/components/schemas/Bodacc'
+      - type: object
+    BodaccProcedureCollective:
+      allOf:
+      - $ref: '#/components/schemas/Bodacc'
+      - type: object
+        properties:
+          famille:
+            type: string
+            description: Famille de la procédure collective
+            example: Jugement de clôture
+          nature:
+            type: string
+            description: Nature de la procédure collective
+            example: Jugement de clôture pour insuffisance d'actif
+          complement_jugement:
+            type: string
+            description: Complément sur le jugement de procédure collective
+            example: Jugement prononçant la clôture de la procédure de liquidation judiciaire pour insuffisance d'actif.
+    BodaccDepotDesComptes:
+      allOf:
+      - $ref: '#/components/schemas/Bodacc'
+      - type: object
+        properties:
+          date_cloture:
+            type: string
+            description: Date de clôture des comptes, au format AAAA-MM-JJ.
+            example: 2020-08-02
+          type_depot:
+            type: string
+            description: Type de dépôt de comptes.
+            example: Comptes annuels et rapports
+          descriptif:
+            type: string
+            format: nullable
+            description: Descriptif du dépôt de comptes.
+    PersonneMarque:
+      type: object
+      properties:
+        siren:
+          type: string
+          description: Siren de l'entité, dans le cas d'une personne morale.
+        entite_legale:
+          type: string
+          description: Entité légale.
+        nom:
+          type: string
+          description: Nom de l'entité.
+        batiment:
+          type: string
+          description: Bâtiment de l'entité.
+        rue:
+          type: string
+          description: Rue de l'entité.
+        ville:
+          type: string
+          description: Ville de l'entité.
+        boite_postale:
+          type: string
+          description: Boîte postale de l'entité.
+        code_postal:
+          type: string
+          description: Code postal de l'entité.
+        code_pays:
+          type: string
+          description: Code pays de l'entité.
+    Ratios:
+      type: object
+      properties:
+        chiffre_affaires:
+          type: integer
+          format: nullable
+          description: Chiffre d'affaires de l'entreprise.
+          example: 411016329
+        resultat:
+          type: integer
+          format: nullable
+          description: Résultat de l'entreprise.
+          example: 29327087
+        effectif:
+          type: integer
+          format: nullable
+          description: Effectif de l'entreprise.
+          example: 723
+        marge_brute:
+          type: integer
+          format: nullable
+          description: Marge brute de l'entreprise.
+        excedent_brut_exploitation:
+          type: integer
+          format: nullable
+          description: Excédent brut d'exploitation (EBITDA) de l'entreprise.
+        resultat_exploitation:
+          type: integer
+          format: nullable
+          description: Résultat d'exploitation (EBIT) de l'entreprise.
+        taux_croissance_chiffre_affaires:
+          type: integer
+          format: nullable
+          description: Taux de croissance du chiffre d'affaires (en %) de l'entreprise.
+        taux_marge_brute:
+          type: integer
+          format: nullable
+          description: Taux de marge brute (en %) de l'entreprise.
+        taux_marge_EBITDA:
+          type: integer
+          format: nullable
+          description: Taux de marge d'EBITDA (en %) de l'entreprise.
+        taux_marge_operationnelle:
+          type: integer
+          format: nullable
+          description: Taux de marge opérationnelle (EBIT) (en %) de l'entreprise.
+        BFR:
+          type: integer
+          format: nullable
+          description: BFR (Besoin en fonds de roulement) de l'entreprise.
+        BFR_exploitation:
+          type: integer
+          format: nullable
+          description: BFR exploitation de l'entreprise.
+        BFR_hors_exploitation:
+          type: integer
+          format: nullable
+          description: BFR hors exploitation de l'entreprise.
+        BFR_jours_CA:
+          type: integer
+          format: nullable
+          description: BFR (en jours de CA) de l'entreprise.
+        BFR_exploitation_jours_CA:
+          type: integer
+          format: nullable
+          description: BFR exploitation (en jours de CA) de l'entreprise.
+        BFR_hors_exploitation_jours_CA:
+          type: integer
+          format: nullable
+          description: BFR hors exploitation (en jours de CA) de l'entreprise.
+        delai_paiement_clients_jours:
+          type: integer
+          format: nullable
+          description: Délai de paiement clients (en jours) de l'entreprise.
+        delai_paiement_fournisseurs_jours:
+          type: integer
+          format: nullable
+          description: Délai de paiement fournisseurs (en jours) de l'entreprise.
+        ratio_stock_CA_jours:
+          type: integer
+          format: nullable
+          description: Ratio des stocks / CA (en jours) de l'entreprise.
+        capacite_autofinancement:
+          type: integer
+          format: nullable
+          description: Capacité d'autofinancement de l'entreprise.
+        capacite_autofinancement_CA:
+          type: integer
+          format: nullable
+          description: Capacité d'autofinancement / CA (en %) de l'entreprise.
+        fonds_roulement_net_global:
+          type: integer
+          format: nullable
+          description: Fonds de roulement net global de l'entreprise.
+        couverture_BFR:
+          type: integer
+          format: nullable
+          description: Couverture du BFR de l'entreprise.
+        tresorerie:
+          type: integer
+          format: nullable
+          description: Trésorerie de l'entreprise.
+        dettes_financieres:
+          type: integer
+          format: nullable
+          description: Dettes financières de l'entreprise.
+        capacite_remboursement:
+          type: integer
+          format: nullable
+          description: Capacité de remboursement de l'entreprise.
+        ratio_endettement:
+          type: integer
+          format: nullable
+          description: Ratio d'endettement (Gearing) de l'entreprise.
+        autonomie_financiere:
+          type: integer
+          format: nullable
+          description: Autonomie financière (en %) de l'entreprise.
+        taux_levier:
+          type: integer
+          format: nullable
+          description: Taux de levier (DFN/EBITDA) de l'entreprise.
+        etat_dettes_1_an_au_plus:
+          type: integer
+          format: nullable
+          description: Etat des dettes à 1 an au plus de l'entreprise.
+        liquidite_generale:
+          type: integer
+          format: nullable
+          description: Liquidité générale de l'entreprise.
+        couverture_dettes:
+          type: integer
+          format: nullable
+          description: Couverture des dettes de l'entreprise.
+        marge_nette:
+          type: integer
+          format: nullable
+          description: Marge nette (en %) de l'entreprise.
+        rentabilite_fonds_propres:
+          type: integer
+          format: nullable
+          description: Rentabilité sur fonds propres (en %) de l'entreprise.
+        rentabilite_economique:
+          type: integer
+          format: nullable
+          description: Rentabilité économique (en %) de l'entreprise.
+        valeur_ajoutee:
+          type: integer
+          format: nullable
+          description: Valeur ajoutée de l'entreprise.
+        valeur_ajoutee_CA:
+          type: integer
+          format: nullable
+          description: Valeur ajoutée / CA (en %) de l'entreprise.
+        salaires_charges_sociales:
+          type: integer
+          format: nullable
+          description: Salaires et charges sociales de l'entreprise.
+        salaires_CA:
+          type: integer
+          format: nullable
+          description: Salaires / CA (en %) de l'entreprise.
+        impots_taxes:
+          type: integer
+          format: nullable
+          description: Impôts et taxes de l'entreprise.
+    Association:
+      type: object
+      format: nullable
+      description: Association liée à l'entreprise.
+      properties:
+        is_waldec:
+          type: boolean
+          example: 1
+          description: Détermine si l'association possède un numéro WALDEC/RNA.
+        id_association:
+          type: string
+          example: "W142005389"
+          description: L'identifiant l'association au format Wxxxxxxxxx si WALDEC, xxxxxxxxxxxxxx sinon.
+        id_ex_association:
+          type: string
+          format: nullable
+          example: 0142004593
+          description: Ancien numéro de l'association.
+        denomination:
+          type: string
+          format: nullable
+          example: COMITÉ RÉGIONAL DE BRIDGE DE BASSE NORMANDIE
+          description: Dénomination de l'association.
+        siret:
+          type: string
+          format: nullable
+          description: Numéro siret de l'association au format xxxxxxxxxxxxxx.
+          example: "95037097300014"
+        numero_rup:
+          type: string
+          format: nullable
+          description: Numéro de Reconnaissance d'Utilité Publique.
+          example: null
+        objet:
+          type: string
+          format: nullable
+          description: Objet de l'association.
+          example: Grouper tous les clubs et joueurs de bridge de Basse-Normandie de soutenir leurs efforts et de développer sous toutes ses formes la pratique du jeu de bridge
+        objet_social_1:
+          type: string
+          format: nullable
+          description: Objet social 1 de l'association.
+          example: 007005
+        categorie_social_1:
+          type: string
+          format: nullable
+          description: Libellé correspondant à l'objet social 1.
+          example: Bridge, jeux de cartes, échecs, dames, jeux de société...
+        objet_social_2:
+          type: string
+          format: nullable
+          description: Objet social 2 de l'association.
+          example: 000000
+        categorie_social_2:
+          type: string
+          format: nullable
+          description: Libellé correspondant à l'objet social 1.
+          example: Non connue
+        date_creation:
+          type: string
+          format: nullable
+          description: Date de déclaration de création au format AAAA-MM-JJ.
+          example: "1978-09-28"
+        date_derniere_declaration:
+          type: string
+          format: nullable
+          description: Date de dernière déclaration au format AAAA-MM-JJ.
+          example: "2019-09-18"
+        date_publication_creation:
+          type: string
+          format: nullable
+          description: Date de publication du Journal Officiel de l'avis de création au format AAAA-MM-JJ.
+          example: "1978-10-12"
+        date_declaration_dissolution:
+          type: string
+          format: nullable
+          description: Date de déclaration de dissolution au format AAAA-MM-JJ.
+          example: "2019-09-18"
+        groupement:
+          type: string
+          format: nullable
+          description: Groupement de l'association.
+          example: Simple
+        position_activite:
+          type: string
+          format: nullable
+          description: Position d'activité de l'association.
+          example: Active
+        nature:
+          type: string
+          format: nullable
+          description: Nature de l'association.
+          example: Simplement Declarée
+        site_web:
+          type: string
+          format: nullable
+          description: Site web de l'association.
+          example: null
+        telephone:
+          type: string
+          format: nullable
+          description: Numéro de téléphone de l'association.
+          example: null
+        email:
+          type: string
+          format: nullable
+          description: Email de l'association.
+          example: null
+        adresse_siege:
+          type: object
+          properties:
+            code_postal:
+              type: string
+              format: nullable
+              description: Code postal du siège social.
+              example: "14075"
+            code_insee:
+              type: string
+              format: nullable
+              description: Code insee du siège social.
+              example: "14118"
+            ville:
+              type: string
+              format: nullable
+              description: Ville du siège social.
+              example: Caen  cedex 05
+            numero_voie:
+              type: string
+              format: nullable
+              description: Numéro de voie du siège social.
+              example: 115ter
+            indice_repetition:
+              type: string
+              format: nullable
+              description: Indice de répétition du siège social.
+              example: null
+            type_voie:
+              type: string
+              format: nullable
+              description: Type de voie du siège social.
+              example: BD
+            libelle_voie:
+              type: string
+              format: nullable
+              description: Libellé de la voie du siège social.
+              example: Vanier  - La Pierre Heuzé
+            complement_adresse:
+              type: string
+              format: nullable
+              description: Complément de l'adresse du siège social.
+              example: null
+            distribution:
+              type: string
+              format: nullable
+              description: Complément de distribution du siege social.
+              example: _BP 75156
+            adresse_ligne_1:
+              type: string
+              format: nullable
+              description: Adresse complète du siège social.
+              example: 115ter BD Vanier  - La Pierre Heuzé
+            adresse_ligne_2:
+              type: string
+              format: nullable
+              description: Renseignement supplémentaire à l'adresse du siège social.
+              example: null
+        adresse_gestionnaire:
+          type: object
+          properties:
+            gestionnaire:
+              type: string
+              format: nullable
+              description: Nom du gestionnaire de l'association.
+              example: null
+            code_postal:
+              type: string
+              format: nullable
+              description: Code postal du gestionnaire.
+              example: "14075"
+            ville:
+              type: string
+              format: nullable
+              description: Ville du gestionnaire.
+              example: CAEN
+            distribution:
+              type: string
+              format: nullable
+              description: Complément de distribution du gestionnaire.
+              example: null
+            adresse_ligne:
+              type: string
+              format: nullable
+              description: Adresse complète du gestionnaire.
+              example: 115TER  BOULEVARD VANIER  - LA PIERRE
+            complement_adresse:
+              type: string
+              format: nullable
+              description: Complément de l'adresse du gestionnaire.
+              example: null
+            indication:
+              type: string
+              format: nullable
+              description: Indication supplémentaire à l'adresse du gestionnaire.
+              example: null
+            pays:
+              type: string
+              format: nullable
+              description: Pays du gestionnaire.
+              example: FRANCE
+        observation:
+          type: string
+          format: nullable
+          description: Observation relative à l'association.
+          example: Reprise auto =>  date publication création au JO à vérifier
+        code_gestion:
+          type: string
+          format: nullable
+          description: Code du site gestionnaire (préfecture, sous-préfecture) de l'association.
+          example: 142P
+        dirigeant_civilite:
+          type: string
+          format: nullable
+          description: Civilité du dirigeant.
+          example: PM
+        derniere_maj:
+          type: string
+          format: nullable
+          description: Date de la dernière mise à jour des informations au RNA au format AAAA-MM-JJ.
+          example: "2020-03-18"
+        publications_joafe:
+          type: object
+          format: optional
+          description: Publications JOAFE.
+          properties:
+            numero_parution:
+              type: string
+              example: "20180024"
+              description: Numéro de parution JOAFE
+            date_parution:
+              type: string
+              example: "2018-06-16"
+              description: Date de parution JOAFE au format AAAA-MM-JJ
+            date_declaration:
+              type: string
+              example: "2018-06-12"
+              description: Date de déclaration au format AAAA-MM-JJ
+            numero_annonce:
+              type: integer
+              example: 1766
+              description: Numéro de l'annonce JOAFE
+            titre:
+              type: string
+              example: ASSOCIATION QUARTIER FOSSES-JEAN
+              description: Nom de l'association
+            type:
+              type: string
+              example: Création
+              description: Type d'annonce (Création, Modification, Dissolution)
+            prefecture:
+              type: string
+              example: Hauts-de-Seine
+              description: Lieu de la déclaration
+            objet:
+              type: string
+              format: optional
+              example: la défense des droits des habitants du quartier auprès éventuellement des bailleurs sociaux ; aide à la gestion des problèmes de voisinage ; superviser le prêt des Lieux Communs de Résidences pour proposer des activités aux jeunes du quartier (jeux, échanges, anniversaires, prêt de livres ou divers) ; l'organisation de rencontres pluriculturelles (apprentissage de l'art culinaire des différentes ethnies qui composent le quartier) ; organisation de goûter et sorties, vide grenier annuel ou semestriel plus couramment brocante ; organisation de rencontres inter-générations retraités qui pourraient apporter une aide aux devoirs pour les enfants (bénévolement)
+              description: Description de l'association
+            site_web:
+              type: string
+              format: optional
+              example: null
+              description: Lien du site web
+            adresse:
+              type: string
+              format: nullable
+              example: 9, avenue D'Orgemont, 92700 Colombes
+              description: Adresse de l'association
+    LienSuccession:
+      type: object
+      properties:
+        siret:
+          type: string
+          description: Numéro siret de l'établissement au format xxxxxxxxxxxxxx.
+          example: "44306184100047"
+        date:
+          type: string
+          description: Date à laquelle la succession a eu lieu.
+          example: '1993-20-02'
+        transfert_siege:
+          type: boolean
+          description: Vrai si le lien de succession concerne l'établissement siège, faux sinon.
+          example: false
+        continuite_economique:
+          type: boolean
+          description: Vrai s'il y a [continuité économique](https://www.sirene.fr/sirene/public/variable/continuiteEconomique), faux sinon.
+          example: true

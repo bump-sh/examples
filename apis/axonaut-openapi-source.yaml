@@ -1,0 +1,6303 @@
+---
+swagger: '2.0'
+info:
+  title: Axonaut API
+  contact:
+    email: support@axonaut.com
+  version: 2.0.0
+host: axonaut.com
+schemes:
+- https
+paths:
+  "/api/v2/companies":
+    get:
+      summary: Get all Companies
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: search
+        in: query
+        description: Filters Companies whose name contains the specified character
+          string
+        type: string
+      - name: internal_id
+        in: query
+        description: Search for the Company whose internal id is the specified character
+          string
+        type: string
+      - name: type
+        in: query
+        description: Filters the Company type
+        type: string
+        default: all
+        enum:
+        - customer
+        - prospect
+        - supplier
+        - all
+      - name: address_city
+        in: query
+        description: Filters the city of the Company
+        type: string
+      - name: address_zipcode
+        in: query
+        description: Filters the zip code of the Company
+        type: string
+      - name: is_prospect
+        in: query
+        description: Filters all prospects (true or false)
+        type: string
+        enum:
+        - 'true'
+        - 'false'
+      - name: is_customer
+        in: query
+        description: Filters all customers (true or false)
+        type: string
+        enum:
+        - 'true'
+        - 'false'
+      - name: is_supplier
+        in: query
+        description: Filters all suppliers (true or false)
+        type: string
+        enum:
+        - 'true'
+        - 'false'
+      - name: sort
+        in: query
+        description: Order of the returned data
+        type: string
+        default: id
+        enum:
+        - id
+        - name
+        - address_city
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              creation_date:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              address_country:
+                type: string
+              comments:
+                type: string
+              is_supplier:
+                type: boolean
+              is_prospect:
+                type: boolean
+              is_customer:
+                type: boolean
+              currency:
+                type: string
+              thirdparty_code:
+                type: string
+              intracommunity_number:
+                type: string
+              siret:
+                type: string
+              internal_id:
+                type: string
+              business_manager:
+                type: object
+              custom_fields:
+                type: object
+              categories:
+                items:
+                  type: string
+                type: array
+              employees:
+                items:
+                  type: object
+                type: array
+              documents:
+                items:
+                  type: integer
+                type: array
+      tags:
+      - Companies
+    post:
+      summary: Create a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: 'The new Company. <br/>Currency must be a 3 letters code : https://fr.iban.com/currency-codes
+          (ISO 4217)'
+        schema:
+          properties:
+            name:
+              type: string
+            address_contact_name:
+              type: string
+            address_street:
+              type: string
+            address_zip_code:
+              type: string
+            address_city:
+              type: string
+            address_country:
+              type: string
+            is_prospect:
+              type: boolean
+            is_customer:
+              type: boolean
+            currency:
+              type: string
+            thirdparty_code:
+              type: string
+            intracommunity_number:
+              type: string
+            siret:
+              type: string
+            comments:
+              type: string
+            custom_fields:
+              type: object
+            categories:
+              items:
+                type: string
+              type: array
+            internal_id:
+              type: string
+            business_manager:
+              type: string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              creation_date:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              address_country:
+                type: string
+              comments:
+                type: string
+              is_supplier:
+                type: boolean
+              is_prospect:
+                type: boolean
+              is_customer:
+                type: boolean
+              thirdparty_code:
+                type: string
+              intracommunity_number:
+                type: string
+              siret:
+                type: string
+              internal_id:
+                type: string
+              business_manager:
+                type: object
+              custom_fields:
+                type: object
+              categories:
+                items:
+                  type: string
+                type: array
+              employees:
+                items:
+                  type: object
+                type: array
+              documents:
+                items:
+                  type: integer
+                type: array
+      tags:
+      - Companies
+  "/api/v2/companies/{companyId}":
+    get:
+      summary: Get a specific Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              creation_date:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              address_country:
+                type: string
+              comments:
+                type: string
+              is_supplier:
+                type: boolean
+              is_prospect:
+                type: boolean
+              is_customer:
+                type: boolean
+              currency:
+                type: string
+              thirdparty_code:
+                type: string
+              intracommunity_number:
+                type: string
+              siret:
+                type: string
+              internal_id:
+                type: string
+              business_manager:
+                type: object
+              custom_fields:
+                type: object
+              categories:
+                items:
+                  type: string
+                type: array
+              employees:
+                items:
+                  type: object
+                type: array
+              documents:
+                items:
+                  type: integer
+                type: array
+      tags:
+      - Companies
+    patch:
+      summary: Update a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            name:
+              type: string
+            address_contact_name:
+              type: string
+            address_street:
+              type: string
+            address_zip_code:
+              type: string
+            address_city:
+              type: string
+            address_country:
+              type: string
+            thirdparty_code:
+              type: string
+            intracommunity_number:
+              type: string
+            siret:
+              type: string
+            comments:
+              type: string
+            custom_fields:
+              type: object
+            categories:
+              items:
+                type: string
+              type: array
+            internal_id:
+              type: string
+            business_manager:
+              type: string
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              creation_date:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              address_country:
+                type: string
+              comments:
+                type: string
+              is_supplier:
+                type: boolean
+              is_prospect:
+                type: boolean
+              is_customer:
+                type: boolean
+              currency:
+                type: string
+              thirdparty_code:
+                type: string
+              intracommunity_number:
+                type: string
+              siret:
+                type: string
+              internal_id:
+                type: string
+              business_manager:
+                type: object
+              custom_fields:
+                type: object
+              categories:
+                items:
+                  type: string
+                type: array
+              employees:
+                items:
+                  type: object
+                type: array
+              documents:
+                items:
+                  type: integer
+                type: array
+      tags:
+      - Companies
+    delete:
+      summary: Delete a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+      tags:
+      - Companies
+  "/api/v2/companies/{companyId}/addresses":
+    get:
+      summary: Get all Addresses of a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              contact_name:
+                type: string
+              company_name:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              address_country:
+                type: string
+              is_for_invoice:
+                type: boolean
+              is_for_delivery:
+                type: boolean
+              is_for_quotation:
+                type: boolean
+      tags:
+      - Companies
+  "/api/v2/addresses":
+    post:
+      summary: Create an Address for a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new Company Address
+        schema:
+          properties:
+            company_id:
+              type: integer
+            name:
+              type: string
+            contact_name:
+              type: string
+            company_name:
+              type: string
+            address_street:
+              type: string
+            address_zip_code:
+              type: string
+            address_city:
+              type: string
+            address_country:
+              type: string
+            is_for_invoice:
+              type: boolean
+            is_for_delivery:
+              type: boolean
+            is_for_quotation:
+              type: boolean
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              contact_name:
+                type: string
+              company_name:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              address_country:
+                type: string
+              is_for_invoice:
+                type: boolean
+              is_for_delivery:
+                type: boolean
+              is_for_quotation:
+                type: boolean
+              company:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                  type: object
+                type: array
+      tags:
+      - Companies
+  "/api/v2/addresses/{addressId}":
+    patch:
+      summary: Update an Address for a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            name:
+              type: string
+            contact_name:
+              type: string
+            company_name:
+              type: string
+            address_street:
+              type: string
+            address_zip_code:
+              type: string
+            address_city:
+              type: string
+            address_country:
+              type: string
+            is_for_invoice:
+              type: boolean
+            is_for_delivery:
+              type: boolean
+            is_for_quotation:
+              type: boolean
+        type: string
+      - name: addressId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              contact_name:
+                type: string
+              company_name:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              address_country:
+                type: string
+              is_for_invoice:
+                type: boolean
+              is_for_delivery:
+                type: boolean
+              is_for_quotation:
+                type: boolean
+              company:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                  type: object
+                type: array
+      tags:
+      - Companies
+    delete:
+      summary: Delete a Company Address
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: addressId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+      tags:
+      - Companies
+  "/api/v2/employees":
+    get:
+      summary: Get all Employees
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: email
+        in: query
+        description: Filters the email of the Employee
+        type: string
+      - name: phone
+        in: query
+        description: Filters the phone/cellphone of the Employee containing the given
+          character string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              gender:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              email:
+                type: string
+              phone_number:
+                type: string
+              cellphone_number:
+                type: string
+              job:
+                type: string
+              is_billing_contact:
+                type: boolean
+              company_id:
+                type: integer
+              custom_fields:
+                type: object
+      tags:
+      - Companies
+    post:
+      summary: Create an Employee
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new Employee
+        schema:
+          properties:
+            company_id:
+              type: integer
+            gender:
+              type: integer
+            firstname:
+              type: string
+            lastname:
+              type: string
+            email:
+              type: string
+            phone_number:
+              type: string
+            cellphone_number:
+              type: string
+            job:
+              type: string
+            custom_fields:
+              type: object
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              gender:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              email:
+                type: string
+              phone_number:
+                type: string
+              cellphone_number:
+                type: string
+              job:
+                type: string
+              is_billing_contact:
+                type: boolean
+              company_id:
+                type: integer
+              custom_fields:
+                type: object
+      tags:
+      - Companies
+  "/api/v2/companies/{companyId}/employees":
+    get:
+      summary: Get all Employees of a specific Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              gender:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              email:
+                type: string
+              phone_number:
+                type: string
+              cellphone_number:
+                type: string
+              job:
+                type: string
+              is_billing_contact:
+                type: boolean
+              company_id:
+                type: integer
+              custom_fields:
+                type: object
+      tags:
+      - Companies
+  "/api/v2/employees/{employeeId}":
+    get:
+      summary: Get a specific Employee
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: employeeId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              gender:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              email:
+                type: string
+              phone_number:
+                type: string
+              cellphone_number:
+                type: string
+              job:
+                type: string
+              is_billing_contact:
+                type: boolean
+              company_id:
+                type: integer
+              custom_fields:
+                type: object
+      tags:
+      - Companies
+    patch:
+      summary: Update an Employee
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            gender:
+              type: integer
+            firstname:
+              type: string
+            lastname:
+              type: string
+            email:
+              type: string
+            phone_number:
+              type: string
+            cellphone_number:
+              type: string
+            job:
+              type: boolean
+            custom_fields:
+              type: object
+        type: string
+      - name: employeeId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              gender:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              email:
+                type: string
+              phone_number:
+                type: string
+              cellphone_number:
+                type: string
+              job:
+                type: string
+              is_billing_contact:
+                type: boolean
+              company_id:
+                type: integer
+              custom_fields:
+                type: object
+      tags:
+      - Companies
+    delete:
+      summary: Delete an Employee
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: employeeId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+      tags:
+      - Companies
+  "/api/v2/company-categories":
+    get:
+      summary: Get all Company Categories
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+      tags:
+      - Companies
+    post:
+      summary: Create a Company Category
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            name:
+              type: string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+      tags:
+      - Companies
+  "/api/v2/documents/{documentId}":
+    get:
+      summary: Get a specific Document
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: documentId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              company_id:
+                type: integer
+              name:
+                type: string
+              external_url:
+                type: string
+              customer_portal_url:
+                type: string
+      tags:
+      - Companies
+    patch:
+      summary: Update a Document
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            name:
+              type: string
+            external_url:
+              type: string
+        type: string
+      - name: documentId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              company_id:
+                type: integer
+              name:
+                type: string
+              external_url:
+                type: string
+              customer_portal_url:
+                type: string
+      tags:
+      - Companies
+  "/api/v2/companies/{companyId}/documents":
+    get:
+      summary: Get all Documents of a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              company_id:
+                type: integer
+              name:
+                type: string
+              external_url:
+                type: string
+              customer_portal_url:
+                type: string
+      tags:
+      - Companies
+  "/api/v2/documents/{documentId}/download":
+    get:
+      summary: Download a Document
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: alt
+        in: query
+        required: false
+        description: If this parameters take the value ?alt=media, downloads the binary
+          file instead of returning the base64
+        type: string
+      - name: documentId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            description: Base64 content file
+            type: string
+      tags:
+      - Companies
+  "/api/v2/documents":
+    post:
+      summary: Add a Document to a Company (URL only, no file)
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            name:
+              type: string
+            company_id:
+              type: integer
+            external_url:
+              type: string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              company_id:
+                type: integer
+              name:
+                type: string
+              external_url:
+                type: string
+              customer_portal_url:
+                type: string
+      tags:
+      - Companies
+  "/api/v2/invoices":
+    get:
+      summary: Get all Invoices
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: sort
+        in: query
+        description: Order of the returned data
+        type: string
+        default: id
+        enum:
+        - id
+        - updatetime
+      - name: number
+        in: query
+        description: Search for the Invoice which number is the specified character
+          string
+        type: string
+      - name: internal_ref
+        in: query
+        description: Search for the Invoice which internal reference is the specified
+          character string
+        type: string
+      - name: date_before
+        in: query
+        description: Invoice date prior to the given date (format DD/MM/YYYY)
+        type: string
+      - name: date_after
+        in: query
+        description: Invoice date after the given date (format DD/MM/YYYY)
+        type: string
+      - name: paid_date
+        in: query
+        description: Invoice date of payment (format DD/MM/YYYY)
+        type: string
+      - name: is_paid
+        in: query
+        description: Filters all paid or unpaid invoices (true or false)
+        type: string
+        enum:
+        - 'true'
+        - 'false'
+      - name: updated_before
+        in: query
+        description: Invoice last updated date prior to the given date (format DD/MM/YYYY)
+        type: string
+      - name: updated_after
+        in: query
+        description: Invoice last updated date after the given date(format DD/MM/YYYY)
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              number:
+                type: string
+              order_number:
+                type: string
+              date:
+                type: string
+              sent_date:
+                type: string
+              due_date:
+                type: string
+              paid_date:
+                type: string
+              last_update_date:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total:
+                type: number
+              currency:
+                type: string
+              mandatory_mentions:
+                type: string
+              payment_terms:
+                type: string
+              outstanding_amount:
+                type: number
+              service_start_date:
+                type: string
+              service_end_date:
+                type: string
+              frequency_in_months:
+                type: integer
+              business_user:
+                type: string
+              public_path:
+                type: string
+              customer_portal_url:
+                type: string
+              invoice_lines:
+                items:
+                  properties:
+                    product_id:
+                      type: integer
+                    product_name:
+                      type: string
+                    product_code:
+                      type: string
+                    price:
+                      type: number
+                    quantity:
+                      type: number
+                    tax_rates:
+                      type: object
+                    details:
+                      type: string
+                    total_pre_tax_amount:
+                      type: number
+                    total_tax_amount:
+                      type: number
+                    total_amount:
+                      type: number
+                    accounting_code:
+                      type: string
+                    unit_job_costing:
+                      type: number
+                  type: object
+                type: array
+              company:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  is_supplier:
+                    type: boolean
+                  is_prospect:
+                    type: boolean
+                  is_customer:
+                    type: boolean
+                type: object
+              billing_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              delivery_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              contract_id:
+                type: object
+              quotation_id:
+                type: object
+              project_id:
+                type: object
+      tags:
+      - Sales & Invoices
+    post:
+      summary: Create an Invoice
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: "The new Invoice.\r\n     *          Either fill company_id or
+          employee_email to assign the invoice to a Company. employee_email must be
+          the email of a known Contact within the Company.\r\n     *          property
+          date has to be posterior to last invoice's date. Default value : date of
+          the request.\r\n     *          If the properties product.id and product.internal_id
+          are empty or missing, a new Product will be created."
+        schema:
+          properties:
+            company_id:
+              type: integer
+            employee_email:
+              type: string
+            contract_id:
+              type: integer
+            date:
+              type: string
+            due_date:
+              type: string
+            products:
+              items:
+                properties:
+                  id:
+                    type: integer
+                  internal_id:
+                    type: string
+                  product_code:
+                    type: string
+                  name:
+                    type: string
+                  price:
+                    type: number
+                  tax_rate:
+                    type: number
+                  quantity:
+                    type: number
+                  description:
+                    type: string
+                  chapter:
+                    type: string
+                  discount_percent:
+                    type: number
+                  discount_flat:
+                    type: number
+                  unit_job_costing:
+                    type: number
+                type: object
+              type: array
+            delivery_address:
+              properties:
+                company_name:
+                  type: string
+                contact_name:
+                  type: string
+                street:
+                  type: string
+                zip_code:
+                  type: string
+                city:
+                  type: string
+                region:
+                  type: string
+                country:
+                  type: string
+              type: object
+            mandatory_mentions:
+              type: string
+            payment_terms:
+              type: string
+            theme_id:
+              type: integer
+            allow_gocardless_payment:
+              type: boolean
+            allow_stripe_payment:
+              type: boolean
+            service_start_date:
+              type: string
+            service_end_date:
+              type: string
+            order_number:
+              type: string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              number:
+                type: string
+              order_number:
+                type: string
+              date:
+                type: string
+              sent_date:
+                type: string
+              due_date:
+                type: string
+              paid_date:
+                type: string
+              last_update_date:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total:
+                type: number
+              currency:
+                type: string
+              mandatory_mentions:
+                type: string
+              payment_terms:
+                type: string
+              outstanding_amount:
+                type: number
+              service_start_date:
+                type: string
+              service_end_date:
+                type: string
+              frequency_in_months:
+                type: integer
+              business_user:
+                type: string
+              public_path:
+                type: string
+              customer_portal_url:
+                type: string
+              invoice_lines:
+                items:
+                  properties:
+                    product_id:
+                      type: integer
+                    product_name:
+                      type: string
+                    product_code:
+                      type: string
+                    price:
+                      type: number
+                    quantity:
+                      type: number
+                    tax_rates:
+                      type: object
+                    details:
+                      type: string
+                    total_pre_tax_amount:
+                      type: number
+                    total_tax_amount:
+                      type: number
+                    total_amount:
+                      type: number
+                    accounting_code:
+                      type: string
+                    unit_job_costing:
+                      type: number
+                  type: object
+                type: array
+              company:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  is_supplier:
+                    type: boolean
+                  is_prospect:
+                    type: boolean
+                  is_customer:
+                    type: boolean
+                type: object
+              billing_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              delivery_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              contract_id:
+                type: object
+              quotation_id:
+                type: object
+              project_id:
+                type: object
+      tags:
+      - Sales & Invoices
+  "/api/v2/companies/{companyId}/invoices":
+    get:
+      summary: Get all Invoices of a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: sort
+        in: query
+        description: Order of the returned data
+        type: string
+        default: id
+        enum:
+        - id
+        - updatetime
+      - name: number
+        in: query
+        description: Search for the Invoice which number is the specified character
+          string
+        type: string
+      - name: internal_ref
+        in: query
+        description: Search for the Invoice which internal reference is the specified
+          character string
+        type: string
+      - name: paid_date
+        in: query
+        description: Invoice date of payment (format DD/MM/YYYY)
+        type: string
+      - name: is_paid
+        in: query
+        description: Filters all paid or unpaid invoices (true or false)
+        type: string
+        enum:
+        - 'true'
+        - 'false'
+      - name: updated_before
+        in: query
+        description: Invoice last updated date prior to the given date (format DD/MM/YYYY)
+        type: string
+      - name: updated_after
+        in: query
+        description: Invoice last updated date after the given date(format DD/MM/YYYY)
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              number:
+                type: string
+              order_number:
+                type: string
+              date:
+                type: string
+              sent_date:
+                type: string
+              due_date:
+                type: string
+              paid_date:
+                type: string
+              last_update_date:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total:
+                type: number
+              currency:
+                type: string
+              mandatory_mentions:
+                type: string
+              payment_terms:
+                type: string
+              outstanding_amount:
+                type: number
+              service_start_date:
+                type: string
+              service_end_date:
+                type: string
+              frequency_in_months:
+                type: integer
+              business_user:
+                type: string
+              public_path:
+                type: string
+              customer_portal_url:
+                type: string
+              invoice_lines:
+                items:
+                  properties:
+                    product_id:
+                      type: integer
+                    product_name:
+                      type: string
+                    product_code:
+                      type: string
+                    price:
+                      type: number
+                    quantity:
+                      type: number
+                    tax_rates:
+                      type: object
+                    details:
+                      type: string
+                    total_pre_tax_amount:
+                      type: number
+                    total_tax_amount:
+                      type: number
+                    total_amount:
+                      type: number
+                    accounting_code:
+                      type: string
+                    unit_job_costing:
+                      type: number
+                  type: object
+                type: array
+              company:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  is_supplier:
+                    type: boolean
+                  is_prospect:
+                    type: boolean
+                  is_customer:
+                    type: boolean
+                type: object
+              billing_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              delivery_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              contract_id:
+                type: object
+              quotation_id:
+                type: object
+              project_id:
+                type: object
+      tags:
+      - Sales & Invoices
+  "/api/v2/invoices/{invoiceId}":
+    get:
+      summary: Get a specific Invoice
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: invoiceId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              number:
+                type: string
+              order_number:
+                type: string
+              date:
+                type: string
+              sent_date:
+                type: string
+              due_date:
+                type: string
+              paid_date:
+                type: string
+              last_update_date:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total:
+                type: number
+              currency:
+                type: string
+              mandatory_mentions:
+                type: string
+              payment_terms:
+                type: string
+              outstanding_amount:
+                type: number
+              service_start_date:
+                type: string
+              service_end_date:
+                type: string
+              frequency_in_months:
+                type: integer
+              business_user:
+                type: string
+              public_path:
+                type: string
+              customer_portal_url:
+                type: string
+              invoice_lines:
+                items:
+                  properties:
+                    product_id:
+                      type: integer
+                    product_name:
+                      type: string
+                    product_code:
+                      type: string
+                    price:
+                      type: number
+                    quantity:
+                      type: number
+                    tax_rates:
+                      type: object
+                    details:
+                      type: string
+                    total_pre_tax_amount:
+                      type: number
+                    total_tax_amount:
+                      type: number
+                    total_amount:
+                      type: number
+                    accounting_code:
+                      type: string
+                    unit_job_costing:
+                      type: number
+                  type: object
+                type: array
+              company:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  is_supplier:
+                    type: boolean
+                  is_prospect:
+                    type: boolean
+                  is_customer:
+                    type: boolean
+                type: object
+              billing_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              delivery_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              contract_id:
+                type: object
+              quotation_id:
+                type: object
+              project_id:
+                type: object
+      tags:
+      - Sales & Invoices
+  "/api/v2/payments":
+    get:
+      summary: Get all Invoice Payments
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: company_id
+        in: query
+        required: false
+        description: Filters payments by Company id
+        type: integer
+      - name: invoice_id
+        in: query
+        required: false
+        description: Filters payments by Invoice id
+        type: integer
+      - name: invoice_number
+        in: query
+        required: false
+        description: Filters payments by Invoice number
+        type: string
+      - name: date_before
+        in: query
+        description: Invoice payment date prior to the given date (format DD/MM/YYYY)
+        type: string
+      - name: date_after
+        in: query
+        description: Invoice payment date after the given date (format DD/MM/YYYY)
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              amount:
+                type: number
+              date:
+                type: string
+              nature:
+                type: string
+              invoice_id:
+                type: integer
+      tags:
+      - Sales & Invoices
+    post:
+      summary: Create an Invoice Payment
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: 'The new Payment <br/> nature property : 1 = Debit, 2 = Transfer,
+          3 = Check, 4 = Credit card, 5 = Cash, 6 = Other'
+        schema:
+          properties:
+            invoice_id:
+              type: integer
+            nature:
+              type: integer
+            amount:
+              type: number
+            date:
+              type: string
+            reference:
+              type: string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              amount:
+                type: number
+              date:
+                type: string
+              invoice_id:
+                type: integer
+      tags:
+      - Sales & Invoices
+  "/api/v2/contracts":
+    get:
+      summary: Get all Orders
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: updated_before
+        in: query
+        description: Order update date after the given date (format DD/MM/YYYY)
+        type: string
+      - name: updated_after
+        in: query
+        description: Order update date prior to the given date (format DD/MM/YYYY)
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: integer
+              start_date:
+                type: string
+              end_date:
+                type: string
+              comments:
+                type: string
+              user_id:
+                type: integer
+              expected_delivery_date:
+                type: string
+              last_updated_date:
+                type: string
+              invoice_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              delivery_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              first_invoice_planned_date:
+                type: string
+              generate_and_send_recurring_invoices:
+                type: integer
+              invoice_frequency_in_months:
+                type: integer
+              preauthorized_debit:
+                type: boolean
+              company:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  address_street:
+                    type: string
+                  address_zip_code:
+                    type: string
+                  address_city:
+                    type: string
+                  address_region:
+                    type: string
+                  address_country:
+                    type: string
+                  comments:
+                    type: string
+                  is_supplier:
+                    type: boolean
+                  is_prospect:
+                    type: boolean
+                  is_customer:
+                    type: boolean
+                  thirdparty_code:
+                    type: string
+                type: object
+              project:
+                type: object
+              quotation:
+                type: object
+              invoices_id:
+                items:
+                  type: integer
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Sales & Invoices
+    post:
+      summary: Create an Order
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: "The new Order.\r\n     *      <br>Properties start_date, end_date,
+          expected_delivery_date, first_invoice_planned_date must be in RFC3339 format.\r\n
+          \    *      <br>Property generate_and_send_recurring_invoices : 0 = Do not
+          generate and send invoices ; 1 = Generate and send automatically ; 2 = Generate
+          without sending"
+        schema:
+          properties:
+            name:
+              type: string
+            company_id:
+              type: integer
+            start_date:
+              type: string
+            end_date:
+              type: string
+            comments:
+              type: string
+            user_id:
+              type: integer
+            expected_delivery_date:
+              type: string
+            first_invoice_planned_date:
+              type: string
+            invoice_frequency_in_months:
+              type: integer
+            generate_and_send_recurring_invoices:
+              type: integer
+            preauthorized_debit:
+              type: boolean
+            products:
+              items:
+                properties:
+                  id:
+                    type: integer
+                  internal_id:
+                    type: string
+                  name:
+                    type: string
+                  price:
+                    type: number
+                  tax_rate:
+                    type: number
+                  quantity:
+                    type: number
+                  description:
+                    type: string
+                type: object
+              type: array
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: integer
+              start_date:
+                type: string
+              end_date:
+                type: string
+              comments:
+                type: string
+              user_id:
+                type: integer
+              expected_delivery_date:
+                type: string
+              last_updated_date:
+                type: string
+              invoice_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              delivery_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              first_invoice_planned_date:
+                type: string
+              generate_and_send_recurring_invoices:
+                type: integer
+              invoice_frequency_in_months:
+                type: integer
+              preauthorized_debit:
+                type: boolean
+              company:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  address_street:
+                    type: string
+                  address_zip_code:
+                    type: string
+                  address_city:
+                    type: string
+                  address_region:
+                    type: string
+                  address_country:
+                    type: string
+                  comments:
+                    type: string
+                  is_supplier:
+                    type: boolean
+                  is_prospect:
+                    type: boolean
+                  is_customer:
+                    type: boolean
+                  thirdparty_code:
+                    type: string
+                type: object
+              project:
+                type: object
+              quotation:
+                type: object
+              invoices_id:
+                items:
+                  type: integer
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Sales & Invoices
+  "/api/v2/companies/{companyId}/contracts":
+    get:
+      summary: Get all Orders of a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: updated_before
+        in: query
+        description: Order update date after the given date (format DD/MM/YYYY)
+        type: string
+      - name: updated_after
+        in: query
+        description: Order update date prior to the given date (format DD/MM/YYYY)
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: integer
+              start_date:
+                type: string
+              end_date:
+                type: string
+              comments:
+                type: string
+              user_id:
+                type: integer
+              expected_delivery_date:
+                type: string
+              last_updated_date:
+                type: string
+              invoice_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              delivery_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              first_invoice_planned_date:
+                type: string
+              generate_and_send_recurring_invoices:
+                type: integer
+              invoice_frequency_in_months:
+                type: integer
+              preauthorized_debit:
+                type: boolean
+              company:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  address_street:
+                    type: string
+                  address_zip_code:
+                    type: string
+                  address_city:
+                    type: string
+                  address_region:
+                    type: string
+                  address_country:
+                    type: string
+                  comments:
+                    type: string
+                  is_supplier:
+                    type: boolean
+                  is_prospect:
+                    type: boolean
+                  is_customer:
+                    type: boolean
+                  thirdparty_code:
+                    type: string
+                type: object
+              project:
+                type: object
+              quotation:
+                type: object
+              invoices_id:
+                items:
+                  type: integer
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Sales & Invoices
+  "/api/v2/contracts/{contractId}":
+    get:
+      summary: Get a specific Order
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: contractId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: integer
+              start_date:
+                type: string
+              end_date:
+                type: string
+              comments:
+                type: string
+              user_id:
+                type: integer
+              expected_delivery_date:
+                type: string
+              last_updated_date:
+                type: string
+              invoice_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              delivery_address:
+                properties:
+                  company_name:
+                    type: string
+                  contact_name:
+                    type: string
+                  street:
+                    type: string
+                  zip_code:
+                    type: string
+                  city:
+                    type: string
+                  region:
+                    type: string
+                  country:
+                    type: string
+                type: object
+              first_invoice_planned_date:
+                type: string
+              generate_and_send_recurring_invoices:
+                type: integer
+              invoice_frequency_in_months:
+                type: integer
+              preauthorized_debit:
+                type: boolean
+              company:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  address_street:
+                    type: string
+                  address_zip_code:
+                    type: string
+                  address_city:
+                    type: string
+                  address_region:
+                    type: string
+                  address_country:
+                    type: string
+                  comments:
+                    type: string
+                  is_supplier:
+                    type: boolean
+                  is_prospect:
+                    type: boolean
+                  is_customer:
+                    type: boolean
+                  thirdparty_code:
+                    type: string
+                type: object
+              project:
+                type: object
+              quotation:
+                type: object
+              invoices_id:
+                items:
+                  type: integer
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Sales & Invoices
+  "/api/v2/quotations":
+    get:
+      summary: Get all Quotations
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: sort
+        in: query
+        description: Order of the returned data
+        type: string
+        default: id
+        enum:
+        - id
+        - updatetime
+      - name: status
+        in: query
+        description: Filters the Quotations status
+        type: string
+        default: all
+        enum:
+        - accepted
+        - refused
+        - pending
+        - all
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              expiry_date:
+                type: string
+              sent_date:
+                type: string
+              last_update_date:
+                type: string
+              status:
+                type: string
+              user_id:
+                type: integer
+              company_id:
+                type: integer
+              company_name:
+                type: string
+              global_discount_amount:
+                type: number
+              global_discount_amount_with_tax:
+                type: number
+              global_discount_unit_is_percent:
+                type: boolean
+              global_discount_comments:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total_amount:
+                type: number
+              margin:
+                type: number
+              electronic_signature_date:
+                type: string
+              public_path:
+                type: string
+              customer_portal_url:
+                type: string
+              quotation_lines:
+                items:
+                  properties:
+                    product_id:
+                      type: integer
+                    product_internal_id:
+                      type: string
+                    product_name:
+                      type: string
+                    product_code:
+                      type: string
+                    title:
+                      type: string
+                    details:
+                      type: string
+                    quantity:
+                      type: number
+                    tax_rates:
+                      items:
+                        properties:
+                          rate:
+                            type: number
+                          name:
+                            type: string
+                        type: object
+                      type: array
+                    line_discount_amount:
+                      type: number
+                    line_discount_amount_with_tax:
+                      type: number
+                    line_discount_unit_is_percent:
+                      type: boolean
+                    tax_amount:
+                      type: number
+                    pre_tax_amount:
+                      type: number
+                    total_amount:
+                      type: number
+                    margin:
+                      type: number
+                    unit_job_costing:
+                      type: number
+                    chapter:
+                      type: string
+                  type: object
+                type: array
+      tags:
+      - Quotations
+    post:
+      summary: Create a Quotation
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new Quotation.<br/>If the properties product.id and product.internal_id
+          are empty or missing, a new Product will be created.<br/>Dates must be in
+          RFC3339 format.
+        schema:
+          properties:
+            company_id:
+              type: integer
+            date:
+              type: string
+            expiry_date:
+              type: string
+            company_address_id:
+              type: integer
+            online_payment:
+              type: boolean
+            comments:
+              type: string
+            project_id:
+              type: integer
+            theme_id:
+              type: integer
+            products:
+              items:
+                properties:
+                  id:
+                    type: integer
+                  internal_id:
+                    type: string
+                  name:
+                    type: string
+                  price:
+                    type: number
+                  tax_rate:
+                    type: number
+                  quantity:
+                    type: number
+                  description:
+                    type: string
+                  unit_job_costing:
+                    type: number
+                  chapter:
+                    type: string
+                  discount_percent:
+                    type: number
+                  discount_flat:
+                    type: number
+                type: object
+              type: array
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              expiry_date:
+                type: string
+              sent_date:
+                type: string
+              last_update_date:
+                type: string
+              status:
+                type: string
+              user_id:
+                type: integer
+              company_id:
+                type: integer
+              company_name:
+                type: string
+              global_discount_amount:
+                type: number
+              global_discount_amount_with_tax:
+                type: number
+              global_discount_unit_is_percent:
+                type: boolean
+              global_discount_comments:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total_amount:
+                type: number
+              margin:
+                type: number
+              electronic_signature_date:
+                type: string
+              comments:
+                type: string
+              public_path:
+                type: string
+              customer_portal_url:
+                type: string
+              quotation_lines:
+                items:
+                  properties:
+                    product_id:
+                      type: integer
+                    product_internal_id:
+                      type: string
+                    product_name:
+                      type: string
+                    product_code:
+                      type: string
+                    title:
+                      type: string
+                    details:
+                      type: string
+                    quantity:
+                      type: number
+                    tax_rates:
+                      items:
+                        properties:
+                          rate:
+                            type: number
+                          name:
+                            type: string
+                        type: object
+                      type: array
+                    line_discount_amount:
+                      type: number
+                    line_discount_amount_with_tax:
+                      type: number
+                    line_discount_unit_is_percent:
+                      type: boolean
+                    tax_amount:
+                      type: number
+                    pre_tax_amount:
+                      type: number
+                    total_amount:
+                      type: number
+                    margin:
+                      type: number
+                    unit_job_costing:
+                      type: number
+                    chapter:
+                      type: string
+                  type: object
+                type: array
+      tags:
+      - Quotations
+  "/api/v2/companies/{companyId}/quotations":
+    get:
+      summary: Get all Quotations of a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: sort
+        in: query
+        description: Order of the returned data
+        type: string
+        default: id
+        enum:
+        - id
+        - updatetime
+      - name: status
+        in: query
+        description: Filters the Quotations status
+        type: string
+        default: all
+        enum:
+        - accepted
+        - refused
+        - pending
+        - all
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              expiry_date:
+                type: string
+              sent_date:
+                type: string
+              last_update_date:
+                type: string
+              status:
+                type: string
+              user_id:
+                type: integer
+              company_id:
+                type: integer
+              company_name:
+                type: string
+              global_discount_amount:
+                type: number
+              global_discount_amount_with_tax:
+                type: number
+              global_discount_unit_is_percent:
+                type: boolean
+              global_discount_comments:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total_amount:
+                type: number
+              margin:
+                type: number
+              electronic_signature_date:
+                type: string
+              public_path:
+                type: string
+              customer_portal_url:
+                type: string
+              quotation_lines:
+                items:
+                  properties:
+                    product_id:
+                      type: integer
+                    product_internal_id:
+                      type: string
+                    product_name:
+                      type: string
+                    product_code:
+                      type: string
+                    title:
+                      type: string
+                    details:
+                      type: string
+                    quantity:
+                      type: number
+                    tax_rates:
+                      items:
+                        properties:
+                          rate:
+                            type: number
+                          name:
+                            type: string
+                        type: object
+                      type: array
+                    line_discount_amount:
+                      type: number
+                    line_discount_amount_with_tax:
+                      type: number
+                    line_discount_unit_is_percent:
+                      type: boolean
+                    tax_amount:
+                      type: number
+                    pre_tax_amount:
+                      type: number
+                    total_amount:
+                      type: number
+                    margin:
+                      type: number
+                    unit_job_costing:
+                      type: number
+                    chapter:
+                      type: string
+                  type: object
+                type: array
+      tags:
+      - Quotations
+  "/api/v2/quotations/{quotationId}":
+    get:
+      summary: Get a specific Quotation
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: quotationId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              expiry_date:
+                type: string
+              sent_date:
+                type: string
+              last_update_date:
+                type: string
+              status:
+                type: string
+              user_id:
+                type: integer
+              company_id:
+                type: integer
+              company_name:
+                type: string
+              global_discount_amount:
+                type: number
+              global_discount_amount_with_tax:
+                type: number
+              global_discount_unit_is_percent:
+                type: boolean
+              global_discount_comments:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total_amount:
+                type: number
+              margin:
+                type: number
+              electronic_signature_date:
+                type: string
+              comments:
+                type: string
+              public_path:
+                type: string
+              customer_portal_url:
+                type: string
+              quotation_lines:
+                items:
+                  properties:
+                    product_id:
+                      type: integer
+                    product_internal_id:
+                      type: string
+                    product_name:
+                      type: string
+                    product_code:
+                      type: string
+                    title:
+                      type: string
+                    details:
+                      type: string
+                    quantity:
+                      type: number
+                    tax_rates:
+                      items:
+                        properties:
+                          rate:
+                            type: number
+                          name:
+                            type: string
+                        type: object
+                      type: array
+                    line_discount_amount:
+                      type: number
+                    line_discount_amount_with_tax:
+                      type: number
+                    line_discount_unit_is_percent:
+                      type: boolean
+                    tax_amount:
+                      type: number
+                    pre_tax_amount:
+                      type: number
+                    total_amount:
+                      type: number
+                    margin:
+                      type: number
+                    unit_job_costing:
+                      type: number
+                    chapter:
+                      type: string
+                  type: object
+                type: array
+      tags:
+      - Quotations
+  "/api/v2/expenses":
+    get:
+      summary: Get all Expenses
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: orderby
+        in: query
+        description: Order of the returned data
+        type: string
+        default: id
+        enum:
+        - last_update_date
+        - id
+      - name: creation_date_before
+        in: query
+        description: Expense creation date prior to the given date (format DD/MM/YYYY)
+        type: string
+      - name: creation_date_after
+        in: query
+        description: Expense creation date after given date (format DD/MM/YYYY)
+        type: string
+      - name: is_paid
+        in: query
+        description: Filters all paid or unpaid expenses (true or false)
+        type: string
+        enum:
+        - 'true'
+        - 'false'
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              number:
+                type: string
+              creation_date:
+                type: string
+              last_update_date:
+                type: string
+              paid_date:
+                type: string
+              expected_payment_date:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total_amount:
+                type: number
+              accounting_code:
+                type: string
+              expense_lines:
+                items:
+                  properties:
+                    title:
+                      type: string
+                    quantity:
+                      type: number
+                    total_pre_tax_amount:
+                      type: number
+                    accounting_code:
+                      type: string
+                  type: object
+                type: array
+              description:
+                type: string
+              supplier_contract_id:
+                type: integer
+              supplier_id:
+                type: integer
+              project_id:
+                type: integer
+              tax_rates:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    tax_rate:
+                      type: number
+                    accounting_code:
+                      type: string
+                    amount:
+                      type: number
+                  type: object
+                type: array
+      tags:
+      - Expenses
+    post:
+      summary: Create an Expense
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new Expense
+        schema:
+          properties:
+            supplier_id:
+              type: integer
+            supplier_thirdparty_code:
+              type: string
+            title:
+              type: string
+            date:
+              type: string
+            pre_tax_amount:
+              type: number
+            taxes:
+              items:
+                properties:
+                  tax_rate:
+                    type: number
+                  accounting_code:
+                    type: string
+                  amount:
+                    type: string
+                type: object
+              type: array
+            project_id:
+              type: integer
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              number:
+                type: string
+              creation_date:
+                type: string
+              last_update_date:
+                type: string
+              paid_date:
+                type: string
+              expected_payment_date:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total_amount:
+                type: number
+              accounting_code:
+                type: string
+              expense_lines:
+                items:
+                  properties:
+                    title:
+                      type: string
+                    quantity:
+                      type: number
+                    total_pre_tax_amount:
+                      type: number
+                    accounting_code:
+                      type: string
+                  type: object
+                type: array
+              description:
+                type: string
+              supplier_contract_id:
+                type: integer
+              supplier_id:
+                type: integer
+              project_id:
+                type: integer
+              tax_rates:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    tax_rate:
+                      type: number
+                    accounting_code:
+                      type: string
+                    amount:
+                      type: number
+                  type: object
+                type: array
+      tags:
+      - Expenses
+  "/api/v2/expenses/{expenseId}":
+    get:
+      summary: Get a specific Expense
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: expenseId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              number:
+                type: string
+              creation_date:
+                type: string
+              last_update_date:
+                type: string
+              paid_date:
+                type: string
+              expected_payment_date:
+                type: string
+              pre_tax_amount:
+                type: number
+              tax_amount:
+                type: number
+              total_amount:
+                type: number
+              accounting_code:
+                type: string
+              expense_lines:
+                items:
+                  properties:
+                    title:
+                      type: string
+                    quantity:
+                      type: number
+                    total_pre_tax_amount:
+                      type: number
+                    accounting_code:
+                      type: string
+                  type: object
+                type: array
+              description:
+                type: string
+              supplier_contract_id:
+                type: integer
+              supplier_id:
+                type: integer
+              project_id:
+                type: integer
+              tax_rates:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    tax_rate:
+                      type: number
+                    accounting_code:
+                      type: string
+                    amount:
+                      type: number
+                  type: object
+                type: array
+      tags:
+      - Expenses
+  "/api/v2/expenses/payments":
+    post:
+      summary: Create an Expense Payment
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: 'The new Expense Payment <br/> nature property : 1 = Debit, 2
+          = Transfer, 3 = Check, 4 = Credit card, 5 = Cash, 6 = Other'
+        schema:
+          properties:
+            expense_id:
+              type: integer
+            nature:
+              type: integer
+            amount:
+              type: number
+            date_ts:
+              type: integer
+            reference:
+              type: string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              amount:
+                type: number
+              date:
+                type: string
+              expense_id:
+                type: integer
+      tags:
+      - Expenses
+  "/api/v2/suppliers":
+    get:
+      summary: Get all Suppliers
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: search
+        in: query
+        description: Filters the Suppliers whose name contain the specified character
+          string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              prefered_tax_rate:
+                type: string
+              custom_fields:
+                type: object
+      tags:
+      - Expenses
+    post:
+      summary: Create a Supplier
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new Supplier
+        schema:
+          properties:
+            name:
+              type: string
+            address_contact_name:
+              type: string
+            address_street:
+              type: string
+            address_zip_code:
+              type: string
+            address_city:
+              type: string
+            address_country:
+              type: string
+            intracommunity_number:
+              type: string
+            siret:
+              type: string
+            comments:
+              type: string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+      tags:
+      - Expenses
+  "/api/v2/suppliers/{supplierId}":
+    get:
+      summary: Get a specific Supplier
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: supplierId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              prefered_tax_rate:
+                type: string
+              custom_fields:
+                type: object
+      tags:
+      - Expenses
+  "/api/v2/supplier-contracts":
+    get:
+      summary: Get all Supplier Contracts
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              supplier:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  prefered_tax_rate:
+                    type: string
+                  custom_fields:
+                    type: object
+                type: object
+              start_date:
+                type: string
+              end_date:
+                type: string
+              frequency_in_months:
+                type: number
+              comments:
+                type: string
+              pre_tax_amount:
+                type: number
+              total_amount:
+                type: number
+              expenses:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Expenses
+  "/api/v2/tasks":
+    get:
+      summary: Get all Tasks
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              number:
+                type: integer
+              title:
+                type: string
+              description:
+                type: string
+              priority:
+                type: string
+              type:
+                type: string
+              creation_date:
+                type: string
+              start_date:
+                type: string
+              estimated_end_date:
+                type: string
+              end_date:
+                type: string
+              estimated_workload:
+                type: number
+              tracked_workload:
+                type: number
+              project_id:
+                type: integer
+              company_id:
+                type: integer
+              user_author_id:
+                type: integer
+              task_status_id:
+                type: integer
+              task_status_name:
+                type: string
+              workforces:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Projects & Tasks
+    post:
+      summary: Create a Task
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: 'The new Task.<br/>Dates format : DD/MM/YYYY.'
+        schema:
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            priority:
+              type: string
+            estimated_workload:
+              type: number
+            task_nature_id:
+              type: integer
+            workforces_id:
+              items:
+                type: integer
+              type: array
+            company_id:
+              type: integer
+            project_id:
+              type: integer
+            start_date:
+              type: string
+            end_date:
+              type: string
+            estimated_end_date:
+              type: string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              number:
+                type: integer
+              title:
+                type: string
+              description:
+                type: string
+              priority:
+                type: string
+              type:
+                type: string
+              creation_date:
+                type: string
+              start_date:
+                type: string
+              estimated_end_date:
+                type: string
+              end_date:
+                type: string
+              estimated_workload:
+                type: number
+              tracked_workload:
+                type: number
+              project_id:
+                type: integer
+              company_id:
+                type: integer
+              user_author_id:
+                type: integer
+              task_status_id:
+                type: integer
+              task_status_name:
+                type: string
+              workforces:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Projects & Tasks
+  "/api/v2/tasks/{taskId}":
+    get:
+      summary: Get a specific Task
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: taskId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              number:
+                type: integer
+              title:
+                type: string
+              description:
+                type: string
+              priority:
+                type: string
+              type:
+                type: string
+              creation_date:
+                type: string
+              start_date:
+                type: string
+              estimated_end_date:
+                type: string
+              end_date:
+                type: string
+              estimated_workload:
+                type: number
+              tracked_workload:
+                type: number
+              project_id:
+                type: integer
+              company_id:
+                type: integer
+              user_author_id:
+                type: integer
+              task_status_id:
+                type: integer
+              task_status_name:
+                type: string
+              workforces:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Projects & Tasks
+  "/api/v2/taskNatures":
+    get:
+      summary: Get all TaskNatures
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              backgroundColor:
+                type: string
+      tags:
+      - Projects & Tasks
+  "/api/v2/projects":
+    get:
+      summary: Get all Projects
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              number:
+                type: string
+              company_id:
+                type: integer
+              comments:
+                type: string
+              estimated_hours:
+                type: number
+              estimated_cost:
+                type: number
+              estimated_revenue:
+                type: number
+              actual_hours:
+                type: number
+              actual_expenses_cost:
+                type: number
+              actual_timetrackings_cost:
+                type: number
+              actual_consume_products_cost:
+                type: number
+              actual_revenue:
+                type: number
+              estimated_start:
+                type: string
+              actual_start:
+                type: string
+              estimated_end:
+                type: string
+              actual_end:
+                type: string
+              workforces:
+                items:
+                  properties:
+                    fullname:
+                      type: string
+                    idUser:
+                      type: integer
+                  type: object
+                type: array
+              statuses:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    date:
+                      type: string
+                  type: object
+                type: array
+              parent_project:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                type: object
+              son_projects:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                  type: object
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Projects & Tasks
+    post:
+      summary: Create a Project
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new Project
+        schema:
+          properties:
+            number:
+              type: string
+            name:
+              type: string
+            comments:
+              type: string
+            workforces_ids:
+              items:
+                type: integer
+              type: array
+            company_id:
+              type: integer
+            parent_project_id:
+              type: integer
+            estimated_start_ts:
+              type: integer
+            estimated_end_ts:
+              type: integer
+            expected_workload_hours:
+              type: integer
+            expected_cost:
+              type: number
+            expected_revenue:
+              type: number
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              number:
+                type: string
+              company_id:
+                type: integer
+              comments:
+                type: string
+              estimated_hours:
+                type: number
+              estimated_cost:
+                type: number
+              estimated_revenue:
+                type: number
+              actual_hours:
+                type: number
+              actual_expenses_cost:
+                type: number
+              actual_timetrackings_cost:
+                type: number
+              actual_consume_products_cost:
+                type: number
+              actual_revenue:
+                type: number
+              estimated_start:
+                type: string
+              actual_start:
+                type: string
+              estimated_end:
+                type: string
+              actual_end:
+                type: string
+              workforces:
+                items:
+                  properties:
+                    fullname:
+                      type: string
+                    idUser:
+                      type: integer
+                  type: object
+                type: array
+              statuses:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    date:
+                      type: string
+                  type: object
+                type: array
+              parent_project:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                type: object
+              son_projects:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                  type: object
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Projects & Tasks
+  "/api/v2/projects/{projectId}":
+    get:
+      summary: Get a specific Project
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: projectId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              number:
+                type: string
+              company_id:
+                type: integer
+              comments:
+                type: string
+              estimated_hours:
+                type: number
+              estimated_cost:
+                type: number
+              estimated_revenue:
+                type: number
+              actual_hours:
+                type: number
+              actual_expenses_cost:
+                type: number
+              actual_timetrackings_cost:
+                type: number
+              actual_consume_products_cost:
+                type: number
+              actual_revenue:
+                type: number
+              estimated_start:
+                type: string
+              actual_start:
+                type: string
+              estimated_end:
+                type: string
+              actual_end:
+                type: string
+              workforces:
+                items:
+                  properties:
+                    fullname:
+                      type: string
+                    idUser:
+                      type: integer
+                  type: object
+                type: array
+              statuses:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    date:
+                      type: string
+                  type: object
+                type: array
+              parent_project:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                type: object
+              son_projects:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                  type: object
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Projects & Tasks
+    patch:
+      summary: Update a Project
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            name:
+              type: string
+            number:
+              type: string
+            comments:
+              type: string
+            company_id:
+              type: integer
+            estimated_start_ts:
+              type: integer
+            estimated_end_ts:
+              type: integer
+            estimated_workload_hours:
+              type: number
+            expected_cost:
+              type: number
+            expected_revenue:
+              type: number
+            actual_end_ts:
+              type: integer
+        type: string
+      - name: projectId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              number:
+                type: string
+              company_id:
+                type: integer
+              comments:
+                type: string
+              estimated_hours:
+                type: number
+              estimated_cost:
+                type: number
+              estimated_revenue:
+                type: number
+              actual_hours:
+                type: number
+              actual_expenses_cost:
+                type: number
+              actual_timetrackings_cost:
+                type: number
+              actual_consume_products_cost:
+                type: number
+              actual_revenue:
+                type: number
+              estimated_start:
+                type: string
+              actual_start:
+                type: string
+              estimated_end:
+                type: string
+              actual_end:
+                type: string
+              workforces:
+                items:
+                  properties:
+                    fullname:
+                      type: string
+                    idUser:
+                      type: integer
+                  type: object
+                type: array
+              statuses:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    date:
+                      type: string
+                  type: object
+                type: array
+              parent_project:
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                type: object
+              son_projects:
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                  type: object
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Projects & Tasks
+    delete:
+      summary: Delete a Project
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: projectId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+      tags:
+      - Projects & Tasks
+  "/api/v2/projectNatures":
+    get:
+      summary: Get all ProjectNatures
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              isDisabled:
+                type: boolean
+      tags:
+      - Projects & Tasks
+  "/api/v2/products":
+    get:
+      summary: Get all Products
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: internal_id
+        in: query
+        description: Search for the Product which internal id is the specified character
+          string
+        type: string
+      - name: product_code
+        in: query
+        description: Filters Products which product code contains the specified character
+          string
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              product_code:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+              price_with_tax:
+                type: number
+              tax_rate:
+                type: number
+              type:
+                type: string
+              category:
+                type: string
+              job_costing:
+                type: number
+              accounting_code:
+                type: string
+              weight:
+                type: number
+              location:
+                type: string
+              unit:
+                type: string
+              disabled:
+                type: boolean
+              internal_id:
+                type: string
+              stock:
+                type: number
+              weighted_average_cost:
+                type: number
+              custom_fields:
+                type: object
+      tags:
+      - Products & Services
+    post:
+      summary: Create a Product
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: 'The new Product.<br>Product type : 601 = Raw material purchase,
+          701 = Sales of finished goods, 706 = Sales of services, 707 = Sales of merchandise'
+        schema:
+          properties:
+            name:
+              type: string
+            price:
+              type: number
+            tax_rate:
+              type: number
+            description:
+              type: string
+            internal_id:
+              type: string
+            product_code:
+              type: string
+            supplier_product_code:
+              type: string
+            weight:
+              type: number
+            job_costing:
+              type: number
+            location:
+              type: string
+            unit:
+              type: string
+            product_type:
+              type: integer
+            accounting_code:
+              type: string
+            category:
+              type: string
+            stock:
+              type: number
+            custom_fields:
+              type: object
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              product_code:
+                type: string
+              supplier_product_code:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+              price_with_tax:
+                type: number
+              tax_rate:
+                type: number
+              type:
+                type: string
+              category:
+                type: string
+              job_costing:
+                type: number
+              accounting_code:
+                type: string
+              weight:
+                type: number
+              location:
+                type: string
+              unit:
+                type: string
+              disabled:
+                type: boolean
+              internal_id:
+                type: string
+              stock:
+                type: number
+              weighted_average_cost:
+                type: number
+              custom_fields:
+                type: object
+      tags:
+      - Products & Services
+  "/api/v2/products/{productId}":
+    get:
+      summary: Get a specific Product
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: productId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              product_code:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+              price_with_tax:
+                type: number
+              tax_rate:
+                type: number
+              type:
+                type: string
+              category:
+                type: string
+              job_costing:
+                type: number
+              accounting_code:
+                type: string
+              weight:
+                type: number
+              location:
+                type: string
+              unit:
+                type: string
+              disabled:
+                type: boolean
+              internal_id:
+                type: string
+              stock:
+                type: number
+              weighted_average_cost:
+                type: number
+              custom_fields:
+                type: object
+      tags:
+      - Products & Services
+    patch:
+      summary: Update a Product
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            product_code:
+              type: string
+            weight:
+              type: number
+            location:
+              type: string
+            unit:
+              type: string
+            price:
+              type: number
+            tax_rate:
+              type: number
+            job_costing:
+              type: number
+            accounting_code:
+              type: string
+            category:
+              type: string
+            custom_fields:
+              type: object
+            disabled:
+              type: boolean
+        type: string
+      - name: productId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              product_code:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+              price_with_tax:
+                type: number
+              tax_rate:
+                type: number
+              type:
+                type: string
+              category:
+                type: string
+              job_costing:
+                type: number
+              accounting_code:
+                type: string
+              weight:
+                type: number
+              location:
+                type: string
+              unit:
+                type: string
+              disabled:
+                type: boolean
+              internal_id:
+                type: string
+              stock:
+                type: number
+              weighted_average_cost:
+                type: number
+              custom_fields:
+                type: object
+      tags:
+      - Products & Services
+  "/api/v2/products/{productId}/stock":
+    get:
+      summary: Get the Stock of a Product
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: productId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              product_id:
+                type: integer
+              current_stock:
+                type: number
+              weighted_average_cost:
+                type: number
+              raw_material:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    stock:
+                      type: number
+                    quantity_needed:
+                      type: number
+                  type: object
+                type: array
+      tags:
+      - Products & Services
+    patch:
+      summary: Update the stock of a Product
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new stock
+        schema:
+          properties:
+            stock:
+              type: integer
+            update_reason:
+              type: string
+        type: string
+      - name: productId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              product_id:
+                type: integer
+              current_stock:
+                type: number
+              weighted_average_cost:
+                type: number
+              raw_material:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    stock:
+                      type: number
+                    quantity_needed:
+                      type: number
+                  type: object
+                type: array
+      tags:
+      - Products & Services
+  "/api/v2/delivery-forms/{deliveryFormId}/download":
+    get:
+      summary: Download a Delivery Note
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: alt
+        in: query
+        required: false
+        description: If this parameters take the value ?alt=media, downloads the binary
+          file instead of returning the base64
+        type: string
+      - name: deliveryFormId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            description: Base64 content file
+            type: string
+      tags:
+      - Delivery Notes
+  "/api/v2/delivery-forms":
+    post:
+      summary: Create a Delivery Note from an Invoice
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new Delivery Note.<br/>Warning, the given Invoice or Quotation
+          must be in an Order to create the Delivery Note.<br/>If you do not want
+          to use Invoice or Quotation, products is required.
+        schema:
+          properties:
+            invoice_id:
+              type: integer
+            quotation_id:
+              type: integer
+            contract_id:
+              type: integer
+            title:
+              type: string
+            comments:
+              type: string
+            products:
+              items:
+                properties:
+                  id:
+                    type: integer
+                  internal_id:
+                    type: string
+                  product_code:
+                    type: string
+                  name:
+                    type: string
+                  quantity:
+                    type: number
+                type: object
+              type: array
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+      tags:
+      - Delivery Notes
+  "/api/v2/tickets":
+    get:
+      summary: Get all Tickets
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: company_id
+        in: query
+        required: false
+        description: Filters tickets by Company id
+        type: integer
+      - name: is_closed
+        in: query
+        description: Filters closed tickets (true or false)
+        type: string
+        enum:
+        - 'true'
+        - 'false'
+      - name: orderby
+        in: query
+        description: Order of the returned data
+        type: string
+        default: id
+        enum:
+        - id
+        - last_update_date
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              reference:
+                type: string
+              status:
+                type: string
+              priority:
+                type: string
+              creation_date:
+                type: string
+              last_update_date:
+                type: string
+              is_closed:
+                type: boolean
+              company_id:
+                type: integer
+              workforce_id:
+                type: integer
+              comments:
+                items:
+                  type: object
+                type: array
+              employees:
+                items:
+                  type: object
+                type: array
+              other_recipients:
+                items:
+                  type: string
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Customer Support / Tickets
+    post:
+      summary: Create a Ticket
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: 'The new Ticket <br/>priority property : basse, normale, haute
+          ou urgente'
+        schema:
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            priority:
+              type: string
+            company_id:
+              type: integer
+            project_id:
+              type: integer
+            workforce_id:
+              type: integer
+            custom_fields:
+              type: object
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              reference:
+                type: string
+              status:
+                type: string
+              priority:
+                type: string
+              creation_date:
+                type: string
+              last_update_date:
+                type: string
+              is_closed:
+                type: boolean
+              company_id:
+                type: integer
+              workforce_id:
+                type: integer
+              comments:
+                items:
+                  type: object
+                type: array
+              employees:
+                items:
+                  type: object
+                type: array
+              other_recipients:
+                items:
+                  type: string
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Customer Support / Tickets
+  "/api/v2/tickets/{ticketId}":
+    get:
+      summary: Get a specific Ticket
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: ticketId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              reference:
+                type: string
+              status:
+                type: string
+              priority:
+                type: string
+              creation_date:
+                type: string
+              last_update_date:
+                type: string
+              is_closed:
+                type: boolean
+              company_id:
+                type: integer
+              workforce_id:
+                type: integer
+              comments:
+                items:
+                  type: object
+                type: array
+              employees:
+                items:
+                  type: object
+                type: array
+              other_recipients:
+                items:
+                  type: string
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Customer Support / Tickets
+    patch:
+      summary: Update a Ticket
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: 'Properties to update <br/> priority property : basse, normale,
+          haute ou urgente'
+        schema:
+          properties:
+            title:
+              type: string
+            priority:
+              type: string
+            is_closed:
+              type: boolean
+            company_id:
+              type: integer
+            workforce_id:
+              type: integer
+        type: string
+      - name: ticketId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              reference:
+                type: string
+              status:
+                type: string
+              priority:
+                type: string
+              creation_date:
+                type: string
+              last_update_date:
+                type: string
+              is_closed:
+                type: boolean
+              company_id:
+                type: integer
+              workforce_id:
+                type: integer
+              comments:
+                items:
+                  type: object
+                type: array
+              employees:
+                items:
+                  type: object
+                type: array
+              other_recipients:
+                items:
+                  type: string
+                type: array
+              custom_fields:
+                type: object
+      tags:
+      - Customer Support / Tickets
+  "/api/v2/events":
+    get:
+      summary: Get all Events
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              timestamp:
+                type: integer
+              duration:
+                type: integer
+              content:
+                type: string
+              flow:
+                type: integer
+              type:
+                type: string
+              is_done:
+                type: boolean
+              users:
+                items:
+                  type: string
+                type: array
+              attachments:
+                properties:
+                  invoices_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                        number:
+                          type: string
+                      type: object
+                    type: array
+                  quotations_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                        number:
+                          type: string
+                      type: object
+                    type: array
+                  documents_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+      tags:
+      - Events
+    post:
+      summary: Create an Event
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: 'The new Event<br/>nature property : 1 = Meeting, 2 = Email,
+          3 = Phone call, 4 = Mail, 5 = Text message<br/>duration property in minutes</br>Warning
+          : attachments available only for emails (nature = 2)'
+        schema:
+          properties:
+            company_id:
+              type: integer
+            employee_email:
+              type: string
+            date:
+              type: string
+            content:
+              type: string
+            nature:
+              type: integer
+            title:
+              type: string
+            duration:
+              type: integer
+            is_done:
+              type: boolean
+            users:
+              items:
+                type: string
+              type: array
+            attachments:
+              properties:
+                invoices_ids:
+                  items:
+                    type: integer
+                  type: array
+                quotations_ids:
+                  items:
+                    type: integer
+                  type: array
+                documents_ids:
+                  items:
+                    type: integer
+                  type: array
+              type: object
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              company_id:
+                type: integer
+              date:
+                type: string
+              nature:
+                type: string
+              is_done:
+                type: boolean
+              title:
+                type: string
+              content:
+                type: string
+              users:
+                items:
+                  type: string
+                type: array
+              attachments:
+                properties:
+                  invoices_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                        number:
+                          type: string
+                      type: object
+                    type: array
+                  quotations_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                        number:
+                          type: string
+                      type: object
+                    type: array
+                  documents_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+      tags:
+      - Events
+  "/api/v2/companies/{companyId}/events":
+    get:
+      summary: Get all Events of a Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              date:
+                type: string
+              timestamp:
+                type: integer
+              duration:
+                type: integer
+              content:
+                type: string
+              flow:
+                type: integer
+              type:
+                type: string
+              is_done:
+                type: boolean
+              users:
+                items:
+                  type: string
+                type: array
+              attachments:
+                properties:
+                  invoices_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                        number:
+                          type: string
+                      type: object
+                    type: array
+                  quotations_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                        number:
+                          type: string
+                      type: object
+                    type: array
+                  documents_ids:
+                    items:
+                      properties:
+                        id:
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+      tags:
+      - Events
+  "/api/v2/events/{eventId}/send":
+    post:
+      summary: Send an Event as email
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: eventId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+      tags:
+      - Events
+  "/api/v2/opportunities":
+    get:
+      summary: Get all Opportunities
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: status
+        in: query
+        description: Filters the Opportunities status
+        type: string
+        default: all
+        enum:
+        - ongoing
+        - archived
+        - all
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              comments:
+                type: string
+              amount:
+                type: number
+              probability:
+                type: number
+              due_date:
+                type: string
+              end_date:
+                type: string
+              is_win:
+                type: boolean
+              user_name:
+                type: string
+              pipe_step_name:
+                type: string
+              custom_fields:
+                type: object
+              company:
+                type: object
+              employees:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Opportunities
+    post:
+      summary: Create an Opportunity
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: The new Opportunity
+        schema:
+          properties:
+            company_id:
+              type: integer
+            amount:
+              type: number
+            probability:
+              type: number
+            name:
+              type: string
+            comments:
+              type: string
+            pipe_name:
+              type: string
+            pipe_step_name:
+              type: string
+            due_date_ts:
+              type: integer
+            pipe_step_date_ts:
+              type: integer
+            employees:
+              items:
+                properties:
+                  employee_firstname:
+                    type: string
+                  employee_lastname:
+                    type: string
+                  employee_email:
+                    type: string
+                  employee_phone:
+                    type: string
+                  employee_cellphone:
+                    type: string
+                type: object
+              type: array
+            business_manager_email:
+              type: string
+            custom_fields:
+              type: object
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              comments:
+                type: string
+              amount:
+                type: number
+              probability:
+                type: number
+              due_date:
+                type: string
+              end_date:
+                type: string
+              is_win:
+                type: boolean
+              user_name:
+                type: string
+              pipe_name:
+                type: string
+              pipe_step_name:
+                type: string
+              custom_fields:
+                type: object
+              company:
+                type: object
+              employees:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Opportunities
+  "/api/v2/companies/{companyId}/opportunities":
+    get:
+      summary: Get all Opportunities of a specific Company
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: status
+        in: query
+        description: Filters the Opportunities status
+        type: string
+        default: all
+        enum:
+        - ongoing
+        - archived
+        - all
+      - name: companyId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              comments:
+                type: string
+              amount:
+                type: number
+              probability:
+                type: number
+              due_date:
+                type: string
+              end_date:
+                type: string
+              is_win:
+                type: boolean
+              user_name:
+                type: string
+              pipe_name:
+                type: string
+              pipe_step_name:
+                type: string
+              custom_fields:
+                type: object
+              company:
+                type: object
+              employees:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Opportunities
+  "/api/v2/opportunities/{opportunityId}":
+    get:
+      summary: Get a specific Opportunity
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: opportunityId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              comments:
+                type: string
+              amount:
+                type: number
+              probability:
+                type: number
+              due_date:
+                type: string
+              end_date:
+                type: string
+              is_win:
+                type: boolean
+              user_name:
+                type: string
+              pipe_name:
+                type: string
+              pipe_step_name:
+                type: string
+              custom_fields:
+                type: object
+              company:
+                type: object
+              employees:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Opportunities
+    patch:
+      summary: Update an Opportunity
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: Properties to update
+        schema:
+          properties:
+            name:
+              type: string
+            amount:
+              type: number
+            probability:
+              type: number
+            pipe_step_name:
+              type: string
+            comments:
+              type: string
+            due_date_ts:
+              type: integer
+            business_manager_email:
+              type: string
+        type: string
+      - name: opportunityId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              comments:
+                type: string
+              amount:
+                type: number
+              probability:
+                type: number
+              due_date:
+                type: string
+              end_date:
+                type: string
+              is_win:
+                type: boolean
+              user_name:
+                type: string
+              pipe_name:
+                type: string
+              pipe_step_name:
+                type: string
+              custom_fields:
+                type: object
+              company:
+                type: object
+              employees:
+                items:
+                  type: object
+                type: array
+      tags:
+      - Opportunities
+    delete:
+      summary: Delete an Opportunity
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: opportunityId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+      tags:
+      - Opportunities
+  "/api/v2/opportunities/{opportunityId}/won":
+    patch:
+      summary: Register an Opportunity as won
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: If date is empty or not given, will default to now. Date must
+          be in RFC3339 format.
+        schema:
+          properties:
+            date:
+              type: string
+        type: string
+      - name: opportunityId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              comments:
+                type: string
+              amount:
+                type: number
+              probability:
+                type: number
+              due_date:
+                type: string
+              end_date:
+                type: string
+              is_win:
+                type: boolean
+              user_name:
+                type: string
+              pipe_name:
+                type: string
+      tags:
+      - Opportunities
+  "/api/v2/opportunities/{opportunityId}/lost":
+    patch:
+      summary: Register an Opportunity as lost
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: body
+        in: body
+        required: true
+        description: If date is empty or not given, will default to now. Date must
+          be in RFC3339 format.
+        schema:
+          properties:
+            date:
+              type: string
+        type: string
+      - name: opportunityId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              comments:
+                type: string
+              amount:
+                type: number
+              probability:
+                type: number
+              due_date:
+                type: string
+              end_date:
+                type: string
+              is_win:
+                type: boolean
+              user_name:
+                type: string
+              pipe_name:
+                type: string
+      tags:
+      - Opportunities
+  "/api/v2/pipes":
+    get:
+      summary: Get all Opportunities Pipes
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              pipe_steps:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    order_number:
+                      type: string
+                  type: object
+                type: array
+      tags:
+      - Opportunities
+  "/api/v2/me":
+    get:
+      summary: Get my informations
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              email:
+                type: string
+              fullname:
+                type: boolean
+              firstname:
+                type: string
+              lastname:
+                type: number
+              phone_number:
+                type: number
+              cellphone_number:
+                type: string
+              company_natures:
+                type: string
+              roles:
+                type: string
+              user_api_key:
+                type: string
+      tags:
+      - Account
+  "/api/v2/users":
+    get:
+      summary: Get all Users of the Axonaut account
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              email:
+                type: string
+              fullname:
+                type: boolean
+              firstname:
+                type: string
+              lastname:
+                type: number
+              phone_number:
+                type: number
+              cellphone_number:
+                type: string
+              company_natures:
+                type: string
+              roles:
+                type: string
+              user_api_key:
+                type: string
+      tags:
+      - Account
+  "/api/v2/credits-history":
+    get:
+      summary: Get credits history of the Axonaut account
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: start
+        in: query
+        description: Filters by start date (after) (Format DD/MM/YYYY)
+        type: string
+      - name: end
+        in: query
+        description: Filters by end date (prior) (Format DD/MM/YYYY)
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              current_credits:
+                type: number
+              total_credits_consumed:
+                type: number
+              total_credits_added:
+                type: number
+              total_euros:
+                type: number
+              mouvements:
+                items:
+                  properties:
+                    date:
+                      type: string
+                    credits:
+                      type: number
+                    euros:
+                      type: number
+                    comments:
+                      type: string
+                  type: object
+                type: array
+      tags:
+      - Account
+  "/api/v2/workforces":
+    get:
+      summary: Get all Workforces
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              email:
+                type: string
+              gender:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              birth:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              job:
+                type: string
+              phone:
+                type: string
+              entry_date:
+                type: string
+              exit_date:
+                type: string
+              payslips:
+                type: object
+      tags:
+      - Workforces
+  "/api/v2/workforces/{workforceId}":
+    get:
+      summary: Get a specific Workforce
+      parameters:
+      - name: userApiKey
+        in: header
+        required: true
+        description: User private API key
+        type: string
+      - name: workforceId
+        in: path
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              id:
+                type: integer
+              email:
+                type: string
+              gender:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              birth:
+                type: string
+              address_street:
+                type: string
+              address_zip_code:
+                type: string
+              address_city:
+                type: string
+              job:
+                type: string
+              phone:
+                type: string
+              entry_date:
+                type: string
+              exit_date:
+                type: string
+              payslips:
+                type: object
+      tags:
+      - Workforces
+  "/api/v2/doc.json":
+    get:
+      responses:
+        default:
+          description: ''
+definitions:
+  Company:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      creation_date:
+        type: string
+      address_street:
+        type: string
+      address_zip_code:
+        type: string
+      address_city:
+        type: string
+      address_country:
+        type: string
+      comments:
+        type: string
+      is_supplier:
+        type: boolean
+      is_prospect:
+        type: boolean
+      is_customer:
+        type: boolean
+      currency:
+        type: string
+      thirdparty_code:
+        type: string
+      intracommunity_number:
+        type: string
+      siret:
+        type: string
+      internal_id:
+        type: string
+      business_manager:
+        type: object
+      custom_fields:
+        type: object
+      categories:
+        items:
+          type: string
+        type: array
+      employees:
+        items:
+          type: object
+        type: array
+      documents:
+        items:
+          type: integer
+        type: array
+    type: object
+  Employee:
+    properties:
+      id:
+        type: integer
+      gender:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      email:
+        type: string
+      phone_number:
+        type: string
+      cellphone_number:
+        type: string
+      job:
+        type: string
+      is_billing_contact:
+        type: boolean
+      company_id:
+        type: integer
+      custom_fields:
+        type: object
+    type: object
+  Company category:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  Document:
+    properties:
+      id:
+        type: integer
+      company_id:
+        type: integer
+      name:
+        type: string
+      external_url:
+        type: string
+      customer_portal_url:
+        type: string
+    type: object
+  Event:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+      date:
+        type: string
+      timestamp:
+        type: integer
+      duration:
+        type: integer
+      content:
+        type: string
+      flow:
+        type: integer
+      type:
+        type: string
+      is_done:
+        type: boolean
+      users:
+        items:
+          type: object
+        type: array
+      attachments:
+        type: object
+    type: object
+  Invoice:
+    properties:
+      id:
+        type: integer
+      number:
+        type: string
+      order_number:
+        type: string
+      date:
+        type: string
+      sent_date:
+        type: string
+      paid_date:
+        type: string
+      last_update_date:
+        type: string
+      pre_tax_amount:
+        type: number
+      tax_amount:
+        type: number
+      total:
+        type: number
+      service_start_date:
+        type: string
+      service_end_date:
+        type: string
+      frequency_in_months:
+        type: integer
+      business_user:
+        type: string
+      public_path:
+        type: string
+      invoice_lines:
+        type: object
+      company:
+        type: object
+    type: object
+  Payment:
+    properties:
+      id:
+        type: integer
+      amount:
+        type: number
+      date:
+        type: string
+      invoice_id:
+        type: integer
+      reference:
+        type: string
+    type: object
+  Contract:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      start_date:
+        type: string
+      end_date:
+        type: string
+      first_invoice_planned_date:
+        type: string
+      invoice_frequency_in_months:
+        type: integer
+    type: object
+  Quotation:
+    properties:
+      id:
+        type: integer
+      number:
+        type: string
+      title:
+        type: string
+      date:
+        type: string
+      sent_date:
+        type: string
+      last_update_date:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: integer
+      company_id:
+        type: integer
+      company_name:
+        type: string
+      global_discount_amount:
+        type: number
+      global_discount_amount_with_tax:
+        type: number
+      global_discount_unit_is_percent:
+        type: boolean
+      global_discount_comments:
+        type: string
+      pre_tax_amount:
+        type: number
+      tax_amount:
+        type: number
+      total_amount:
+        type: number
+      margin:
+        type: number
+      electronic_signature_date:
+        type: string
+      public_path:
+        type: string
+      quotation_lines:
+        type: object
+    type: object
+  Task:
+    properties:
+      id:
+        type: integer
+      number:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      priority:
+        type: string
+      creation_date:
+        type: string
+      start_date:
+        type: string
+      estimated_end_date:
+        type: string
+      end_date:
+        type: string
+      estimated_workload:
+        type: number
+      tracked_workload:
+        type: number
+      task_nature_id:
+        type: integer
+      project_id:
+        type: integer
+      company_id:
+        type: integer
+      user_author_id:
+        type: integer
+      task_status_id:
+        type: integer
+    type: object
+  Project:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      number:
+        type: string
+      company_id:
+        type: integer
+      comments:
+        type: string
+      estimated_hours:
+        type: number
+      estimated_cost:
+        type: number
+      estimated_revenue:
+        type: number
+      actual_hours:
+        type: number
+      actual_expenses_cost:
+        type: number
+      actual_timetrackings_cost:
+        type: number
+      actual_consume_products_cost:
+        type: number
+      actual_revenue:
+        type: number
+      estimated_start:
+        type: string
+      actual_start:
+        type: string
+      estimated_end:
+        type: string
+      actual_end:
+        type: string
+      workforces:
+        items:
+          type: object
+        type: array
+      statuses:
+        type: object
+      parent_project:
+        type: object
+      son_projects:
+        items:
+          type: object
+        type: array
+      custom_fields:
+        type: object
+    type: object
+  Product:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      product_code:
+        type: string
+      description:
+        type: string
+      price:
+        type: number
+      price_with_tax:
+        type: number
+      tax_rate:
+        type: number
+      type:
+        type: string
+      job_costing:
+        type: number
+      weight:
+        type: number
+      location:
+        type: string
+      disabled:
+        type: boolean
+      internal_id:
+        type: string
+      custom_fields:
+        type: object
+    type: object
+  Stock:
+    properties:
+      current_stock:
+        type: number
+      raw_material:
+        items:
+          type: object
+        type: array
+    type: object
+  Opportunity:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      comments:
+        type: string
+      amount:
+        type: number
+      probability:
+        type: number
+      due_date:
+        type: string
+      end_date:
+        type: string
+      is_win:
+        type: boolean
+      is_archived:
+        type: boolean
+      user_name:
+        type: string
+      pipe_name:
+        type: string
+      custom_fields:
+        type: object
+      company:
+        type: object
+      employees:
+        items:
+          type: object
+        type: array
+    type: object
+  User:
+    properties:
+      id:
+        type: integer
+      email:
+        type: string
+      full_name:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      phone_number:
+        type: string
+      cellphone_number:
+        type: string
+      company_natures:
+        type: string
+      roles:
+        type: string
+      user_api_key:
+        type: string
+    type: object
+  Expense:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+      date:
+        type: string
+      pre_tax_amount:
+        type: number
+      tax_amount:
+        type: number
+      total_amount:
+        type: number
+      supplier_id:
+        type: integer
+      project_id:
+        type: integer
+      expense_lines:
+        type: object
+    type: object
+  Ticket:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+      description:
+        type: string
+      creation_date:
+        type: string
+      is_closed:
+        type: boolean
+      company_id:
+        type: integer
+      workforce_id:
+        type: integer
+      custom_fields:
+        type: object
+    type: object
+  Workforce:
+    properties:
+      id:
+        type: integer
+      email:
+        type: string
+      gender:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      birth:
+        type: string
+      address_street:
+        type: string
+      address_zip_code:
+        type: string
+      address_city:
+        type: string
+      job:
+        type: string
+      phone:
+        type: string
+      entry_date:
+        type: string
+      exit_date:
+        type: string
+      payslips:
+        type: object
+    type: object
