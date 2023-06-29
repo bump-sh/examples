@@ -32,3 +32,4 @@ jobs:
           GITLAB_BUMP_TOKEN: ${{ secrets.GITLAB_BUMP_TOKEN }}
           REALWORLD_BUMP_TOKEN: ${{ secrets.REALWORLD_BUMP_TOKEN }}
           AMAZON_BUMP_TOKEN: ${{ secrets.AMAZON_BUMP_TOKEN }}
+          GRAVITEE_BUMP_TOKEN: ${{ secrets.GRAVITEE_BUMP_TOKEN }}
