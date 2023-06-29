@@ -33,3 +33,4 @@ jobs:
           REALWORLD_BUMP_TOKEN: ${{ secrets.REALWORLD_BUMP_TOKEN }}
           AMAZON_BUMP_TOKEN: ${{ secrets.AMAZON_BUMP_TOKEN }}
           GRAVITEE_BUMP_TOKEN: ${{ secrets.GRAVITEE_BUMP_TOKEN }}
+          IGN_BUMP_TOKEN: ${{ secrets.IGN_BUMP_TOKEN }}

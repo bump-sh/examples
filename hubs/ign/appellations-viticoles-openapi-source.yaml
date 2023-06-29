@@ -1,0 +1,154 @@
+swagger: '2.0'
+
+info:
+  title: API Carto Appellations viticoles
+  version: 1.0.1
+  description: >
+    Le module appellations viticoles permet de récupérer les zones intersectant une géométrie GeoJSON.
+
+    Le module utilise une base de données entretenue par FranceAgriMer. Cette base de données regroupe :
+    
+    * Les zones d’appellation d’origine contrôlées (AOC)
+    
+    * Les zones d’indications géographiques protégées (IGP)
+    
+    * Les zones viticoles sans indication géographique (VSIG)
+
+   
+     Consultez la [documentation utilisateur](https://apicarto.ign.fr/api/doc/pdf/docUser_moduleAoc.pdf) pour plus d’informations sur les paramètres d’appel disponibles et le format des résultats.
+
+     Dernière mise à jour des données : 06 Juillet 2021
+
+    ## Géométrie
+
+    La géométrie doit être exprimée en valeur décimale dans le référentiel WGS84.
+
+
+    **Exemples de géométrie** : (référentiel EPSG:4326) 
+
+      * Point : 
+        
+        `{"type": "Point","coordinates":[-1.691634,48.104237]}`
+
+      * MultiPolygon : 
+        
+        `{"type":"MultiPolygon","coordinates":[[[[-0.288863182067871,48.963666607295977],[-0.299592018127441,48.959299208576141],[-0.296330451965332,48.955325952385039],[-0.282125473022461,48.950675995388366],[-0.279722213745117,48.967019382922331],[-0.288863182067871,48.963666607295977]]]]}`
+      
+      * Surface trouée : 
+          
+        `{"type":"Polygon","coordinates":[[[1.2,48.85],[1.3,48.85],[1.3,48.9],[1.2,48.9],[1.2,48.85]],[[1.23,48.86],[1.23,48.88],[1.26,48.88],[1.26,48.86],[1.23,48.86]]]}`
+
+      * Linéaire :
+
+        `{"type":"LineString","coordinates":[[4.681549,47.793784],[4.741974,47.788248]]}`
+   
+
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+
+paths:
+  /aoc/appellation-viticole:
+    post:
+      description: |
+        Prend une geometrie de type GeoJSON en paramètre d'entrée et renvoie les appellations viticoles intersectantes
+      consumes:
+        - application/x-www-form-urlencoded
+      Paramètres de sorties : Retourne un résultat de Type "FeatureCollection"
+      parameters:
+
+        - name: geom
+          in: query
+          required: true
+          schema:
+            $ref: "#/definitions/Geometry"
+
+      tags:
+        - Appellations viticoles
+      responses:
+        '200':
+          description: "Succès"
+          schema:
+            $ref: "#/definitions/FeatureCollectionAppellationViticole"
+        '400':
+          description: "Paramètres invalide"
+          schema:
+            $ref: "#/definitions/Error"
+        '500':
+          description: "Erreur dans le traitement de la requête"
+          schema:
+            $ref: "#/definitions/Error"
+
+definitions:
+
+
+  FeatureAppellationViticole:
+    description: "Objet géographique appellation viticole" 
+    type: object
+    allOf:
+      - $ref: "#/definitions/Feature"
+    properties:
+      properties:
+        type: object
+        properties:
+          appelation:
+            type: string        
+          idapp:
+            type: string
+          id_uni:
+            type: string
+            description: corresponds à "segment-idapp-insee"
+          insee:
+            type: string
+          segment:
+            type: string
+          instruction_obligatoire:
+            type: boolean
+          granularite:
+            type: string
+            enum:
+              - commune
+              - exacte
+          appellation:
+            type: string
+          contains:
+            type: boolean
+      geometry:
+        $ref: '#/definitions/MultiPolygon'
+
+  FeatureCollectionAppellationViticole:
+    description: "Liste d'objet géographique appellation viticole"
+    type: object
+    properties:
+      type: 
+        type: string
+        enum:
+        - FeatureCollection
+      features:
+        type: array
+        items:
+          $ref: '#/definitions/FeatureAppellationViticole'
+      
+  Error:
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+
+  # import definitions
+  FeatureCollection:
+    $ref: './schema/geojson.yml#definitions/FeatureCollection'
+  Feature:
+    $ref: './schema/geojson.yml#definitions/Feature'
+  Geometry:
+    $ref: './schema/geojson.yml#definitions/Geometry'
+  MultiPolygon:
+    $ref: './schema/geojson.yml#definitions/MultiPolygon'    
