@@ -31,3 +31,4 @@ jobs:
           PIPEDRIVE_BUMP_TOKEN:  ${{ secrets.PIPEDRIVE_BUMP_TOKEN }}
           GITLAB_BUMP_TOKEN: ${{ secrets.GITLAB_BUMP_TOKEN }}
           REALWORLD_BUMP_TOKEN: ${{ secrets.REALWORLD_BUMP_TOKEN }}
+          AMAZON_BUMP_TOKEN: ${{ secrets.AMAZON_BUMP_TOKEN }}
