@@ -1,0 +1,241 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Restaurants API
+  license:
+    name: MIT
+  description: >
+    During project week, we learn to Build an API with restaurants.
+    This is a documentation for this API, proudly created with Bump.
+
+    🚂     Enjoy     🚀
+
+servers:
+  - url: http://localhost:3000/api/v1
+paths:
+  /restaurants:
+    get:
+      summary: List all restaurants
+      responses:
+        '200':
+          description: Array of restaurants
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurants"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create a restaurant
+      parameters:
+        - name: X-User-email
+          in: header
+          required: true
+          schema:
+            type: string
+            example: polo@bump.sh
+        - name: X-User-Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: oRWFjCmuzP-cUeshuZpq
+            requestBody:
+      requestBody:
+        description: New Restaurant information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewRestaurant'
+      responses:
+        '201':
+          description: Restaurant created
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /restaurants/{restaurantId}:
+    get:
+      summary: Info for a specific restaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: The id of the restaurant to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantWithComment"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      summary: Update specific restaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: The id of the restaurant to retrieve
+          schema:
+            type: string
+        - name: X-User-email
+          in: header
+          required: true
+          schema:
+            type: string
+            example: polo@bump.sh
+        - name: X-User-Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: oRWFjCmuzP-cUeshuZpq
+      requestBody:
+        description: Restaurant update information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewRestaurant'
+      responses:
+        '200':
+          description: Expected response with updated restaurant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantWithComment"
+        '401':
+          description: User not authorized to update this restaurant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorized"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Destroy specific restaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: The id of the restaurant to retrieve
+          schema:
+            type: string
+        - name: X-User-email
+          in: header
+          required: true
+          schema:
+            type: string
+            example: polo@bump.sh
+        - name: X-User-Token
+          in: header
+          required: true
+          schema:
+            type: string
+            example: oRWFjCmuzP-cUeshuZpq
+      responses:
+        '204':
+          description: No Content
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Comment:
+      type: object
+      required:
+        - id
+        - content
+      properties:
+        id:
+          type: integer
+          format: int64
+        content:
+          type: string
+          example: Don't forget your Broche before livecode
+    NewRestaurant:
+      type: object
+      required:
+        - name
+        - address
+      properties:
+        name:
+          type: string
+          example: This is a new restaurant example
+        address:
+          type: string
+          example: On a new place
+    Restaurant:
+      type: object
+      required:
+        - id
+        - name
+        - address
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: La Broche
+        address:
+          type: string
+          example: 14 Rue Romarin, 69001 Lyon
+    RestaurantWithComment:
+      type: object
+      required:
+        - id
+        - name
+        - address
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: La Broche
+        address:
+          type: string
+          example: rue du plat
+        comment:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+    Restaurants:
+      type: array
+      items:
+        $ref: "#/components/schemas/Restaurant"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

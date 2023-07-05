@@ -1,0 +1,6020 @@
+openapi: '3.0.0'
+
+
+servers:
+- url: https://demo.tagpay.fr/api/distributor/v1
+
+info:
+  title: Distributor API
+  version: "v1.7.0"
+  description: |
+    # Introduction
+    
+    Welcome to the Skaleet APIs documentation. <br>
+    Here you can learn everything you need to know about our API and how to interact with Skaleet! This documentation is designed to give you complete information about technical specifications, endpoints, attributes, requests and responses, error codes, validation, ... that will help you to set up the product.
+    
+    # About Distributor API
+    
+    The Distributor API allows you to discover the payment solutions and financial services we offer: acquiring, card issuing, bank transfer SEPA, KYC/KYB management…
+    
+    The API is available in REST.
+    
+    To use the Distributor API, it is necessary to respect the requested formats :
+    
+    - Country :<br>
+    ISO 3166-1 alpha-2 (DE, DE, US, GB...). Read more at https://fr.wikipedia.org/wiki/ISO_3166-2
+    - Language / locale :<br>
+    IETF Language Tag (e.g. fr_FR, en_US, en_GB...)
+    - Currency :<br>
+    ISO 4217 (3-letter code : EUR, USD, GBP...). Read more at https://fr.wikipedia.org/wiki/ISO_4217
+    - Amount :<br>
+    All API requests expect amounts to be provided in a currency’s smallest unit. For example, to charge $1 USD, provide an amount value of 100 (i.e, 100 cents). For zero-decimal currencies, still provide amounts as an integer but without multiplying by 100. For example, to charge ¥100, simply provide an amount value of 100.
+    - Phone :<br>
+    E.164 format [country code][area code][local phone number] no plus sign (i.e. 33612345678). Read more at https://en.wikipedia.org/wiki/E.164
+    - Date-time :<br>
+    ISO 8601 UTC time (e.g. 2018-11-19T17:13:38Z). Read more at https://en.wikipedia.org/wiki/ISO_8601
+    - Date :<br>
+    Shorter version of ISO 8601 without time [YYYY-MM-DD]
+    - Documents :<br>
+    Documents (files) are encoded in base64 format. You can download or upload a document as a base64 string and decode to its original file format (png, pdf, etc.)
+    
+    The field and parameter names in requests are case sensitive. 
+    You need to use Content-Type "application/json" to send requests. 
+    The request and response body encoding are always in UTF-8.
+    
+    You will find below all the Objects of the Distributor API.
+    
+    To access the test environment (Sandbox) and try out the API, you must contact TagPay Demo.
+    
+    # Live and Sandbox environments
+    API is located at https://demo.tagpay.fr/api/distributor/v1<br>
+    Contact us to identify your live and sandbox environments
+    
+    # Building your backend
+    You should develop a backend for your web and mobile clients to access TagPay Demo features. Your backend system will manage both communication to the Distributor API and internal operations such as user authentication, and custom security features like sms validation (once the sms is confirmed you can send the request to TagPay Demo to transfer money).
+    
+    You should also store a copy of certain data relating to TagPay Demo to decrease latency and increase resiliency when users review previous transfers they made or recipients they sent funds to. The extent of what you store will depend on your integration.
+    
+    # Events and Webhooks
+    Use webhooks to be notified about events that happen in a TagPay Demo account. This is especially useful for asynchronous events like a disputed charge or a credit transfer received, events that are not triggered by a direct API request
+    
+    Your application can subscribe to those events by providing a webhook (e.g. https://api.my-website.com/webhook). When the event occurs the API creates an Event object and send it to your webhook.
+    
+    Example of events :
+    - Account change (KYC validated, blocked, limit reached)
+    - Transaction (pending, settled, refused), i.e. Incoming SCT received, Outgoing SCT refused
+    
+    Important : To acknowledge receipt of a webhook, your endpoint should return a 2xx HTTP status code. You can query  to reconcile your data with any missed events at /events.
+    
+    # Headers
+    You can pass parameters in the header as follow :
+    
+    Accept-Language	
+        string<br>
+        Example: "en-US"<br>
+        End-user prefered language, will be used for text translations.
+    
+    User-Agent	
+        string<br>
+        Example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"<br>
+        End-user user agent.
+    
+    Forwarded	
+        string<br>
+        Example: "Forwarded: for=192.0.2.60; proto=http; by=203.0.113.43"<br>
+        End-user IP address.
+    
+    # HTTP Status Codes
+    HTTP Status Codes
+    We use Common HTTP status codes included in the response header to indicate success or failure.
+    
+    Code	Description
+     - 200	OK. Successful request.
+     - 201	OK. Resource created.
+     - 400	Bad request. Request message data did not pass validation.
+     - 401	Unauthorised. Not authorised to access requested data.
+     - 403	Forbidden. Access to requested data is forbidden.
+     - 404	Not Found. Requested resource does not exist.
+     - 408	Timeout. Operation timed out.
+     - 422	Unprocessable entity. Request message data did not pass validation.
+     - 500	API server error.
+    
+    # Authentication
+    
+    The Distributor API uses the OAuth2 following token grant flows:
+    * Client credentials grant
+    * Password grant
+    * Refresh token grant
+    
+    ### Pre-requisites
+    To access this API you must have a registered user account on the **TagPay Demo** platform.
+    Please see the platform documentation to find out how to obtain the API key for the user account you wish to use to consume the platform API services.
+    
+    ### Obtaining an Access Token
+    In order to obtain an Access Token, you must `POST` to the URL **https://demo.tagpay.fr/api/distributor/v1/oauth2/token** using a `Content-type: application/json` header and a JSON body containing the following items:
+    
+    | Field | Type | Description |
+    | :---: | :---: | --- |
+    | **grant_type** | string | Accepted values are "client_credentials", "password", "refresh_token" |
+    | **client_id** | string | the API key identifier |
+    | **client_secret** | string | the API key secret |
+    | **scope** | string | with a space-delimited list of requested scope permissions - If missing all scopes will be returned if configuration allows it (except for refresh_token grant type) |
+    | **username** |  string | Delegate user login ( password grant type only ) |
+    | **password** |  string | Delegate user password ( password grant type only ) |
+    | **refresh_token** |  string | When refreshing an expired access token using password grant |
+    
+    #### Request body example
+    
+    ##### Client credentials grant (Distributor identity only)
+    ```
+      {
+        "grant_type":"client_credentials", 
+        "client_id":"my-api-key-identifier", 
+        "client_secret":"eb5d1477-0dab-4b36-bc3e-9da6d6cc25ba",
+        "scope": "the scopes list"
+      }
+    ```
+    
+    ##### Password grant (Delegate User only)
+    ```
+      {
+        "grant_type":"password", 
+        "client_id":"app-api-key-identifier", 
+        "client_secret":"087915e5-9372-4edf-83e5-83631fda114f",
+        "username": "delegate-user-login",
+        "password": "delegate-user-password",
+        "scope": "the scopes list"
+      }
+    ```
+    
+    ##### Refresh token grant (Delegate User only)
+    ```
+      {
+        "grant_type":"refresh_token", 
+        "client_id":"app-api-key-identifier", 
+        "client_secret":"087915e5-9372-4edf-83e5-83631fda114f",
+        "refresh_token": "the-refresh-token",
+        "scope": "the scopes list"
+      }
+    ```
+    
+    #### Response body example
+    Calling the URL as described above will yield a response similar to this (actual token cut off with `[...]` for brevity):
+    ```
+      {
+          "token_type": "Bearer",
+          "expires_in": 59940,
+          "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVjNTY0MzI5ODNiMzJj[...]"
+      }
+    ```
+    _Note:_ the `expires_in` value is expressed in seconds.
+    
+    When using **Password Grant** and **Refresh Token Grant** an additional response parameter is returned
+    ```
+      {
+          ...
+          "refresh_token": "def502001a3fd579643cedd176f96425a2c3fb81d9ebbd0fb52c7337a194e7b[...]"
+      }
+    ```
+    
+    
+    ### Now that you have an Access Token
+    The thus obtained access token must be provided in the HTTP request header `Authorization` **for each API call** prefixed by the word `Bearer ` (**with** the trailing space):
+    
+    `
+    Authorization: Bearer your_api_token
+    `
+    
+    ### Access token lifetime
+    The access token has the **same lifetime as a user's session** (defined in the platform configuration), with the significant difference that **it's lifetime is not extended** upon each API action.
+    
+    Therefore, the access token will expire after it's predefined lifetime has expired, resulting in a `HTTP 401 Unauthorized` response with the message `Access token is invalid`.
+    
+    It is the API consumer's responsibility to detect such response, to obtain a fresh access token using the process described above, and optionally to issue the failed request anew.
+    
+  x-logo:
+    url: /img/logo_tagpay_500x172.png
+
+paths:
+  /oauth2/public-keys/latest:
+    get:
+      summary: Get latest public key
+      operationId: getLatestPublicKey
+      tags:
+      - Configuration
+      responses:
+        '200':
+          description: the latest public key in X.509 format
+          content:
+            application/x-pem-file:
+              schema:
+                type: string
+                example: |
+                  -----BEGIN PUBLIC KEY-----
+                  MIICIjANBgkqhkiG9[...]Cb0CAwEAAQ==
+                  -----END PUBLIC KEY-----
+      '404':
+        description: No public key available
+  /configuration:
+    get:
+      tags:
+        - Distributor
+      summary: Get configuration
+      operationId: DistributorConfiguration
+      description: Get distributor's configuration
+  
+      responses:
+        '200':
+          description: Distributor configuration response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DistributorConfiguration'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /password:
+    put:
+      tags:
+        - Distributor
+      summary: Password update
+      operationId: PasswordUpdate
+      description: Update distributor password when required by configuration
+      requestBody:
+        required: true
+        description: |
+          Password update request
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                  description: Current distributor password
+                newPassword:
+                  type: string
+                  description: New distributor password
+  
+      responses:
+        '200':
+          description: Password update response
+          content:
+            application/json:
+              schema:
+                type: object
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /u2f/register:
+    get:
+      tags:
+        - U2F
+      summary: Request U2F Registration
+      operationId: U2FRegisterRequest
+      description: Ask for an U2F registration
+  
+      responses:
+        '200':
+          description: U2F Registration request response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - registerRequest
+                properties:
+                  registerRequest:
+                    $ref: '#/components/schemas/RegisterRequest'
+                  signRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SignRequest'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - U2F
+      summary: U2F Register
+      operationId: U2FRegister
+      description: Register an U2F Device Key
+      requestBody:
+        required: true
+        description: |
+          Registration data
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - alias
+                - challengeResponse
+              properties:
+                alias:
+                  type: string
+                  description: U2F Key alias
+                challengeResponse:
+                  $ref: '#/components/schemas/RegisterChallengeResponse'
+      responses:
+        '200':
+          description: U2F Register response
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /u2f/authenticate:
+    get:
+      tags:
+        - U2F
+      summary: Request U2F Authentication
+      operationId: U2FAuthenticationRequest
+      description: Ask for an U2F authentication
+  
+      responses:
+        '200':
+          description: U2F Authentication request response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - signRequests
+                properties:
+                  signRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SignRequest'
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    post:
+      tags:
+        - U2F
+      summary: U2F Authenticate
+      operationId: U2FAuthenticate
+      description: Authenticate an U2F Device Key
+      requestBody:
+        required: true
+        description: |
+          Authentication data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticateChallengeResponse'
+  
+      responses:
+        '200':
+          description: U2F Authentication response
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /users:
+    get:
+      security:
+        - OAuth2: [user_view]
+      tags:
+        - Users
+      summary: List all users
+      operationId: SearchUser
+      description: A “user” represents a natural person or a legal entity who has contracted with the bank, and owns one or several accounts in the system. A user is defined by an identifier called id for the identifier generated by Skaleet or externalId for the identifier generated by the Distributor and stored in the database.
+                  A ‘role’ is assigned to each user. The role defines how an user may be implied in the financial services managed by the platform. Distributors may manage users belonging to the following roles Client, Company, Merchant, Agent.
+      parameters:
+        - name: firstName
+          in: query
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          schema:
+            type: string
+        - name: legalName
+          in: query
+          schema:
+            type: string
+        - name: birthDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: email
+          in: query
+          schema:
+            type: string
+            format: email
+        - name: profileId
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserProfileId'
+        - name: externalId
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserExternalId'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserStatus'
+        - name: role
+          in: query
+          schema:
+            $ref: '#/components/schemas/Role'
+        - name: legalType
+          in: query
+          schema:
+            $ref: '#/components/schemas/LegalType'
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - firstName
+              - lastName
+              - legalName
+              - birthDate
+              - email
+              - profileId
+              - externalId
+              - status
+              - role
+              - legalType
+          
+        
+      responses:
+        '200':
+          description: Users found for this search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCollection'
+            
+    post:
+      security:
+        - OAuth2: [user_creation]
+      tags:
+        - Users
+      summary: Create a user
+      operationId: CreateUser
+      requestBody:
+        required: true
+        description: user to add to the system
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/NaturalPersonCreation'
+                - $ref: '#/components/schemas/LegalEntityWithBoardMember'
+              discriminator:
+                propertyName: legalType
+                mapping:
+                  NATURAL_PERSON: '#/components/schemas/NaturalPersonCreation'
+                  LEGAL_ENTITY: '#/components/schemas/LegalEntityWithBoardMember'
+  
+      responses:
+        '201':
+          description: User creation response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  
+  /users/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserId'
+  
+  
+    get:
+      security:
+        - OAuth2: [user_view]
+      tags:
+        - Users
+      summary: Retrieve a user
+      operationId: GetUser
+  
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  
+        '404':
+          description: Requested user was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    put:
+      security:
+        - OAuth2: [user_update]
+      tags:
+      - Users
+      summary: Update a user
+      description: Update user information.
+      operationId: UpdateUser
+      requestBody:
+        description: Update a user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+  
+      responses:
+        '200':
+          description: User modification response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      security:
+        - OAuth2: [user_update]
+      tags:
+      - Users
+      summary: Patch a user
+      description: Patch user information.
+      operationId: PatchUser
+      requestBody:
+        description: Patch a user
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    userPin:
+                      type: string
+                      example: 1337
+                      description: |
+                        If specified, allow user to be patched with this specific pin code.
+                        Users will have to change their pin on next usage
+                - $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User modification response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/ErrorResponse'
+  
+    delete:
+      security:
+        - OAuth2: [user_deactivate]
+      tags:
+      - Users
+      summary: Deactivate a user
+      operationId: DeleteUser
+  
+      responses:
+        '200':
+          description: User desactivation response.
+          content:
+            application/json:
+              schema:
+                type: object
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /users/{userId}/board-member:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserId'
+    get:
+      security:
+        - OAuth2: [user_view]
+      tags:
+        - Users
+      summary: Retrieve a legal entity board member
+      operationId: GetBoardMember
+  
+      responses:
+        '200':
+          description: Board member information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NaturalPerson'
+  
+        '404':
+          description: cannot found any board member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /users/{userId}/actions/reset-password:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserId'
+    post:
+      security:
+        - OAuth2: [password_reset]
+      tags:
+        - Users
+      summary: Reset delegate user's password
+      operationId: ResetPassword
+  
+      responses:
+        '200':
+          description: Empty json response if operation succeded
+        '404':
+          description: Requested user was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /users/{userId}/actions/required-action:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserId'
+    get:
+      security:
+        - OAuth2: [required_action]
+      tags:
+        - Users
+      summary: Get user's required action
+      operationId: RequiredAction
+      responses:
+        '200':
+          description: Actual required action and possible values
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requiredAction:
+                    $ref: '#/components/schemas/UserRequiredAction'
+                  reason:
+                    type: string
+                    example: 'Please update documents'
+                  values:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserRequiredAction'
+        '404':
+          description: Requested user was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      security:
+        - OAuth2: [required_action]
+      tags:
+        - Users
+      summary: Update a user's required action
+      operationId: RequiredAction
+      requestBody:
+        description: Required action
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequiredAction'
+  
+      responses:
+        '200':
+          description: Updated required action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequiredAction'
+        '400':
+          description: Required action value incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Requested user was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /autocomplete/{inputId}:
+    get:
+      tags:
+        - Autocomplete
+      summary: KYC field auto-complete
+      operationId: Autocomplete
+      parameters:
+        - name: inputId
+          in: path
+          required: true
+          description: KYC field identifier
+          schema:
+            $ref: '#/components/schemas/InputId'
+        - name: userInput
+          in: query
+          required: true
+          description: Current user input, to be completed
+          schema:
+            type: string
+  
+      responses:
+        '200':
+          description: list of possible values found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PossibleValueCollection'
+        default:
+          description: KYC field not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  /users/{userId}/recipients:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserId'
+    get:
+      security:
+        - OAuth2: [recipient_management]
+      tags:
+      - Recipients
+      summary: List user recipients
+      operationId: SearchUserRecipient
+      parameters:
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - name
+              - iban
+          
+        
+  
+  
+      responses:
+        '200':
+          description: Recipients found for this search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipientCollection'
+  
+    post:
+      security:
+        - OAuth2: [recipient_management]
+      tags:
+      - Recipients
+      summary: Create a recipient
+      operationId: CreateUserRecipient
+      requestBody:
+        required: true
+        description: |
+          Recipient information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recipient'
+  
+      responses:
+        '201':
+          description: User's Recipient creation response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipient'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /users/{userId}/recipients/{recipientId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserId'
+      - name: recipientId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/RecipientId'
+    delete:
+      security:
+        - OAuth2: [recipient_management]
+      tags:
+      - Recipients
+      summary: Delete a recipient
+      operationId: RemoveRecipient
+  
+      responses:
+        '200':
+          description: Recipient sucessfully removed
+          content:
+            application/json:
+              schema:
+                type: object
+  
+  
+        '404':
+          description: Requested recipient was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  /users/{userId}/relations:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserId'
+    get:
+      security:
+        - OAuth2: [relation_management]
+      tags:
+      - Relations
+      summary: List user relations
+      operationId: SearchUserRelation
+      parameters:
+        - name: type
+          in: query
+          schema:
+              $ref: '#/components/schemas/RelationType'
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - type
+          
+        
+  
+      responses:
+        '200':
+          description: Relations found for this search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationCollection'
+  
+    post:
+      security:
+        - OAuth2: [relation_management]
+      tags:
+      - Relations
+      summary: Create a relation
+      operationId: CreateUserRelation
+      requestBody:
+        required: true
+        description: |
+          Relation information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/RelationType'
+                targetId:
+                  type: string
+                  description: Id of the user to associate
+                  example: USR42
+  
+      responses:
+        '201':
+          description: User's relation creation response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    description: Id of the origin of the relation
+                    example: USR42
+                  type:
+                    $ref: '#/components/schemas/RelationType'
+                  targetId:
+                    type: string
+                    description: Id of the target of the relation
+                    example: USR43
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /users/relations/{relationId}:
+    parameters:
+      - name: relationId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/RelationId'
+    delete:
+      security:
+        - OAuth2: [relation_management]
+      tags:
+        - Relations
+      summary: Delete a user relation
+      operationId: RemoveUserRelation
+  
+      responses:
+        '200':
+          description: User relation successfully removed
+          content:
+            application/json:
+              schema:
+                type: object
+  
+        '404':
+          description: Requested relation was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /products:
+    get:
+      security:
+        - OAuth2: [account_view]
+      tags:
+      - Products
+      summary: List all products
+      operationId: SearchProduct
+      parameters:
+        - name: id
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProductId'
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProductType'
+  
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - type
+          
+        
+  
+      responses:
+        '200':
+          description: Products found for this search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCollection'
+  
+  /accounts:
+    get:
+      security:
+        - OAuth2: [account_view]
+      tags:
+      - Accounts
+      summary: List all accounts
+      operationId: SearchAccount
+      parameters:
+        - name: id
+          in: query
+          schema:
+            $ref: '#/components/schemas/AccountId'
+  
+        - name: userId
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserId'
+  
+        - name: externalId
+          in: query
+          schema:
+            $ref: '#/components/schemas/AccountExternalId'
+  
+        - name: productId
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProductId'
+  
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/AccountStatus'
+  
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - userId
+              - externalId
+              - productId
+              - status
+          
+        
+  
+      responses:
+        '200':
+          description: Example response (Status 200)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountCollection'
+  
+  /accounts/{accountId}:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountId'
+    get:
+      security:
+        - OAuth2: [account_view]
+      tags:
+      - Accounts
+      summary: Retrieve an account
+      operationId: GetAccount
+  
+      responses:
+        '200':
+          description: Account information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  
+        '404':
+          description: Requested account was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    delete:
+      security:
+        - OAuth2: [account_close]
+      tags:
+      - Accounts
+      summary: Close an account
+      operationId: CloseAccount
+  
+      responses:
+        '200':
+          description: Account successfully closed
+          content:
+            application/json:
+              schema:
+                type: object
+  
+        '400':
+          description: Account could not be closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested account was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  /accounts/{accountId}/block:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountId'
+  
+    patch:
+      security:
+        - OAuth2: [account_block]
+      tags:
+        - Accounts
+      summary: Block an account
+      operationId: BlockAccount
+      requestBody:
+        required: false
+        description: Account block status
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newStatus:
+                  $ref: '#/components/schemas/AccountBlock'
+  
+      responses:
+        '200':
+          description: Account successfully blocked
+          content:
+            application/json:
+              schema:
+                type: object
+  
+        '400':
+          description: Account could not be blocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested account was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /accounts/{accountId}/unblock:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountId'
+    patch:
+      security:
+        - OAuth2: [account_unblock]
+      tags:
+      - Accounts
+      summary: Unblock an account
+      operationId: UnblockAccount
+  
+      responses:
+        '200':
+          description: Account successfully unblocked
+          content:
+            application/json:
+              schema:
+                type: object
+  
+        '400':
+          description: Account could not be unblocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested account was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /accounts/{accountId}/externalId:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountId'
+    patch:
+      security:
+        - OAuth2: [externalid_update]
+      tags:
+        - Accounts
+      summary: Update externalId
+      operationId: UpdateExternalid
+      requestBody:
+        required: true
+        description: Account external ID
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - externalId
+              properties:
+                externalId:
+                  $ref: '#/components/schemas/AccountExternalId'
+  
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  
+        '400':
+          description: Account could not be updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested account was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /accounts/{accountId}/iban:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountId'
+    patch:
+      security:
+        - OAuth2: [iban_modification]
+      tags:
+        - Accounts
+      summary: Update account IBAN
+      operationId: UpdateIban
+      requestBody:
+        required: true
+        description: New IBAN
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - iban
+              properties:
+                iban:
+                  $ref: '#/components/schemas/AccountIban'
+  
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  
+        '400':
+          description: Account IBAN could not be updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested account was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  /users/{userId}/accounts:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserId'
+    post:
+      security:
+        - OAuth2: [account_creation]
+      tags:
+        - Accounts
+      summary: Create an account
+      operationId: CreateUserAccount
+      requestBody:
+        required: true
+        description: |
+          Account information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Account'
+  
+      responses:
+        '201':
+          description: Account creation response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /accounts/{accountId}/actions/download-rib:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountId'
+    get:
+      security:
+        - OAuth2: [account_view]
+      tags:
+        - Accounts
+      summary: Download RIB
+      operationId: DownloadRIB
+      responses:
+        '200':
+          description: The document content
+          content:
+            application/pdf:
+              schema:
+              type: string
+              format: binary
+        '404':
+          description: Requested account was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /transactions:
+    get:
+      security:
+        - OAuth2: [transaction_view]
+      tags:
+      - Transactions
+      summary: List all transactions
+      operationId: SearchTransaction
+      parameters:
+        - name: id
+          in: query
+          schema:
+            $ref: '#/components/schemas/TransactionId'
+  
+        - name: externalId
+          in: query
+          schema:
+            $ref: '#/components/schemas/TransactionExternalId'
+  
+        - name: userId
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserId'
+  
+        - name: type
+          in: query
+          description: Transaction type
+          schema:
+            $ref: '#/components/schemas/TransactionType'
+        - name: startDate
+          in: query
+          description: Transaction date range start
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+  
+        - name: endDate
+          in: query
+          description: Transaction date range end
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+  
+        - name: amount
+          in: query
+          description: Transaction amount (in cents)
+          schema:
+            type: integer
+        - name: currency
+          in: query
+          description: Transaction currency
+          schema:
+            $ref: '#/components/schemas/Currency'
+  
+        - name: media
+          in: query
+          description: Transaction currency
+          schema:
+            allOf:
+              - default: ALL
+              - $ref: '#/components/schemas/Media'
+  
+        - name: accountingCode
+          in: query
+          schema:
+            type: string
+            description: Accounting code from the point of view of the calling system
+            
+        - name: byActiveCard
+          in: query
+          schema:
+            type: boolean
+            description: If true, get transactions made by an active card
+  
+  
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - externalId
+              - type
+              - date
+              - currency
+              - media
+              - amount
+              - accountingCode
+          
+        
+  
+      responses:
+        '200':
+          description: Transactions found for this search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionCollection'
+  
+  /transactions/export:
+    get:
+      security:
+        - OAuth2: [transaction_export]
+      tags:
+        - Transactions
+      summary: Export all transactions
+      operationId: ExportTransaction
+      parameters:
+        - name: id
+          in: query
+          schema:
+              $ref: '#/components/schemas/TransactionId'
+        - name: externalId
+          in: query
+          schema:
+              $ref: '#/components/schemas/TransactionExternalId'
+        - name: userId
+          in: query
+          schema:
+              $ref: '#/components/schemas/UserId'
+        - name: type
+          in: query
+          description: Transaction type
+          schema:
+              $ref: '#/components/schemas/TransactionType'
+        - name: startDate
+          in: query
+          description: Transaction date range start
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          description: Transaction date range end
+          schema:
+            type: string
+            format: date-time
+        - name: amount
+          in: query
+          description: Transaction amount (in cents)
+          schema:
+            type: integer
+        - name: currency
+          in: query
+          description: Transaction currency
+          schema:
+              $ref: '#/components/schemas/Currency'
+        - name: media
+          in: query
+          description: Transaction currency
+          schema:
+            allOf:
+              - default: ALL
+              - $ref: '#/components/schemas/Media'
+        - name: accountingCode
+          in: query
+          schema:
+            type: string
+            description: Accounting code from the point of view of the calling system
+      responses:
+        '200':
+          description: A CSV file with the requested export
+          content:
+            text/csv:
+              schema:
+                type: string
+  
+  /transactions/{transactionId}:
+    parameters:
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/TransactionId'
+    get:
+      security:
+        - OAuth2: [transaction_view]
+      tags:
+        - Transactions
+      summary: Retrieve a transaction
+      operationId: GetTransaction
+  
+      responses:
+        '200':
+          description: Transaction information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetails'
+  
+        '404':
+          description: Requested transaction was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  /transactions/payout:
+    post:
+      security:
+        - OAuth2: [payout]
+      tags:
+      - Transactions
+      summary: External transfer (Payout)
+      description: |
+        Transfer from a TagPay Demo account to an external account.
+  
+        When external transfer uses SEPA, it is a SCT (SEPA Credit Transfer).
+      operationId: Payout
+      requestBody:
+        required: true
+        description: |
+          Payout information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayoutRequest'
+  
+      responses:
+        '201':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TransactionDetails'
+                  - type: object
+                    properties:
+                      instructionId:
+                        type: string
+                        description: Instruction id
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /transactions/payin:
+    post:
+      security:
+        - OAuth2: [payin]
+      tags:
+      - Transactions
+      summary: External Direct Debit (Payin)
+      description: |
+        Transfer to an external account from a TagPay Demo account.
+  
+        When external Direct Debit uses SEPA, it is a SDD (SEPA Direct Debit).
+      operationId: Payin
+      requestBody:
+        required: true
+        description: |
+          Payin information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayinRequest'
+  
+      responses:
+        '201':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TransactionDetails'
+                  - type: object
+                    properties:
+                      instructionId:
+                        type: string
+                        description: Instruction id
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /transactions/distributorPosting:
+    post:
+      security:
+        - OAuth2: [posting]
+      tags:
+        - Transactions
+      summary: Internal transfer (Posting)
+      description: Internal transfer between TagPay Demo accounts
+      operationId: DistributorPosting
+      requestBody:
+        required: true
+        description: |
+          Transaction information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DistributorPostingRequest'
+  
+      responses:
+        '201':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetails'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /users/profiles:
+    parameters:
+      - name: role
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/UserProfileRole'
+    get:
+      security:
+        - OAuth2: [profile_view]
+      tags:
+      - Users
+      summary: List all profiles
+      operationId: SearchUserProfile
+      responses:
+        '200':
+          description: User profiles found for this search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileCollection'
+  
+  /users/kyc:
+    parameters:
+      - name: legalType
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/LegalType'
+      - name: profileId
+        in: query
+        schema:
+          $ref: '#/components/schemas/UserProfileId'
+    get:
+      security:
+        - OAuth2: [kyc_view]
+      tags:
+      - Users
+      summary: Retrieve KYC requirements
+      operationId: GetSegmentationKYC
+  
+      responses:
+        '200':
+          description: Segment KYC inputs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSegmentationKycResponse'
+  
+  /documents/{documentId}:
+    get:
+      security:
+        - OAuth2: [document_management]
+      tags:
+      - Documents
+      summary: Retrieve a document
+      operationId: GetDocument
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/DocumentId'
+      responses:
+        '200':
+          description: Example response (Status 200)
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/DocumentWithContent'
+  /documents/{documentId}/content:
+    get:
+      security:
+        - OAuth2: [document_management]
+      tags:
+        - Documents
+      summary: Retrieve a document's content
+      operationId: GetDocumentContent
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/DocumentId'
+      responses:
+        '200':
+          description: The document content
+  /documents/{documentId}/preview:
+    get:
+      security:
+        - OAuth2: [document_management]
+      tags:
+        - Documents
+      summary: Retrieve a document's preview content, with a max width of 200px
+      operationId: GetDocumentPreview
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/DocumentId'
+      responses:
+        '200':
+          description: The document's preview content
+  /users/{userId}/documents:
+    get:
+      security:
+        - OAuth2: [document_management]
+      tags:
+      - Documents
+      summary: List user's documents
+      operationId: SearchDocument
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UserId'
+      responses:
+        '200':
+          description: Example response (Status 200)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentCollection'
+    post:
+      security:
+        - OAuth2: [document_management]
+      tags:
+        - Documents
+      summary: Send a document
+      operationId: CreateDocument
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentWithContent'
+  
+      responses:
+        '201':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /accounting:
+    get:
+      security:
+        - OAuth2: [accounting_view]
+      tags:
+      - Accounting
+      summary: List accounting entries
+      operationId: SearchAccounting
+      parameters:
+        - name: id
+          in: query
+          schema:
+              $ref: '#/components/schemas/AccountingEntryId'
+  
+        - name: accountId
+          in: query
+          schema:
+            $ref: '#/components/schemas/AccountId'
+  
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/EntryType'
+  
+        - name: startDate
+          in: query
+          description: Start date
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+  
+        - name: endDate
+          in: query
+          description: End date
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+  
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - accountId
+              - type
+          
+        
+  
+      responses:
+        '200':
+          description: Example response (Status 200)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountingEntryCollection'
+  
+  /accounting/export:
+    get:
+      security:
+        - OAuth2: [accounting_export]
+      tags:
+      - Accounting
+      summary: Export accounting entries
+      operationId: ExportAccounting
+      parameters:
+        - name: id
+          in: query
+          schema:
+              $ref: '#/components/schemas/AccountingEntryId'
+  
+        - name: accountId
+          in: query
+          schema:
+              $ref: '#/components/schemas/AccountId'
+  
+        - name: type
+          in: query
+          schema:
+              $ref: '#/components/schemas/EntryType'
+  
+        - name: startDate
+          in: query
+          description: Start date
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+  
+        - name: endDate
+          in: query
+          description: End date
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+      responses:
+        '200':
+          description: A CSV file with the requested export
+          content:
+            text/csv:
+              schema:
+                type: string
+  
+  /hooks:
+    get:
+      security:
+        - OAuth2: [event_management]
+      tags:
+      - Events
+      summary: Subscriptions to events
+      description: Search your subscriptions to Events
+      operationId: SearchHook
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HookCollection'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    post:
+      security:
+        - OAuth2: [event_management]
+      tags:
+      - Events
+      summary: Subscribe to events
+      description: |
+        Provide your third-party endpoint where to receive events, and what events types to receive
+  
+        Events will be sent as a POST request with this model of payload :
+  
+        //Client 359 status is now opened
+  
+        POST: {
+  
+          "id":"359",
+  
+          "type":"client",
+  
+          "event":"client.status.opened"
+  
+        }
+  
+        OR
+  
+        //Document 66 created
+  
+        POST: {
+  
+          "id":"66",
+  
+          "type":"document",
+  
+          "event":"identity.document.new"
+  
+        }
+      operationId: SubscribeEvents
+      requestBody:
+        required: true
+        description: Event information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Hook'
+  
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hook'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  /hooks/{hookId}:
+    parameters:
+      - name: hookId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/HookId'
+    delete:
+      security:
+        - OAuth2: [event_management]
+      tags:
+      - Events
+      summary: Unsubscribe to events
+      operationId: unsubscribeEvent
+  
+      responses:
+        '200':
+          description: Subscription sucessfully removed
+          content:
+            application/json:
+              schema:
+                type: object
+  
+  
+        '404':
+          description: Subscription was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /cards:
+    get:
+      security:
+        - OAuth2: [card_view]
+      tags:
+      - Cards
+      summary: List all cards
+      operationId: SearchCard
+      parameters:
+        - name: id
+          in: query
+          description: Card reference id
+          schema:
+            type: string
+            nullable: true
+        - name: embossedName
+          in: query
+          description: Card embossed name
+          schema:
+            type: string
+            nullable: true
+        - name: embossedReference
+          in: query
+          description: Card embossed reference
+          schema:
+            type: string
+            nullable: true
+        - name: number
+          in: query
+          description: Card support number
+          schema:
+            type: string
+            nullable: true
+        - name: truncatedPan
+          in: query
+          description: Card truncated PAN
+          schema:
+            type: string
+            nullable: true
+        - name: startConfirmationDate
+          in: query
+          description: Confirmation date range start
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: endConfirmationDate
+          in: query
+          description: Confirmation date range end
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: startExpirtationDate
+          in: query
+          description: Expiration date range start
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: endExpirationDate
+          in: query
+          description: Expiration date range end
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: anonymous
+          in: query
+          description: Get anonymous cards
+          schema:
+            type: boolean
+            nullable: true
+        - name: startActivationDate
+          in: query
+          description: Activation date range start
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: endActivationDate
+          in: query
+          description: Activation date range end
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: startAssociationDate
+          in: query
+          description: Association date range start
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: endAssociationDate
+          in: query
+          description: Association date range end
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: startCreationDate
+          in: query
+          description: Creation date range start
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: endCreationDate
+          in: query
+          description: Creation date range end
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: externalStatus
+          in: query
+          description: Card external status
+          schema:
+            type: string
+            nullable: true
+        - name: hasOperationInError
+          in: query
+          description: Get cards with an operation in error
+          schema:
+            type: boolean
+            nullable: true
+        - name: hasOperationBlocked
+          in: query
+          description: Get cards with last operation in pending block request
+          schema:
+            type: boolean
+            nullable: true
+        - name: hasOperationUnblocked
+          in: query
+          description: Get cards with last operation in pending unblock request
+          schema:
+            type: boolean
+            nullable: true
+        - name: hasPendingOppositionRequest
+          in: query
+          description: Get cards with last operation in pending opposition request
+          schema:
+            type: boolean
+            nullable: true
+        - name: productId
+          in: query
+          schema:
+              $ref: '#/components/schemas/ProductId'
+        - name: status
+          in: query
+          description: Card status
+          schema:
+            type: string
+            nullable: true
+            enum:
+              - ACTIVE
+              - BLOCKED
+              - EXPIRED
+              - NEW
+              - OPPOSED
+              - PENDING
+              - REMOVED
+        - name: startStatusChangeDate
+          in: query
+          description: Status change date range start
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: endStatusChangeDate
+          in: query
+          description: Status change date rand end
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+        - name: userId
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserId'
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - embossedName
+              - embossedReference
+              - externalStatusConfirmationDate
+              - activationDate
+              - associationDate
+              - panDisplay
+              - number
+              - expirationDate
+              - creationDate
+              - productId
+              - status
+              - statusChangeDate
+              - userId
+          
+        
+  
+      responses:
+        '200':
+          description: Example response (Status 200)
+          content:
+            application/json:
+              schema:
+                description: Sorted and paginated list of cards
+                allOf:
+                - $ref: '#/components/schemas/Collection'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      description: collection of cards
+                      items:
+                        $ref: '#/components/schemas/Card'
+  
+  /cards/{cardId}:
+    parameters:
+      - name: cardId
+        in: path
+        required: true
+        schema:
+          type: string
+          description: card id
+          example: 0
+    get:
+      security:
+        - OAuth2: [card_view]
+      tags:
+      - Cards
+      summary: Retrieve a card
+      operationId: GetCard
+  
+      responses:
+        '200':
+          description: Card information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    patch:
+      security:
+        - OAuth2: [card_update]
+      tags:
+      - Cards
+      summary: Update a card
+      operationId: UpdateCard
+  
+      requestBody:
+        required: true
+        description: Card update request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                embossedName:
+                  type: string
+                  description: Can be modified while status is NEW, default is account's holder name. Can only contain "A-Z", "0-9", "'", "-", " ", and ".".
+                  example: 'JOHN DOE'
+      responses:
+        '200':
+          description: Card successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  
+        '400':
+          description: Card could not be updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    delete:
+      security:
+        - OAuth2: [card_deactivate]
+      tags:
+        - Cards
+      summary: Deactivate a card
+      operationId: DeleteCard
+  
+      responses:
+        '200':
+          description: Card successfully deactivated
+          content:
+            application/json:
+              schema:
+                type: object
+  
+        '400':
+          description: Card could not be deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  /cards/{cardId}/features:
+    parameters:
+      - name: cardId
+        in: path
+        required: true
+        schema:
+          type: string
+          description: card id
+          example: 0
+    patch:
+      security:
+        - OAuth2: [card_option]
+      tags:
+        - Cards
+      summary: Change card feature
+      description: Enable or disable a card feature
+      operationId: changeCardFeature
+  
+      requestBody:
+        required: true
+        description: Card feature change request. Features availables depends on product configuration
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - feature
+                - enabled
+              properties:
+                feature:
+                  type: string
+                  enum:
+                    - NFC
+                    - CASH_OPERATION
+                    - EUR_WITHDRAWAL
+                    - FOREIGN_WITHDRAWAL
+                    - PAYMENT_AUTHORIZED
+                    - EUR_PAYMENT
+                    - FOREIGN_PAYMENT
+                    - FOREIGN_ALL
+                    - ONLINE_PAYMENT
+                    - FOREIGN_ONLINE_PAYMENT
+                enabled:
+                  type: boolean
+      responses:
+        '200':
+          description: Card feature change successfully requested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  
+        '400':
+          description: Card feature could not be changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /cards/{cardId}/block:
+    parameters:
+      - name: cardId
+        in: path
+        required: true
+        schema:
+          type: string
+          description: card id
+          example: 0
+    patch:
+      security:
+        - OAuth2: [card_block]
+      tags:
+      - Cards
+      summary: Block a card
+      operationId: BlockCard
+  
+      responses:
+        '200':
+          description: Card successfully blocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  
+        '400':
+          description: Card could not be blocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /cards/{cardId}/unblock:
+    parameters:
+      - name: cardId
+        in: path
+        required: true
+        schema:
+          type: string
+          description: card id
+          example: 0
+    patch:
+      security:
+        - OAuth2: [card_unblock]
+      tags:
+      - Cards
+      summary: Unblock a card
+      operationId: UnblockCard
+  
+      responses:
+        '200':
+          description: Card successfully unblocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  
+        '400':
+          description: Card could not be unblocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /cards/{cardId}/oppose:
+     parameters:
+       - name: cardId
+         in: path
+         required: true
+         schema:
+           type: string
+           description: card id
+           example: 0
+  
+     patch:
+       security:
+         - OAuth2: [card_oppose]
+       tags:
+         - Cards
+       summary: Oppose a card
+       operationId: OpposeCard
+       requestBody:
+         required: true
+         description: Card opposition request
+         content:
+           application/json:
+             schema:
+               type: object
+               required:
+                 - reason
+               properties:
+                 reason:
+                   type: string
+                   enum:
+                     - ABUSE
+                     - LOST
+                     - STOLEN
+                     - NOT_DISTRIBUTED
+                     - COUNTERFEIT
+       responses:
+         '200':
+           description: Card successfully opposed
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Card'
+  
+         '400':
+           description: Card could not be opposed
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ErrorResponse'
+  
+         '404':
+           description: Requested card was not found
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ErrorResponse'
+  
+  /cards/{cardId}/activate:
+    parameters:
+    - name: cardId
+      in: path
+      required: true
+      schema:
+        type: string
+        description: card id
+        example: 1234
+    patch:
+      security:
+        - OAuth2: [card_activate]
+      tags:
+      - Cards
+      summary: Activate a card
+      operationId: ActivateCard
+      requestBody:
+        required: true
+        description: Card activation options
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateCardRequest'
+      responses:
+        '200':
+          description: Activation was requested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  
+        '400':
+          description: Card could not be activated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /accounts/{accountId}/cards:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+          description: account id
+          example: 0
+    post:
+      security:
+        - OAuth2: [card_creation]
+      tags:
+        - Cards
+      summary: Create a card
+      operationId: CreateUserCard
+      requestBody:
+        required: true
+        description: card to add to the system
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Card'
+      responses:
+        '201':
+          description: Card creation response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  
+        '400':
+          description: An error occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /cards/{cardId}/outstandings:
+    parameters:
+      - name: cardId
+        in: path
+        required: true
+        schema:
+          type: string
+          description: card id
+          example: 1234
+    get:
+      security:
+        - OAuth2: [card_view]
+      tags:
+        - Cards
+      summary: Get card outstandings
+      operationId: GetCardOutstandings
+      responses:
+        '200':
+          description: Card outstanding list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [outstandings]
+                properties:
+                  outstandings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Outstanding'
+  
+        '400':
+          description: Could not get card outsandings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /cards/{cardId}/refabricate:
+    parameters:
+      - name: cardId
+        in: path
+        required: true
+        schema:
+          type: string
+          description: card id
+          example: 1234
+    patch:
+      security:
+        - OAuth2: [card_refabrication]
+      tags:
+        - Cards
+      summary: Refabricate a card
+      operationId: RefabricateCard
+      responses:
+        '200':
+          description: Refabrication was requested
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [operationId]
+                properties:
+                  operationId:
+                    type: string
+                    description: Refabrication operation id
+                    example: '1234'
+  
+        '400':
+          description: Card could not be refabricated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+        '404':
+          description: Requested card was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  
+  /cards/{cardId}/operations:
+    get:
+      security:
+        - OAuth2: [card_view]
+      tags:
+        - Cards
+      summary: List all card management operations
+      operationId: searchOperations
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+            description: card id
+            example: 1234
+        - name: id
+          in: query
+          schema:
+            $ref: '#/components/schemas/CardManagementOperationId'
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/CardManagementOperationType'
+        - name: state
+          in: query
+          schema:
+            $ref: '#/components/schemas/CardManagementOperationState'
+  
+        - name: offset
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            nullable: true
+        
+        - name: limit
+          in: query
+          description: The number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+            nullable: true
+        
+        - name: sort
+          in: query
+          description: Field to define the sort order. To indicate sorting direction, ascending (oldest first) fields may be prefixed with +. Descending (newer first) fields may be prefixed with -
+          schema:
+            type: string
+            default: id
+            nullable: true
+            enum:
+              - id
+              - type
+              - state
+              - creation_date
+          
+        
+  
+      responses:
+        '200':
+          description: Example response (Status 200)
+          content:
+            application/json:
+              schema:
+                description: Sorted and paginated list of operations
+                allOf:
+                  - $ref: '#/components/schemas/Collection'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        description: collection of operations
+                        items:
+                          $ref: '#/components/schemas/CardManagementOperation'
+  
+  /identities/{identityId}/available-statuses:
+    get:
+      tags:
+        - Identities
+      security:
+        - OAuth2: [ identity_status_change ]
+      summary: List available statuses
+      description: |
+        Returns the possible statuses to which the Identity can be switched to
+      operationId: GetIdentityAvailableStatuses
+      responses:
+        '200':
+          description: List of available statuses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityStatusArray'
+        default:
+          $ref: '#/components/responses/RestfulErrorResponse'
+  
+  /identities/{identityId}/actions/change-status:
+    put:
+      tags:
+        - Identities
+      security:
+        - OAuth2: [ identity_status_change ]
+      summary: Change Identity status
+      operationId: ChangeIdentityStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeIdentityStatusActionRequest'
+      responses:
+        '204':
+          description: Identity status was successfully changed
+        default:
+          $ref: '#/components/responses/RestfulErrorResponse'
+  /identities/{identityId}/actions/open:
+    post:
+      tags:
+        - Identities
+      security:
+        - OAuth2: [ open_identity ]
+      summary: Open an Identity
+      operationId: OpenIdentity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+                  description: the reason of the opening
+                  example: my reason
+      responses:
+        '204':
+          description: Identity was successfully opened
+        default:
+          $ref: '#/components/responses/RestfulErrorResponse'
+  
+
+x-tagGroups:
+  - name: TagPay
+    tags:
+    - Configuration
+    - Distributor
+    - U2F
+    - Users
+    - Autocomplete
+    - Recipients
+    - Relations
+    - Products
+    - Accounts
+    - Transactions
+    - Documents
+    - Accounting
+    - Events
+    - Cards
+    - Identities
+  
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://demo.tagpay.fr/api/distributor/v1/oauth2/token
+          scopes:
+            user_view: Can list and retrieve users
+            user_creation: Can create a user
+            user_update: Can update a user
+            user_deactivate: Can deactivate a user
+            recipient_management: Can create, delete and list user's recipients
+            relation_management: Can list, create and delete user's relations
+            profile_view: Can list the profiles available to the distributor
+            kyc_view: Can access kyc requirements
+            document_management: Can view and add documents to users
+            account_view: Can list and retrieve users’ accounts
+            account_creation: Can create accounts for users
+            externalid_update: Can update external Id fields
+            account_close: Can close users' accounts
+            account_block: Can block users' accounts
+            account_unblock: Can unblock users' accounts
+            transaction_view: Can list and retrieve transactions
+            transaction_export: Can export all transactions or part of them using filters
+            payout: Can initiate an External Transfer (Distributor Payout)
+            posting: Can initiate an External Direct Debit (Distributor Payin)
+            payin: Can initiate an Internal Transfer (Distributor Posting)
+            event_management: Can manage hooks
+            card_view: Can list and retrieve cards
+            card_creation: Can create a card for an account
+            card_update: Can update a card
+            card_activate: Can activate a card for an account
+            card_deactivate: Can deactivate a card for an account
+            card_block: Can block a card for an account
+            card_unblock: Can unblock a card for an account
+            card_oppose: Can oppose a card for an account
+            card_option: Can manage options for a card
+            card_reissue_pincode: Can reissue the pincode of a card
+            card_refabrication: Can refabricate a card
+            accounting_view: Can list and retrieve accounting entries
+            accounting_export: Can export all accounting entries or part of them using filters
+            password_update: Change distributor password
+            required_action: Can update a user's required action
+            iban_modification: Can modify an account's IBAN
+            identity_profile_change: Allow the API client to change the Profile of an Identity
+            identity_status_change: Allow the API client to change the status of an Identity
+            
+              
+  schemas:
+    DistributorConfiguration:
+      type: object
+      required:
+        - u2fRequired
+        - hasU2fDevice
+        - mustChangePassword
+      properties:
+        defaultLanguage:
+          type: string
+          description: Platform default langage
+          example: 'en_US'
+        defaultColor:
+          type: string
+          description: Platform default color
+          example: '#286A38'
+        u2fRequired:
+          type: boolean
+          description: Tell if u2f authentication is required for the distributor
+        hasU2fDevice:
+          type: boolean
+          description: Tell if distributor has a paired u2f device
+        mustChangePassword:
+          type: boolean
+          description: Tell if distributor has to change his password
+          example: false
+        currencies:
+          type: array
+          description: Plaform currencies
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: 'Euro'
+              iso_numeric:
+                type: string
+                example: '978'
+              iso_alpha:
+                type: string
+                example: 'EUR'
+              decimal_number:
+                type: int
+                example: 2
+              symbol:
+                type: string
+                example: '€'
+              symbol_first:
+                type: bool
+                example: false
+      
+        links:
+          type: array
+          description: "Platform logo's url"
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                enum:
+                  - logo
+                  - cornerLogo
+              href:
+                type: string
+                description: URL to the content
+                example: '/api/Common/v1/configuration/logo'
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+      
+    RegisterRequest:
+      type: object
+      required:
+        - version
+        - challenge
+        - appId
+      properties:
+        version:
+          type: string
+        challenge:
+          type: string
+        appId:
+          type: string
+      
+    SignRequest:
+      type: object
+      required:
+        - version
+        - challenge
+        - keyHandle
+        - appId
+      properties:
+        version:
+          type: string
+        challenge:
+          type: string
+        keyHandle:
+          type: string
+        appId:
+          type: string
+      
+    RegisterChallengeResponse:
+      type: object
+      required:
+        - registrationData
+        - clientData
+      properties:
+        errorCode:
+          type: integer
+        registrationData:
+          type: string
+        clientData:
+          type: string
+      
+    AuthenticateChallengeResponse:
+      type: object
+      required:
+        - keyHandle
+        - signatureData
+        - clientData
+      properties:
+        errorCode:
+          type: integer
+        keyHandle:
+          type: string
+        signatureData:
+          type: string
+        clientData:
+          type: string
+      
+    UserProfileId:
+      type: string
+      example: "1"
+      description: Id for a profile. List all profiles at GET /users/profiles
+      
+    UserExternalId:
+      type: string
+      description: Client custom data for UserId
+      example: EXT123456789
+      
+    UserStatus:
+      type: string
+      enum:
+       - INITIATED
+       - PENDING
+       - OPENED
+       - BLOCKED
+       - CLOSED
+       - INIBLOCKED
+      
+    Role:
+      type: string|null
+      description: A user can be a CLIENT, a COMPANY, a MERCHANT, an AGENT, a DISTRIBUTOR, a DELEGATE_USER or a NON_CUSTOMER
+      enum:
+      - CLIENT
+      - COMPANY
+      - MERCHANT
+      - AGENT
+      - NON_CUSTOMER
+      - DISTRIBUTOR
+      - DELEGATE_USER
+      
+    LegalType:
+      type: string
+      description: |
+          The user can be a natural person (physical person with firstname and lastname) or a legal entity (company or non-profit with legalName)
+      
+          **This property is required when creating a user**
+      enum:
+      - NATURAL_PERSON
+      - LEGAL_ENTITY
+      
+    UserCollection:
+      description: Sorted and paginated list of users
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of users
+            items:
+              $ref: '#/components/schemas/User'
+      
+    NaturalPersonCreation:
+      allOf:
+        - type: object
+          properties:
+            mainMobile:
+              type: string
+              example: 33600000000
+              writeOnly: true
+              description: |
+                (For client usage only) Allow to create a client with it's main mobile phone
+        - $ref: '#/components/schemas/NaturalPerson'
+      
+    LegalEntityWithBoardMember:
+      allOf:
+        - $ref: '#/components/schemas/LegalEntity'
+        - type: object
+          required:
+            - boardMember
+            - legalName
+          properties:
+            boardMember:
+              $ref: '#/components/schemas/NaturalPerson'
+      
+      
+      
+    User:
+      oneOf:
+        - $ref: '#/components/schemas/NaturalPerson'
+        - $ref: '#/components/schemas/LegalEntity'
+      discriminator:
+        propertyName: legalType
+        mapping:
+          NATURAL_PERSON: '#/components/schemas/NaturalPerson'
+          LEGAL_ENTITY: '#/components/schemas/LegalEntity'
+      
+    UserId:
+      type: string
+      description: TagPay Demo user id
+      example: "USR42"
+      
+    NaturalPerson:
+      allOf:
+        - $ref: '#/components/schemas/BaseUser'
+        - type: object
+          properties:
+            gender:
+              $ref: '#/components/schemas/Gender'
+            personTitle:
+              $ref: '#/components/schemas/Title'
+            firstName:
+              type: string
+              example: "John"
+            lastName:
+              type: string
+              example: "Doe"
+            postName:
+              type: string
+              example: "Junior"
+            maidenName:
+              type: string
+              example: "Dupont"
+            alias:
+              type: string
+              example: "JD"
+            birthDate:
+              type: string
+              format: date
+            birthCountry:
+              $ref: '#/components/schemas/Country'
+            birthPlace:
+              type: string
+              example: "Paris"
+            deathDate:
+              type: string
+              format: date
+            jobTitle:
+              type: string
+              example: "Account manager"
+            incomeRange:
+              type: string
+              example: "30 000 €"
+            averageSalary:
+              type: string
+              example: "4000 €"
+            cumulativeSalary:
+              type: string
+              example: "45 000 €"
+            socioProfessionalCategory:
+              type: string
+              example: "Employee"
+            u2fRequired:
+              type: boolean
+              example: false
+              description: |
+                (Only available for delegate users) U2F authentication flag
+            expirationDate:
+              type: string
+              format: date
+              description: |
+                (Only available for delegate users) User's expiration date
+            legalCategory:
+              type: string
+            registrationNumber:
+              type: string
+            businessDirectory:
+              type: string
+            spouseFirstName:
+              type: string
+            marriedName:
+              type: string
+            familyName:
+              type: string
+            givenName:
+              type: string
+            notTaxResident:
+              type: boolean
+            birthDepartment:
+              type: string
+            birthCounty:
+              type: string
+            additionalAttributes:
+              type: object
+              properties:
+                category:
+                  type: integer
+                categoryName:
+                  type: string
+                subcategoryId:
+                  type: integer
+                subcategoryName:
+                  type: string
+    UserRequiredAction:
+      type: object
+      properties:
+          id:
+              type: string
+              example: 'ADMIN_ACTION_REQUIRED'
+          label:
+              type: string
+              example: 'Required action for admin'
+    RequiredAction:
+      type: object
+      required:
+          - requiredAction
+      properties:
+          requiredAction:
+              type: string
+              example: 'ADMIN_ACTION_REQUIRED'
+          reason:
+              type: string
+              example: 'Please update documents'
+    InputId:
+      type: string
+      description: KYC field identifier
+      example: 'FIELD123'
+      
+    PossibleValueCollection:
+      type: object
+      properties:
+        inputId:
+          $ref: '#/components/schemas/InputId'
+        userInput:
+          type: string
+          description: Current user input, to be completed
+        possibleValues:
+          type: array
+          description: List of values found for auto-completion
+          items:
+            $ref: '#/components/schemas/PossibleValue'
+      
+    RecipientCollection:
+      description: Sorted and paginated list of recipients
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of recipents
+            items:
+              $ref: '#/components/schemas/Recipient'
+      
+    Recipient:
+      type: object
+      required:
+        - id
+        - name
+        - iban
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/RecipientId'
+            - readOnly: true
+      
+        name:
+          type: string
+          description: Name to visualize recipient
+          example: Paul DOE
+      
+        iban:
+              $ref: '#/components/schemas/IBAN'
+      
+        bic:
+              $ref: '#/components/schemas/BIC'
+      
+        userId:
+          allOf:
+          - $ref: '#/components/schemas/UserId'
+          - readOnly: true
+      
+        phone:
+          $ref: '#/components/schemas/Phone'
+      
+        externalData:
+          allOf:
+            - $ref: '#/components/schemas/ExternalData'
+            - type: object
+              description: Additional information on recipient
+              example: {"firstname":"Paul", "lastname":"Joe","countryCode":"FR"}
+        links:
+          type: array
+          description: "Links related to the recipient"
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                enum:
+                  - bicLogo
+              href:
+                type: string
+                description: URL to the content
+                example: '/api/Common/v1/logo/bic/SOGEFR'
+      
+      
+    RecipientId:
+      type: string
+      description: Recipient TagPay Demo ID
+      example: REC2
+      
+    RelationType:
+      type: string
+      enum:
+          - IS_BOARD_MEMBER_OF
+          - HAS_FOR_BOARD_MEMBER
+          - IS_BENEFICIAL_OWNER_OF
+          - HAS_FOR_BENEFICIAL_OWNER
+          - IS_EMPLOYER_OF
+          - IS_EMPLOYED_BY
+      description: Type of the relation
+      example: HAS_FOR_BOARD_MEMBER
+      
+    RelationCollection:
+      description: Sorted and paginated list of relations
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of relations
+            items:
+              $ref: '#/components/schemas/Relation'
+    RelationId:
+      type: string
+      description: Relation ID
+      example: REL42
+      
+    ProductId:
+      type: string
+      description: TagPay Demo Product Id.
+      example: "PRO123"
+      
+    ProductType:
+      type: string
+      description: Product type
+      example: CURRENT
+      enum:
+        - CURRENT
+        - SAVINGS
+        - COMMISSIONS
+        - DEDICATED
+        - MONEYPOT
+        - DEBIT_CARD
+        - GUARANTEE_ACCOUNT
+      
+    ProductCollection:
+      description: Sorted and paginated list of products
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of products
+            items:
+              $ref: '#/components/schemas/Product'
+            example:
+              - id: PRO123
+                name: Current Account
+                type: CURRENT
+                currency: EUR
+                profiles: [1]
+              - id: PRO456
+                name: Saving Account
+                type: SAVINGS
+                currency: USD
+                profiles: [1, 2, 4]
+              - id: PRO789
+                name: Moneypot
+                type: MONEYPOT
+                currency: EUR
+                profiles: [5, 7, 12]
+              - id: PRO987
+                name: Standard Card
+                type: DEBIT_CARD
+                currency: USD
+                profiles: [1]
+      
+    AccountId:
+      type: string
+      description: Id for an account
+      example: "ACC123"
+      
+    AccountExternalId:
+      type: string
+      description: External id (from the calling system)
+      example: EXT123456789
+      nullable: true
+      
+    AccountStatus:
+      type: string
+      description: The account status
+      enum:
+      - OPENED
+      - CLOSED
+      - BLOCKED
+      - DEBIT_BLOCKED
+      - CREDIT_BLOCKED
+    AccountCollection:
+      nullable: true
+      description: Sorted and paginated list of accounts
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of accounts
+            items:
+              $ref: '#/components/schemas/Account'
+      
+    Account:
+      type: object
+      required:
+        - id
+        - userId
+        - productId
+        - balance
+        - availableBalance
+        - status
+        - label
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/AccountId'
+            - readOnly: true
+        userId:
+          allOf:
+            - $ref: '#/components/schemas/UserId'
+            - readOnly: true
+        productId:
+          $ref: '#/components/schemas/ProductId'
+      
+        balance:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - readOnly: true
+      
+        availableBalance:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - readOnly: true
+      
+        status:
+          allOf:
+            - $ref: '#/components/schemas/AccountStatus'
+            - readOnly: true
+      
+        label:
+          type: string
+          description: The account label
+          example: 'Current account #123546'
+          readOnly: true
+      
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      
+        externalId:
+              $ref: '#/components/schemas/AccountExternalId'
+      
+        iban:
+              $ref: '#/components/schemas/IBAN'
+      
+        bic:
+          allOf:
+            - $ref: '#/components/schemas/BIC'
+            - readOnly: true
+      
+        externalData:
+          allOf:
+            - $ref: '#/components/schemas/ExternalData'
+            - readOnly: true
+      
+        lastUsedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      
+        deletedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      
+    AccountBlock:
+      type: string
+      description: The account block status
+      enum:
+      - BLOCKED
+      - DEBIT_BLOCKED
+      - CREDIT_BLOCKED
+    AccountIban:
+      type: string
+      description: IBAN
+      example: FR1420041010050500013M02606
+      nullable: true
+      
+    TransactionId:
+      type: string
+      description: TagPay Demo transaction id
+      example: TRX123
+      
+    TransactionExternalId:
+      type: string
+      description: Client custom data (external) for TransactionId 
+      example: EXT123456789
+      
+    TransactionType:
+      type: string
+      description: Transaction type
+      enum:
+        - ACCOUNT_FROM_EXTERNAL
+        - ACCOUNT_TO_ACCOUNT
+        - ACCOUNT_TO_DEDICATED
+        - ACCOUNT_TO_EXTERNAL
+        - ACCOUNT_TO_EXTERNAL_TRF
+        - ACCOUNT_TO_TRANSIT
+        - ADJUSTMENT
+        - AGENT_BALANCE
+        - AGENT_HISTORY
+        - AGIOS_PAYMENT
+        - AID_PAYMENT
+        - BANK_TO_WALLET
+        - BLOCK_ACCOUNT
+        - BUY_DEPOSIT
+        - CASHIN
+        - CASHIN_TO_TRANSIT
+        - CASHOUT
+        - CASHOUT_FROM_EXTERNAL_TRF
+        - CASHOUT_FROM_TRANSIT
+        - CASHOUT_FUNDS_RESERVATION
+        - CASH_TO_EXTERNAL_TRF
+        - CLIENT_BALANCE
+        - CLIENT_ENROLLMENT
+        - CLIENT_HISTORY
+        - CLIENT_VALIDATION
+        - CLOSE_ACCOUNT
+        - CREDIT_BLOCK_ACCOUNT
+        - CREDIT_TRANSFER_IN
+        - CREDIT_TRANSFER_OUT
+        - DEBIT_BLOCK_ACCOUNT
+        - DIRECT_DEBIT_IN
+        - DIRECT_DEBIT_OUT
+        - DISTRIBUTOR_POSTING
+        - EXTERNAL
+        - EXTERNAL_FROM_ACCOUNT
+        - EXTERNAL_FROM_MONEYPOT
+        - EXTERNAL_TO_ACCOUNT
+        - ETM_SCREENING
+        - ETM_SCREENING_SUCCESS
+        - ETM_SCREENING_FAIL
+        - ETM_SCREENING_FAIL_TO_SUCCESS
+        - EXTERNAL_TRF_TO_ACCOUNT
+        - EXTERNAL_TRF_WITHDRAW
+        - FOREX
+        - FUNDS_ISOLATION
+        - FUNDS_RELEASE
+        - MAINTENANCE_PAYMENT
+        - MARK
+        - ONLINE_PAYMENT
+        - OPEN_ACCOUNT
+        - PAYBILL_ACCOUNT
+        - PAYBILL_CASH
+        - PAYMENT
+        - PAYMENT_FUNDS_RESERVATION
+        - POSTING
+        - REVERSAL
+        - SALARY_DISBURSEMENT
+        - SALARY_TO_ACCOUNT
+        - SALARY_TO_CASH
+        - SELL_DEPOSIT
+        - SETTLEMENT_TO_ACCOUNT
+        - SETTLEMENT_TO_BANK
+        - SETTLEMENT_TO_CASH
+        - STANDING_ORDER_PAYMENT
+        - TRANSFER_DEPOSIT
+        - TRANSIT_TO_ACCOUNT
+        - UNBLOCK_ACCOUNT
+        - USER_CREATION
+        - WALLET_TO_BANK
+        - WALLET_TO_BANK_ARCHIVE
+      
+    Currency:
+      description: Three-letter ISO currency code, in uppercase. Read more at https://fr.wikipedia.org/wiki/ISO_4217.
+      type: string
+      format: iso-4217
+      example: "EUR"
+      
+    Media:
+      type: string
+      default: API
+      enum:
+        - SMS
+        - USSD
+        - POS
+        - WEB
+        - BANK
+        - IVR
+        - API
+        - APP
+        - ONLINE
+        - ALL
+        - UNKNOWN
+      
+    TransactionCollection:
+      description: Sorted and paginated list of transactions
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of transactions
+            items:
+              $ref: '#/components/schemas/Transaction'
+      
+    TransactionDetails:
+      allOf:
+        - type: object
+          required:
+            - accountingEntries
+            - contributions
+          properties:
+            accountingEntries:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccountingEntry'
+            contributions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Contribution'
+        - $ref: '#/components/schemas/Transaction'
+      
+    PayoutRequest:
+      allOf:
+        - type: object
+          required:
+            - amount
+            - srcAccountId
+            - recipientId
+          properties:
+            amount:
+              $ref: '#/components/schemas/Amount'
+      
+            srcAccountId:
+              $ref: '#/components/schemas/AccountId'
+      
+            recipientId:
+              $ref: '#/components/schemas/RecipientId'
+      
+            purpose:
+              type: string
+              description: Purpose of external transfer (max 140 characters)
+      
+            userReference:
+              type: string
+              description: User reference
+      
+        - $ref: '#/components/schemas/TransactionRequest'
+      
+      
+      
+    PayinRequest:
+      allOf:
+      - type: object
+        required:
+          - debtor
+          - amount
+          - dstAccountId
+          - mandate
+        properties:
+          amount:
+            $ref: '#/components/schemas/Amount'
+          dstAccountId:
+            $ref: '#/components/schemas/AccountId'
+          debtor:
+            $ref: '#/components/schemas/Debtor'
+          mandate:
+            $ref: '#/components/schemas/Mandate'
+          purpose:
+            type: string
+            description : reason of distributor payin
+          userReference:
+            type: string
+            description: user reference
+          dueDate:
+            type: string
+            format: date-time
+            description: due date of direct debit (mandatory when using SEPA)
+      
+      - $ref: '#/components/schemas/TransactionRequest'
+      
+    DistributorPostingRequest:
+      allOf:
+        - type: object
+          required:
+            - accounting
+          properties:
+            accounting:
+              type: array
+              description: transaction accounting
+              items:
+                $ref: '#/components/schemas/AccountingRequest'
+            operation: 
+              type: string
+              description: Type of the operation
+        - $ref: '#/components/schemas/TransactionRequest'
+      
+      
+    UserProfileRole:
+      type: string
+      enum:
+        - Client
+        - Agent
+        - Merchant
+        - Company
+        - DelegateUser
+      
+    UserProfileCollection:
+      description: Sorted and paginated list of profiles
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of profiles
+            items:
+              $ref: '#/components/schemas/UserProfile'
+            example:
+              - id: 1
+                name: Anonymous
+                description: Anonymous profile description
+                role: Client
+              - id: 2
+                name: French resident
+                description: French resident profile description
+                role: Client
+              - id: 3
+                name: French resident minor
+                description: French resident minor profile description
+                role: Client
+      
+    GetSegmentationKycResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Input'
+          example:
+            - id: 1
+              type: string
+              label: firstname
+              description: firstname
+              required: true
+              value: John
+            - id: 2
+              type: string
+              label: lastname
+              description: lastname
+              required: true
+              value: Doe
+            - id: 3
+              type: string
+              label: companyName
+              description: company name
+              required: true
+              value: Acme
+      
+    DocumentId:
+      type: string
+      example: 'DOC123'
+      description: TagPay Demo document id
+      
+    DocumentWithContent:
+      allOf:
+        - $ref: '#/components/schemas/Document'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              description: Document file content encoded in base64 format
+              type: string
+              example: "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+      
+    DocumentCollection:
+      description: Sorted and paginated list of documents
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of documents
+            items:
+              $ref: '#/components/schemas/Document'
+      
+    Document:
+      type: object
+      required:
+        - id
+        - ownerId
+        - status
+        - type
+        - links
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/DocumentId'
+            - readOnly: true
+        ownerId:
+          allOf:
+            - $ref: '#/components/schemas/UserId'
+            - readOnly: true
+        status:
+          $ref: '#/components/schemas/DocumentStatus'
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        description:
+          type: string
+          description: Custom description
+          example: 'Government ID user #XXX'
+      
+        uploadDate:
+          type: string
+          format: date-time
+          readOnly: true
+      
+        lastUpdateDate:
+          type: string
+          format: date-time
+          readOnly: true
+      
+        metadata:
+          readOnly: true
+          oneOf:
+            - $ref: '#/components/schemas/IncorporationCertificateMetadata'
+            - $ref: '#/components/schemas/PortraitMetadata'
+            - $ref: '#/components/schemas/ProofOfActivityMetadata'
+            - $ref: '#/components/schemas/ProofOfBankDomiciliationMetadata'
+            - $ref: '#/components/schemas/ProofOfIdentityMetadata'
+            - $ref: '#/components/schemas/ProofOfResidenceMetadata'
+            - $ref: '#/components/schemas/ProofOfResourcesMetadata'
+            - $ref: '#/components/schemas/ProofOfTaxationMetadata'
+            - $ref: '#/components/schemas/SignatureMetadata'
+            - $ref: '#/components/schemas/OtherMetadata'
+          discriminator:
+            propertyName: type
+            mapping:
+              PORTRAIT: '#/components/schemas/PortraitMetadata'
+              INCORPORATION_CERTIFICATE: '#/components/schemas/IncorporationCertificateMetadata'
+              PROOF_OF_ACTIVITY: '#/components/schemas/ProofOfActivityMetadata'
+              PROOF_OF_BANK_DOMICILIATION: '#/components/schemas/ProofOfBankDomiciliationMetadata'
+              PROOF_OF_IDENTITY: '#/components/schemas/ProofOfIdentityMetadata'
+              PROOF_OF_RESIDENCE: '#/components/schemas/ProofOfResidenceMetadata'
+              PROOF_OF_RESOURCES: '#/components/schemas/ProofOfResourcesMetadata'
+              PROOF_OF_TAXATION: '#/components/schemas/ProofOfTaxationMetadata'
+              SIGNATURE: '#/components/schemas/SignatureMetadata'
+              OTHER_DOCUMENTS_LEGAL_ENTITY: '#/components/schemas/OtherMetadata'
+              OTHER_DOCUMENTS: '#/components/schemas/OtherMetadata'
+        externalData:
+          $ref: '#/components/schemas/ExternalData'
+        links:
+          type: array
+          description: "Document's content and preview urls"
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                enum:
+                  - content
+                  - preview
+              href:
+                type: string
+                example: '/documents/{documentId}/content'
+    AccountingEntryId:
+      type: string
+      description: TagPay Demo accounting entry id
+      example: ACO4
+      
+    EntryType:
+      type: string
+      enum:
+        - TRANSFER
+        - FEE
+        - COMMISSION
+        - TAX
+        - DISCOUNT
+        - INTEREST
+      
+    AccountingEntryCollection:
+      description: Sorted and paginated list of accounting entries
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: Array of accounting entries (srcAccount, dstAccount, amount)
+            items:
+              $ref: '#/components/schemas/AccountingEntry'
+      
+    HookCollection:
+      description: Sorted and paginated list of hooks
+      allOf:
+      - $ref: '#/components/schemas/Collection'
+      - type: object
+        properties:
+          items:
+            type: array
+            description: collection of hooks
+            items:
+              $ref: '#/components/schemas/Hook'
+      
+    Hook:
+      type: object
+      required:
+        - id
+        - name
+        - url
+        - events
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/HookId'
+            - readOnly: true
+        name:
+          type: string
+          description: Something used to identify hook in a list
+        url:
+          type: string
+          example: https://your.domain.com/webhooks/endpoint
+          description: This url will be called (HTTP POST request) when a subscribed event occurs
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
+      
+      
+    HookId:
+      type: string
+      description: TagPay Demo hook id
+      example: "HOK123"
+      
+    Collection:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+        count:
+          type: integer
+          description: the total count of objects in collection
+          minimum: 0
+        offset:
+          type: integer
+          description: Pagination start (from 0)
+          minimum: 0
+          default: 0
+        limit:
+          type: integer
+          description: Number of results to display (default 20)
+          minimum: 0
+          maximum: 100
+          default: 20
+        sort:
+          type: string
+          description: Field to define sort order
+          default: id
+      
+    Card:
+      type: object
+      required:
+        - id
+        - productId
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Card id
+          example: '0'
+        productId:
+          $ref: '#/components/schemas/ProductId'
+        accountId:
+          allOf:
+            - $ref: '#/components/schemas/AccountId'
+            - readOnly: true
+        externalId:
+          $ref: '#/components/schemas/ExternalId'
+        userId:
+          allOf:
+          - $ref: '#/components/schemas/UserId'
+          - readOnly: true
+        contractId:
+          type: string
+          nullable: true
+          description: Card contract associated with the card. Leave empty to create a card in a new contract.
+        currency:
+          type: string
+          readOnly: true
+          description: Card and account currency
+          example: 'EUR'
+        productCode:
+          type: string
+          readOnly: true
+          description: Product Code
+          example: 'PRD1'
+        productType:
+          type: string
+          readOnly: true
+          description: Product Type
+          example: 'DEBIT_CARD'
+        profileId:
+          allOf:
+          - $ref: '#/components/schemas/UserProfileId'
+          - readOnly: true
+        embossedName:
+          type: string
+          nullable: true
+          description: The card holder name, default is account's holder name. Can be modified while status is NEW. Can only contain "A-Z", "0-9", "'", "-", " ", and ".".
+          example: 'JOHN DOE'
+        embossedReference:
+          type: string
+          nullable: true
+          description: Mandatory for anonymous cards, reference at the back of the card to link anonymous card with an account
+        pincode:
+          type: string
+          description: Card's pincode. Must be 4 digits if defined
+          example: 1234
+          writeOnly: true
+        panDisplay:
+          type: string
+          readOnly: true
+          example: '5119 77XX XXXX 4431'
+      
+        expirationDate:
+          type: string
+          readOnly: true
+          description : Card expiration date (YYYY-MM)
+          example: '2022-12'
+        status:
+          type: string
+          readOnly: true
+          enum:
+            - NEW
+            - PENDING
+            - ACTIVE
+            - EXPIRED
+            - REMOVED
+            - BLOCKED
+            - OPPOSED
+      
+        externalStatus:
+          type: object
+          description: Block, Unblock, Lost, Stolen, ...
+          readOnly: true
+          properties:
+            value:
+              type: string
+              description: Block, Unblock, Lost, Stolen, ...
+            creationDate:
+              type: string
+              nullable: true
+              format: 'date-time'
+            confirmationDate:
+              type: string
+              nullable: true
+              format: 'date-time'
+              
+        activationCode:
+          type: string
+          description: Card's activation code
+          example: 123456789
+        limits:
+          type: object
+          description: Card's limits
+        anonymous:
+          type: boolean
+          readOnly: true
+          description: Is the card anonymous
+      
+        features:
+          type: object
+          properties:
+            anonymous:
+              type: boolean
+              default: false
+              readOnly: true
+              deprecated: true
+              description : Is the card anonymous
+            cash:
+              type: boolean
+              example: true
+              description : Are cash operation available ?
+            foreign:
+              type: boolean
+              example: false
+              description : Is foreign payment available ?
+            online:
+              type: boolean
+              example: true
+              description : Is online payment available ?
+            nfc:
+              type: boolean
+              example: false
+              description : Is NFC payment allowed ?
+            paymentAuthorized:
+              type: boolean
+              example: false
+              description: Is payment authorized ?
+            foreignWithdrawal:
+              type: boolean
+              example: true
+              description: Is foreign withdrawal allowed ?
+            foreignOnlinePayment:
+              type: boolean
+              example: true
+              description: Is foreign online payment allowed ?
+            foreignAll:
+              type: boolean
+              example: true
+              description: Are foreign payment and withdrawal allowed ?
+            eurWithdrawal:
+              type: boolean
+              example: true
+              description: Is withdrawal allowed in the European zone ?
+            eurPayment:
+              type: boolean
+              example: true
+              description: Is payment allowed in the European zone ?
+              
+        paymentBlockedCountries:
+          type: array
+          description: Countries in which payment will be blocked for the card. Countries must be set with their ISO 2 code
+          example:
+            - FR
+            - GB
+            - US
+          items: 
+            type: string
+        withdrawalBlockedCountries:
+          type: array
+          description: Countries in which withdrawal will be blocked for the card. Countries must be set with their ISO 2 code
+          example:
+            - FR
+            - GB
+            - US
+          items: 
+            type: string
+        mccRestrictionGroupId:
+          type: integer
+          description: Group id for restrictions on merchant categories (MCC)
+          example: 0
+      
+        merchantRestrictionGroupId:
+          type: integer
+          description: Group id for restrictions on specific merchants (European Merchant ID)
+          example: 0
+      
+        lastUsageDate:
+          type: string
+          readOnly: true
+          format: 'date-time'
+        createdAt:
+          type: string
+          readOnly: true
+          format: 'date-time'
+        pendingManagementOperation:
+          $ref: '#/components/schemas/PendingManagementOperation'
+      
+    ActivateCardRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Optional activation code
+          example: 123ABC
+        reason:
+          type: string
+          description: Optional activation reason
+          example: Customer activated card in ATM
+    Outstanding:
+      type: object
+      required: [id, maximumAmount, currentAmount, duration]
+      properties:
+        id:
+          type: string
+          example: OUT1
+        maximumAmount:
+          $ref: '#/components/schemas/Amount'
+        currentAmount:
+          $ref: '#/components/schemas/Amount'
+        duration:
+          $ref: '#/components/schemas/Duration'
+        termDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+        period:
+          type: object
+          required: [startDate, endDate]
+          properties:
+            startDate:
+              type: string
+              format: date-time
+            endDate:
+              type: string
+              format: date-time
+      
+    CardManagementOperationId:
+      type: string
+      description: TagPay Demo Operation Id.
+      example: "123"
+      
+    CardManagementOperationType:
+      type: string
+      description: Operation type
+      example: REFABRICATION
+      enum:
+        - REFABRICATION
+        - CARD_CODE_REISSUING
+        - CARD_OPPOSITION
+      
+    CardManagementOperationState:
+      type: string
+      description: Operation state
+      example: ACCEPTED
+      enum:
+        - INITIATED
+        - CTRL_PASSED
+        - CTRL_FAILED
+        - ACCEPTED
+        - EXECUTED
+        - SETTLED
+        - EXT_ACCEPTED
+        - ERR_EXECUTED
+        - EXT_PENDING
+        - EXT_REFUSED
+        - ERR_EXT
+        - CANCELED
+        - IS_VALID
+        - IS_NOT_VALID
+        - REFUSED
+      
+    CardManagementOperation:
+      type: object
+      required:
+        - cardId
+        - operationId
+        - operationType
+        - operationState
+        - createdAt
+        - updatedAt
+      properties:
+        cardId:
+          type: string
+          description: Card id
+          example: '567'
+      
+        operationId:
+          $ref: '#/components/schemas/CardManagementOperationId'
+      
+        operationType:
+          $ref: '#/components/schemas/CardManagementOperationType'
+      
+        operationState:
+          $ref: '#/components/schemas/CardManagementOperationState'
+      
+        createdAt:
+          type: string
+          format: 'date-time'
+      
+        updatedAt:
+          type: string
+          format: 'date-time'
+      
+    IdentityStatusArray:
+      type: array
+      description: List of Credential status
+      items:
+        $ref: '#/components/schemas/IdentityStatus'
+      
+    ChangeIdentityStatusActionRequest:
+      type: object
+      required:
+        - status
+        - reason
+      properties:
+        status:
+          $ref: '#/components/schemas/IdentityStatusEnum'
+        reason:
+          type: string
+          description: the reason of the change
+      
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: error code
+          example: 1234
+        message:
+          type: string
+          description: This is an error message that can be shown to the end user
+          example: something went wrong because requirement X was not met.
+        hint:
+          type: string
+          nullable: true
+          description: This is a more technical message about the current error. It can be used to better understand the underlying issue. This is intended for developer usage
+      
+    LegalEntity:
+      allOf:
+        - $ref: '#/components/schemas/BaseUser'
+        - type: object
+          properties:
+      
+            brandName:
+              type: string
+              example: "My Business"
+      
+            legalForm:
+              type: string
+              example: "Inc"
+      
+            legalName:
+              type: string
+              example: "My Business Inc"
+      
+            closureDate:
+              type: string
+              format: date
+      
+            webSite:
+              type: string
+              example: "www.my-business.com"
+      
+            shareCapital:
+              type: string
+              example: "10 000 €"
+      
+            annualTurnover:
+              type: string
+              example: "100 000 €"
+      
+            netIncomeRange:
+              type: string
+              example: "10 000 €"
+      
+            registrationDate:
+              type: string
+              format: date
+      
+            registrationPlace:
+              type: string
+              example: "Paris"
+              
+            registrationNumber:
+              type: string
+              example: "RCS123546"
+      
+            registrationCountry:
+              $ref: '#/components/schemas/Country'
+            
+            numberOfEmployees:
+              type: string
+              example: "50"
+        
+            legalCategory:
+              type: string
+              
+            businessDirectory:
+              type: string
+      
+    BaseUser:
+      type: object
+      properties:
+        legalType:
+              $ref: '#/components/schemas/LegalType'
+      
+        profileId:
+              $ref: '#/components/schemas/UserProfileId'
+      
+        id:
+          allOf:
+          - $ref: '#/components/schemas/UserId'
+          - readOnly: true
+      
+        externalId:
+          $ref: '#/components/schemas/UserExternalId'
+      
+        role:
+          allOf:
+          - $ref: '#/components/schemas/Role'
+          - readOnly: true
+      
+        userPin:
+          type: string
+          example: 1337
+          writeOnly: true
+          description: |
+            If specified, allow user to be created with this specific pin code.
+            Agent and merchant will have to change their pin on first usage
+      
+        status:
+          allOf:
+            - $ref: '#/components/schemas/UserStatus'
+            - readOnly: true
+      
+        distributorId:
+          type: string
+          description: Distributor Id
+          readOnly: true
+      
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      
+        login:
+          type: string
+          example: myLogin
+      
+        email:
+          type: string
+          format: email
+          example: my.email@example.com
+      
+        lang:
+          $ref: '#/components/schemas/Lang'
+      
+        address:
+          $ref: '#/components/schemas/UserAddress'
+        taxAddress:
+          $ref: '#/components/schemas/UserAddress'
+      
+        idNumber:
+          type: string
+          example: "AZE123456789"
+      
+        nationality:
+          type: string
+          example: "French"
+          
+        otherNationality:
+          type: string
+          example: "German"
+      
+        contactPhone:
+          $ref: '#/components/schemas/Phone'
+      
+        activitySectorCode:
+          type: string
+          example: "ACTIVITY12345"
+      
+        specialAttributes:
+          type: object
+          description: |
+            An object containing values submitted / modified by the user. List available fields and format at GET /users/kyc
+          example:
+            icsCode: "ICS123456"
+            building: "D2"
+            mainBusiness: "Car seller"
+      
+    Gender:
+      type: string
+      enum:
+        - MALE
+        - FEMALE
+        - NONE
+      
+    Title:
+      type: string
+      enum:
+        - MR
+        - MS
+        - MRS
+      
+    Country:
+      description: Two letter iso code of associated country (2 letters code)
+      type: string
+      minLength: 2
+      maxLength: 2
+      example: "FR"
+      
+    PossibleValue:
+      type: object
+      required:
+        - value
+        - label
+      properties:
+        value:
+            type: string
+            description: The possible value
+            example: 'Value123'
+        label:
+            type: string
+            description: The value translation
+      
+    IBAN:
+      type: string
+      description: IBAN (International Bank Account Number), e.g. FR791680810000000538
+      example: FR791680810000000538
+      
+    BIC:
+      type: string
+      description: BIC (Beneficiary Bank Identifier Code), e.g. FRGAILP1
+      example: FRGAILP1
+      
+    Phone:
+      type: string
+      description: Phone number in international format (e.g. 33612354678)
+      example: 33612354678
+      
+    ExternalData:
+      type: object
+      description: Set of key-value pairs that you can attach to an object. This can be useful for storing your additional information about the object in a structured format.
+      
+    Relation:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/RelationId'
+        type:
+          $ref: '#/components/schemas/RelationType'
+        associatedUser:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Id of the associated user
+              example: string
+            legalType:
+              $ref: '#/components/schemas/LegalType'
+            name:
+              type: string
+              description: Name of the user in relation
+              example: Jane Doe
+    Product:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/ProductId'
+      
+        name:
+          type: string
+          example: Standard current account
+      
+        type:
+          allOf:
+           - $ref: '#/components/schemas/ProductType'
+           - readOnly: true
+      
+        currency:
+          type: string
+          readOnly: true
+          description: Product currency
+          example: EUR
+      
+        profiles:
+          description: List of profile ID
+          type: array
+          items:
+            type: integer
+          example: [1, 2, 5]
+      
+    Amount:
+      type: object
+      required:
+        - value
+        - currency
+      properties:
+        value:
+          description: Amount without separator and symbol
+          type: integer
+          example: 1337
+        currency:
+          $ref: '#/components/schemas/Currency'
+      
+    Transaction:
+      type: object
+      required:
+        - id
+        - amount
+        - type
+        - description
+        - media
+        - createdAt
+      
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/TransactionId'
+            - readOnly: true
+      
+        amount:
+              $ref: '#/components/schemas/Amount'
+      
+        type:
+          deprecated: true
+          allOf:
+            - $ref: '#/components/schemas/TransactionType'
+            - readOnly: true
+      
+        localizedType:
+          type: object
+          readOnly: true
+          properties:
+            value:
+              allOf:
+                - $ref: '#/components/schemas/TransactionType'
+                - readOnly: true
+            label:
+              type: string
+              description: Transaction type label translated
+      
+        description:
+          type: string
+          description: Human readable text about the transaction
+          readOnly: true
+      
+        media:
+          allOf:
+            - $ref: '#/components/schemas/Media'
+            - readOnly: true
+      
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      
+        externalData:
+          $ref: '#/components/schemas/ExternalData'
+      
+        accountingCode:
+          type: string
+          description: Accounting code from the point of view of the calling system
+      
+        cancelledTransactionId:
+          allOf:
+            - $ref: '#/components/schemas/TransactionId'
+            - type: string
+              readOnly: true
+              description: Original transaction ID related to this Transaction refund
+      
+        externalId:
+              $ref: '#/components/schemas/TransactionExternalId'
+      
+    AccountingEntry:
+      type: object
+      required:
+        - id
+        - accountId
+        - transactionId
+        - description
+        - amount
+        - balance
+        - type
+      
+      properties:
+        id:
+          $ref: '#/components/schemas/AccountingEntryId'
+      
+        accountId:
+          allOf:
+            - $ref: '#/components/schemas/AccountId'
+            - readOnly: true
+      
+        transactionId:
+          allOf:
+            - $ref: '#/components/schemas/TransactionId'
+            - readOnly: true
+      
+        description:
+          type: string
+          example: Transfer of 13.37 € from John Doe to Jane Dae
+      
+        amount:
+              $ref: '#/components/schemas/Amount'
+      
+        balance:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - readOnly: true
+      
+        type:
+          $ref: '#/components/schemas/EntryType'
+      
+        externalId:
+              $ref: '#/components/schemas/TransactionExternalId'
+      
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      
+        accountOwner:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/UserId'
+            name:
+              $ref: '#/components/schemas/UserName'
+            externalId:
+              $ref: '#/components/schemas/UserExternalId'
+            userRole:
+              $ref: '#/components/schemas/Role'
+    Contribution:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/ContributionId'
+      
+        role:
+          type: string
+          enum:
+            - INITIATOR
+            - RECIPIENT
+            - INTERMEDIARY
+      
+        device:
+          type: string
+          example: "12345"
+      
+        contributor:
+          $ref: '#/components/schemas/UserId'
+      
+        name:
+          $ref: '#/components/schemas/UserName'
+      
+        externalId:
+          $ref: '#/components/schemas/UserExternalId'
+      
+        userRole:
+          $ref: '#/components/schemas/Role'
+      
+        employee:
+          type: string
+          example: "12345"
+      
+    TransactionRequest:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          $ref: '#/components/schemas/TransactionMode'
+        externalId:
+          $ref: '#/components/schemas/TransactionExternalId'
+        externalData:
+          $ref: '#/components/schemas/ExternalData'
+        accountingCode:
+          type: string
+          description: Accounting code from the point of view of the calling system
+      
+      
+    Debtor:
+      allOf:
+      - type: object
+        required:
+          - iban
+          - name
+        properties:
+          iban:
+            $ref: '#/components/schemas/IBAN'
+          bic:
+            $ref: '#/components/schemas/BIC'
+          name:
+            type: string
+            description: Debtor's name
+            example: John Doe
+          country:
+            $ref: '#/components/schemas/Country'
+          address:
+            type: string
+            description: Debtor's address
+            example: 88 rue du dôme
+          zipCode:
+            type: string
+            description: Debtor's zip code
+            example: 92100
+      
+    Mandate:
+      type: object
+      required:
+       - reference
+       - creditorRef
+       - signatureDate
+       - type
+       - recurrent
+      properties:
+        reference:
+          type: string
+        creditorRef:
+          type: string
+        signatureDate:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum: [CORE, B2B]
+          description: When using SEPA this is the SDD Scheme field
+        recurrent:
+          type: boolean
+          example: false
+        originalMandate:
+          type: object
+          description: To be used if mandate information have been updated since last direct debit (mandatory when using SEPA)
+          properties:
+            reference:
+              type: string
+            creditorRef:
+              type: string
+            type:
+              type: string
+            debtorIban:
+              $ref: '#/components/schemas/IBAN'
+            debtorBic:
+              $ref: '#/components/schemas/BIC'
+            debtorName:
+              type: string
+            debtorCountry:
+              $ref: '#/components/schemas/Country'
+            debtorAddress:
+              type: string
+              description: Debtor's address
+              example: 88 rue du dôme
+            debtorZipCode:
+              type: string
+              description: Debtor's zip code
+              example: 92100
+      
+    AccountingRequest:
+      type: object
+      required:
+        - srcAccount
+        - dstAccount
+        - amount
+      properties:
+      
+        srcAccount:
+          allOf:
+            - $ref: '#/components/schemas/AccountId'
+            - description: source Account ID to be debited
+      
+        dstAccount:
+          allOf:
+            - $ref: '#/components/schemas/AccountId'
+            - description: destination Account ID to be credited
+      
+        amount:
+          $ref: '#/components/schemas/Amount'
+      
+        type:
+          $ref: '#/components/schemas/EntryType'
+    UserProfile:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UserProfileId'
+        name:
+          type: string
+          description: The user Profile name
+          example: Standard Client
+        description:
+          type: string
+          description: The user Profile description
+          example: Standard Client description
+        role:
+          $ref: '#/components/schemas/UserProfileRole'
+      
+    Input:
+      oneOf:
+        - $ref: '#/components/schemas/TextInput'
+        - $ref: '#/components/schemas/AmountInput'
+        - $ref: '#/components/schemas/BoolInput'
+        - $ref: '#/components/schemas/DateInput'
+        - $ref: '#/components/schemas/DateTimeInput'
+        - $ref: '#/components/schemas/DurationInput'
+        - $ref: '#/components/schemas/EmailInput'
+        - $ref: '#/components/schemas/FileInput'
+        - $ref: '#/components/schemas/InputCollection'
+        - $ref: '#/components/schemas/IntInput'
+        - $ref: '#/components/schemas/IpInput'
+        - $ref: '#/components/schemas/SelectInput'
+        - $ref: '#/components/schemas/MultiSelectInput'
+        - $ref: '#/components/schemas/NumberInput'
+        - $ref: '#/components/schemas/PercentInput'
+        - $ref: '#/components/schemas/PasswordInput'
+        - $ref: '#/components/schemas/PhoneInput'
+        - $ref: '#/components/schemas/RateInput'
+        - $ref: '#/components/schemas/SelectWithAmountInput'
+      discriminator:
+        propertyName: type
+        mapping:
+          TEXT: '#/components/schemas/TextInput'
+          AMOUNT: '#/components/schemas/AmountInput'
+          BOOL: '#/components/schemas/BoolInput'
+          DATE: '#/components/schemas/DateInput'
+          DATE_TIME: '#/components/schemas/DateTimeInput'
+          DURATION: '#/components/schemas/DurationInput'
+          EMAIL: '#/components/schemas/EmailInput'
+          FILE: '#/components/schemas/FileInput'
+          COLLECTION: '#/components/schemas/InputCollection'
+          INT: '#/components/schemas/IntInput'
+          IP: '#/components/schemas/IpInput'
+          SELECT: '#/components/schemas/SelectInput'
+          MULTI_SELECT: '#/components/schemas/MultiSelectInput'
+          NUMBER: '#/components/schemas/NumberInput'
+          PERCENT: '#/components/schemas/PercentInput'
+          PASSWORD: '#/components/schemas/PasswordInput'
+          PHONE: '#/components/schemas/PhoneInput'
+          RATE: '#/components/schemas/RateInput'
+          SELECT_WITH_AMOUNT: '#/components/schemas/SelectWithAmountInput'
+      
+      
+    DocumentStatus:
+      type: string
+      readOnly: true
+      enum:
+      - NEW
+      - PENDING
+      - VALIDATED
+      - REFUSED
+      - UNKNOWN
+    DocumentType:
+      type: string
+      enum:
+      - PORTRAIT
+      - SUBSCRIPTION_FORM
+      - SIGNATURE
+      - PROOF_OF_RESIDENCE
+      - PROOF_OF_BANK_DOMICILIATION
+      - PROOF_OF_TAXATION
+      - PROOF_OF_ACTIVITY
+      - PROOF_OF_RESOURCES
+      - PROOF_OF_STATUS
+      - PHOTO
+      - PROOF_OF_IDENTITY
+      - OTHER_DOCUMENTS
+      - INCORPORATION_CERTIFICATE
+      - OTHER_DOCUMENTS_LEGAL_ENTITY
+    IncorporationCertificateMetadata:
+      type: object
+      description: Document metadatas for INCORPORATION_CERTIFICATE documents
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        deliveryDate:
+          type: string
+          format: date
+        denomination:
+          type: string
+        legalForm:
+          type: string
+        numberOfEmployees:
+          type: string
+        registrationDate:
+          type: string
+          format: date
+        registrationNumber:
+          type: string
+        registrationPlace:
+          type: string
+        shareCapital:
+          type: string
+        zipcode:
+          type: string
+      
+    PortraitMetadata:
+      type: object
+      description: Document metadatas for PORTRAIT documents
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        identityPhotoMatch:
+          type: string
+      
+    ProofOfActivityMetadata:
+      type: object
+      description: Document metadatas for PROOF_OF_ACTIVITY documents
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        deliveryDate:
+          type: string
+          format: date
+        firstName:
+          type: string
+        grossSalary:
+          type: string
+        lastName:
+          type: string
+        netSalary:
+          type: string
+        personTitle:
+          type: string
+          enum:
+            - MR
+            - MS
+            - MRS
+      
+    ProofOfBankDomiciliationMetadata:
+      type: object
+      description: Document metadatas for PROOF_OF_BANK_DOMICILIATION documents
+      properties:
+        type:
+           $ref: '#/components/schemas/DocumentType'
+        bic:
+          type: string
+        firstName:
+          type: string
+        iban:
+          type: string
+        lastName:
+          type: string
+        personTitle:
+          type: string
+          enum:
+            - MR
+            - MS
+            - MRS
+      
+    ProofOfIdentityMetadata:
+      type: object
+      description: Document metadatas for PROOF_OF_IDENTITY documents
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        birthPlace:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        deliveryDate:
+          type: string
+          format: date
+        expirationDate:
+          type: string
+          format: date
+        firstName:
+          type: string
+        idNumber:
+          type: string
+        issuingAuthority:
+          type: string
+        issuingCountry:
+          type: string
+        lastName:
+          type: string
+        mrz:
+          type: string
+        nationality:
+          type: string
+        personTitle:
+          type: string
+          enum:
+            - MR
+            - MS
+            - MRS
+        zipcode:
+          type: string
+      
+    ProofOfResidenceMetadata:
+      type: object
+      description: Document metadatas for PROOF_OF_RESIDENCE documents
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        city:
+          type: string
+        contractNumber:
+          type: string
+        contractType:
+          type: string
+        country:
+          type: string
+        emissionDate:
+          type: string
+          format: date
+        firstName:
+          type: string
+        lastName:
+          type: string
+        personTitle:
+          type: string
+          enum:
+            - MR
+            - MS
+            - MRS
+        zipcode:
+          type: string
+      
+    ProofOfResourcesMetadata:
+      type: object
+      description: Document metadatas for PROOF_OF_RESOURCES documents
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        deliveryDate:
+          type: string
+          format: date
+        firstName:
+          type: string
+        lastName:
+          type: string
+        personTitle:
+          type: string
+          enum:
+            - MR
+            - MS
+            - MRS
+        resourceAmount:
+          type: string
+      
+    ProofOfTaxationMetadata:
+      type: object
+      description: Document metadatas for PROOF_OF_TAXATION documents
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        deliveryDate:
+          type: string
+          format: date
+        firstName:
+          type: string
+        lastName:
+          type: string
+        personTitle:
+          type: string
+          enum:
+            - MR
+            - MS
+            - MRS
+        taxAmount:
+          type: string
+        taxNumber:
+          type: string
+      
+    SignatureMetadata:
+      type: object
+      description: Document metadatas for SIGNATURE documents
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        identitySignatureMatch:
+          type: string
+      
+    OtherMetadata:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentType'
+      
+    EventType:
+      type: string
+      enum:
+          - client.status.pending
+          - client.status.opened
+          - client.status.blocked
+          - identity.document.new
+          - identity.document.verification_requested
+          - card.new
+          - card.status.pending
+          - card.status.opposed
+          - card.status.activated
+          - card.status.activation_requested
+          - card.status.blocked
+          - card.status.unblocked
+          - card.status.removed
+          - card.status.expired
+          - card.feature.change_requested
+          - kyc.package.added
+          - kyc.package.updated
+          - transaction.new
+      
+      
+    ExternalId:
+      type: string
+      description: External id (from the calling system)
+      example: EXT123456789
+      nullable: true
+      
+    PendingManagementOperation:
+      type: object
+      required:
+        - operationType
+      properties:
+        operationType:
+          $ref: '#/components/schemas/OperationType'
+        featureId:
+          $ref: '#/components/schemas/CardFeatureId'
+      
+    Duration:
+      type: object
+      properties:
+        value:
+          type: integer
+          example: 42
+        unit:
+          $ref: '#/components/schemas/Periodicity'
+    IdentityStatus:
+      type: object
+      description: Identity's operational status
+      required:
+        - id
+        - label
+      properties:
+        id:
+          $ref: '#/components/schemas/IdentityStatusEnum'
+        label:
+          type: string
+          description: |
+            a displayable label translated in the platform default language or the first available language in `Accept-Language` HTTP header
+      
+    IdentityStatusEnum:
+      type: string
+      enum:
+        - INITIATED
+        - PENDING
+        - OPENED
+        - BLOCKED
+        - CLOSED
+        - INIBLOCKED
+      
+    Lang:
+      type: string
+      description: Locale identificator
+      example: fr_FR
+      enum:
+        - en_UK
+        - es_ES
+        - fr_FR
+        - pt_PT
+      
+      
+      
+      
+      
+    UserAddress:
+      type: object
+      nullable: true
+      properties:
+        line1:
+          type: string
+          nullable: true
+        line2:
+          type: string
+          nullable: true
+        zipcode:
+          type: string
+          nullable: true
+        district:
+          type: string
+          nullable: true
+        province:
+          type: string
+          nullable: true
+        region:
+          type: string
+          nullable: true    
+        city:
+          type: string
+          nullable: true
+        country:
+          allOf:
+            - $ref: '#/components/schemas/Country'
+            - nullable: true
+      
+      example:
+        line1: 88 rue du dôme
+        line2: Apt 3
+        zipcode: "92100"
+        province: Ile-de-france
+        city: Boulogne-Billancourt
+        country: FR
+      
+    UserName:
+      type: string
+      description: "User's firstname and lastname or legal name"
+      example: "John Doe"
+    ContributionId:
+      type: string
+      description: TagPay Demo contribution id
+      example: CON4
+      
+    TransactionMode:
+      type: string
+      enum:
+        - PREAUTH
+        - TRANSACTION
+      
+    TextInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+      
+    AmountInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              $ref: '#/components/schemas/Amount'
+            currencies:
+              type: array
+              items:
+                $ref: '#/components/schemas/Currency'
+      
+    BoolInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: boolean
+      
+    DateInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: 20180717
+            format:
+              type: string
+              description: Possible formats are the ones accepted by the [date function (php)](http://php.net/manual/en/function.date.php)
+              example: Ymd
+      
+    DateTimeInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: 20180717162042
+            format:
+              type: string
+              description: Possible formats are the ones accepted by the [date function (php)](http://php.net/manual/en/function.date.php)
+              example: YmdHis
+      
+    DurationInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              $ref: '#/components/schemas/Duration'
+            periodicities:
+              type: array
+              items:
+                $ref: '#/components/schemas/Periodicity'
+      
+    EmailInput:
+      allOf:
+        - $ref: '#/components/schemas/TextInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              format: email
+      
+    FileInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: object
+              properties:
+                content:
+                  type: string
+                  format: byte
+                name:
+                  type: string
+                  example: fileName.txt
+                type:
+                  type: string
+                  example: txt
+                size:
+                  type: integer
+            maxsize:
+              type: integer
+              
+            acceptedtypes:
+              type: array
+              items:
+                type: string
+              example:
+               - txt
+               - csv
+               - xls
+      
+    InputCollection:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            inputs:
+              type: array
+              items:
+                $ref: '#/components/schemas/Input'
+      
+    IntInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: integer
+      
+    IpInput:
+      allOf:
+        - $ref: '#/components/schemas/TextInput'
+        - type: object
+          properties:
+            value:
+              type: string
+      
+    SelectInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: someValue
+            values:
+              type: array
+              items:
+               $ref: '#/components/schemas/Option'
+      
+    MultiSelectInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: array
+              items:
+                type: string
+              example:
+               - someValue
+               - anotherValue
+            values:
+              type: array
+              items:
+               $ref: '#/components/schemas/Option'
+      
+    NumberInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: number
+              format: float
+      
+    PercentInput:
+      allOf:
+        - $ref: '#/components/schemas/NumberInput'
+      
+    PasswordInput:
+      allOf:
+        - $ref: '#/components/schemas/TextInput'
+      
+    PhoneInput:
+      allOf:
+        - $ref: '#/components/schemas/TextInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: 33612345678
+              description: Phone number in international format (MSISDN)
+      
+    RateInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            inputs:
+              type: object
+              required:
+               - value
+               - periodicity
+              properties:
+                value:
+                  $ref: '#/components/schemas/NumberInput'
+                periodicity:
+                  $ref: '#/components/schemas/SelectInput'
+      
+    SelectWithAmountInput:
+      allOf:
+        - $ref: '#/components/schemas/AbstractInput'
+        - type: object
+          properties:
+            value:
+              type: string
+              example: someValue
+            values:
+              type: array
+              items:
+               $ref: '#/components/schemas/OptionWithAmount'
+      
+    OperationType:
+      type: string
+      example: card_features_update
+      enum:
+       - refabrication
+       - card_code_reissuing
+       - card_opposition
+       - card_blocking
+       - card_unblocking
+       - card_activation
+       - card_creation
+       - card_features_update
+       - card_limits_update
+      
+    CardFeatureId:
+      type: string
+      description: |
+        Feature Identitifier - Depends on product configuration
+        - `NFC` : card can be used for contactless payment
+        - `CASH_OPERATION` : card can be used to withdraw cash
+        - `EUR_WITHDRAWAL` : card can be used to withdraw cash in euro zone
+        - `FOREIGN_WITHDRAWAL` : card can be used to withdraw cash in foreign countries
+        - `PAYMENT_AUTHORIZED` : card can be used to pay
+        - `EUR_PAYMENT` : card can be used to pay in euro zone
+        - `FOREIGN_PAYMENT` : card can be used to pay in foreign countries
+        - `FOREIGN_ALL` : card can be used to pay or withdraw cash in foreign countries
+        - `ONLINE_PAYMENT` : card can be used to pay online
+        - `FOREIGN_ONLINE_PAYMENT` : card can be used to pay online in foreign countries
+      enum:
+        - NFC
+        - CASH_OPERATION
+        - EUR_WITHDRAWAL
+        - FOREIGN_WITHDRAWAL
+        - PAYMENT_AUTHORIZED
+        - EUR_PAYMENT
+        - FOREIGN_PAYMENT
+        - FOREIGN_ALL
+        - ONLINE_PAYMENT
+        - FOREIGN_ONLINE_PAYMENT
+      
+    Periodicity:
+      description: Available periodicities
+      type: string
+      enum:
+        - HOUR
+        - WEEK
+        - DAY
+        - MONTH
+        - YEAR
+      example: DAY
+    AbstractInput:
+      type: object
+      required:
+       - id
+       - type
+      properties:
+        id:
+          type: string
+          example: myInputId
+        type:
+          $ref: '#/components/schemas/InputType'
+        label:
+          type: string
+          example: My input label
+        description:
+          type: string
+          example: This is my input description
+        required:
+          type: boolean
+        disabled:
+          type: boolean
+      
+    Option:
+      type: object
+      required:
+       - id
+       - label
+      properties:
+        id:
+          type: string
+          example: someValue
+        label:
+          type: string
+          example: Label for someValue
+      
+    OptionWithAmount:
+      allOf:
+        - $ref: '#/components/schemas/Option'
+        - type: object
+          required:
+           - amount
+          properties:
+            amount:
+              $ref: '#/components/schemas/Amount'
+      
+    InputType:
+      type: string
+      enum:
+       - AMOUNT
+       - TEXT
+       - BOOL
+       - DATE
+       - DATE_TIME
+       - DURATION
+       - EMAIL
+       - FILE
+       - IMAGE
+       - COLLECTION
+       - INT
+       - IP
+       - MULTI_SELECT
+       - NUMBER
+       - PERCENT
+       - PASSWORD
+       - PHONE
+       - PINCODE
+       - RATE
+       - SELECT
+       - SELECT_WITH_AMOUNT
+      
+
+  responses:
+    RestfulErrorResponse:
+      description: Request could not be processed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      

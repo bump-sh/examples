@@ -1,0 +1,2324 @@
+openapi: 3.0.3
+info:
+  version: 2.7.0
+  title: nextAuth Server API
+  description: >
+    The nextAuth Server verifies the actual authentication: logins and
+    transaction signing. It relies upon nextAuth-enabled app’s Second Factor
+    Server for verifying the second factor and makes use of the nextAuth-enabled
+    app’s Message Center to send messages directly to the intended
+    nextAuth-enabled app.
+servers:
+  - url: 'https://ns-api.nextauth.com/api/v2'
+security:
+  - ApiKey: []
+  - ApiKey: []
+    RoleId: []
+tags:
+  - name: Sessions
+    description: Everything about session management and login.
+  - name: Registration
+    description: Enrolling new users or coupling an exising account to a user.
+  - name: HTML
+    description: >
+      Basic calls that provide you with all the necessary HTML to include into
+      your webpage for logging in (sessions), enrolling new users (registration)
+      and logging out (sessions).
+  - name: Users
+    description: Everything about users.
+    externalDocs:
+      url: 'https://docs.nextauth.com/introduction/concepts.html#users'
+  - name: Accounts
+    description: Everything about accounts.
+    externalDocs:
+      url: 'https://docs.nextauth.com/introduction/concepts.html#accounts'
+  - name: Transactions
+    description: Everything about transactions.
+  - name: Servers
+    description: Everything about your servers.
+    externalDocs:
+      url: 'https://doc.nextauth.com/introduction/concepts.html#servers'
+  - name: Global
+    description: >
+      Everything about global and privileged server attributes. Required
+      permission: global 'servers'.
+  - name: Configuration
+    description: >
+      Everything for configuring the nextAuth Server: setting up Message Center
+      connections and registering licenses.
+  - name: Management
+    description: >
+      Everything for managing the access and authorisations to the servers
+      themselves: permissions, roles and API keys.
+paths:
+  '/servers/{serverid}/accounts/':
+    get:
+      summary: Get all accounts for a specific server
+      operationId: getAccounts
+      tags:
+        - Accounts
+      description: >
+        Returns all accounts registered on the server. Required permission
+        'accounts'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Marker'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accounts'
+  '/servers/{serverid}/accounts/{accountid}/':
+    get:
+      summary: Get specific account
+      operationId: getAccount
+      tags:
+        - Accounts
+      description: |
+        Returns the account. Required permission: 'sessions' or 'accounts'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Could not find account with the specified ID
+    put:
+      summary: Update specific account
+      operationId: updateAccount
+      tags:
+        - Accounts
+      description: >
+        Update an account. The only available change is (un)blocking the
+        account. Required permission: 'accounts'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AccountId'
+        - name: blocked
+          in: query
+          required: true
+          description: Whether the account should be blocked
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Details of the updated account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Could not find account with the specified ID
+    delete:
+      summary: Delete specific account
+      operationId: deleteAccount
+      tags:
+        - Accounts
+      description: 'Delete an account. Required permission: ''accounts''.'
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Successfully deleted the account
+        '404':
+          description: Could not find account with the specified ID
+  '/servers/{serverid}/accounts/{accountid}/user':
+    put:
+      summary: Update user of the given account
+      operationId: updateAccountUser
+      tags:
+        - Accounts
+        - Registration
+      description: |
+        Update the user of the given account. Required permission: 'accounts'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AccountId'
+        - name: userid
+          in: query
+          required: true
+          description: Username
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Details of the updated account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: >
+            Could not find account with the specified ID or user with the given
+            username
+  '/servers/{serverid}/accounts/{accountid}/provokelogin':
+    post:
+      summary: Push a login confirmation to the user's app
+      operationId: provokeLoginOnAccount
+      tags:
+        - Sessions
+      description: >
+        Push a login to the nextAuth app for the user to confirm, based on the
+        given account (app instance). Required permission: 'sessions' or
+        'accounts'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        required: false
+        description: Session information to display to user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserContext'
+      responses:
+        '200':
+          description: Login was successfully provoked
+  /attributes/:
+    post:
+      summary: Set all global attributes
+      operationId: setGlobalAttributes
+      tags:
+        - Global
+      description: >
+        Set the global attributes. Prior attributes with keys that are not
+        provided in the body of the request will be deleted. Required
+        permission: global 'servers'.
+      requestBody:
+        required: true
+        description: Dictionary of attributes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attributes'
+      responses:
+        '200':
+          description: Successfully set the attributes
+    get:
+      summary: Get all global attributes
+      operationId: getGlobalAttributes
+      tags:
+        - Global
+      description: >
+        Returns an array containing all global attributes. Required permission:
+        global 'servers'.
+      responses:
+        '200':
+          description: Dictionary of attributes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attributes'
+    put:
+      summary: Update specified global attributes
+      operationId: updateGlobalAttributes
+      tags:
+        - Global
+      description: >
+        Update the specified global attributes. Prior attributes with keys that
+        are not provided in the body of the request will not be deleted.
+        Required permission: 'servers'.
+      requestBody:
+        required: true
+        description: Dictionary of attributes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attributes'
+      responses:
+        '200':
+          description: Successfully updated the attributes
+    delete:
+      summary: Delete all global attributes
+      operationId: deleteGlobalAttributes
+      tags:
+        - Global
+      description: |
+        Delete all global attributes. Required permission: global 'servers'.
+      responses:
+        '200':
+          description: Successfully deleted the attributes
+  '/attributes/{attributekey}':
+    get:
+      summary: Get specific global attribute
+      operationId: getGlobalAttribute
+      tags:
+        - Global
+      description: |
+        Returns the global attribute. Required permission: global 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/AttributeKey'
+      responses:
+        '200':
+          description: Value of the attribute
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attribute'
+        '404':
+          description: Could not find global attribute with the given key
+    delete:
+      summary: Delete specific global attribute
+      operationId: deleteGlobalAttribute
+      tags:
+        - Global
+      description: >
+        Delete global attribute with the specified key. Required: global
+        'servers'.
+      parameters:
+        - $ref: '#/components/parameters/AttributeKey'
+      responses:
+        '200':
+          description: Successfully deleted the attribute
+  /apikeys/:
+    get:
+      summary: List all your API keys
+      operationId: getApiKeys
+      tags:
+        - Management
+      description: Retrieve all API keys generated by the current role.
+      responses:
+        '200':
+          description: 'List of API keys, with role and description'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeys'
+    post:
+      summary: Create a new API key
+      operationId: createApiKey
+      tags:
+        - Management
+      description: 'Create a new API key, which will be owned by the authorised role.'
+      parameters:
+        - name: description
+          in: query
+          required: true
+          description: |
+            Description for the new role which will be linked to this API key
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >
+            Newly-created API key, including the full secret instead of just the
+            prefix. Note that all subsuquent calls will only present the prefix.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+  '/apikeys/{hash}':
+    get:
+      summary: Get specific API key
+      operationId: getApiKey
+      tags:
+        - Management
+      description: Returns the API key.
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyHash'
+      responses:
+        '200':
+          description: API Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '404':
+          description: >
+            Could not find API key, for the specified hash, owned by the
+            authorised role
+    delete:
+      summary: Delete specific API key
+      operationId: deleteApiKey
+      tags:
+        - Management
+      description: >
+        Delete an API key. Note that only API keys can be deleted that are owned
+        by the authorised role, unless the authorised role has been granted
+        global ''root'' permissions.
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyHash'
+      responses:
+        '200':
+          description: Successfully deleted the API key
+        '404':
+          description: >
+            Could not find API key, for the specified hash, owned by the
+            authorised role
+  /config/licenses/:
+    post:
+      summary: Create a new license
+      operationId: createLicense
+      tags:
+        - Configuration
+      description: |
+        Create a new license. Required permission: global 'root'.
+      requestBody:
+        required: true
+        description: Parameters to initialise the license with
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                license:
+                  type: string
+                  description: License string generated by nextAuth
+              required:
+                - license
+      responses:
+        '200':
+          description: Configuration of the newly-created license
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
+    get:
+      summary: List all licenses
+      operationId: getLicenses
+      tags:
+        - Configuration
+      description: |
+        Retrieve all configured licenses. Required permission: global 'root'.
+      responses:
+        '200':
+          description: List of configured licenses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Licenses'
+  '/config/licenses/{licenseid}':
+    get:
+      summary: Get specific license
+      operationId: getLicense
+      tags:
+        - Configuration
+      description: 'Returns the license. Required permission: global ''root''.'
+      parameters:
+        - $ref: '#/components/parameters/LicenseId'
+      responses:
+        '200':
+          description: License
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
+        '404':
+          description: Could not find license with the specified ID
+    delete:
+      summary: Delete specific license
+      operationId: deleteLicense
+      tags:
+        - Configuration
+      description: 'Delete a license. Required permission: global ''root''.'
+      parameters:
+        - $ref: '#/components/parameters/LicenseId'
+      responses:
+        '200':
+          description: Successfully deleted the license
+        '404':
+          description: Could not find license with the specified ID
+  /config/messagecenters/:
+    post:
+      summary: Create a new Message Center
+      operationId: createMessageCenter
+      tags:
+        - Configuration
+      description: |
+        Create a new Message Center. Required permission: global 'root'.
+      requestBody:
+        required: true
+        description: Parameters to initialise the Message Center configuration with
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageCenter'
+      responses:
+        '200':
+          description: Configuration of the newly-created Message Center
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageCenter'
+    get:
+      summary: List all Message Centers
+      operationId: getMessageCenters
+      tags:
+        - Configuration
+      description: >
+        Retrieve all configured Messages Centers. Required permission: global
+        'root'.
+      responses:
+        '200':
+          description: List of configured Message Centers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageCenters'
+  '/config/messagecenters/{mcserverid}':
+    get:
+      summary: Get specific Message Center
+      operationId: getMessageCenter
+      tags:
+        - Configuration
+      description: 'Returns the Message Center. Required permission: global ''root''.'
+      parameters:
+        - $ref: '#/components/parameters/McServerId'
+      responses:
+        '200':
+          description: Message Center
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageCenter'
+        '404':
+          description: Could not find Message Center with the specified server ID
+    put:
+      summary: Update specific Message Center
+      operationId: updateMessageCenter
+      tags:
+        - Configuration
+      description: 'Update a Message Center. Required permission: global ''root''.'
+      parameters:
+        - $ref: '#/components/parameters/McServerId'
+      requestBody:
+        required: true
+        description: Parameters to update the Message Center configuration with
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                apikey:
+                  type: string
+                  description: API key to authenticate to the Message Center
+                tlscacert:
+                  type: string
+                  description: >
+                    TLS CA certificate to trust when connecting to the Message
+                    Center
+                tlscert:
+                  type: string
+                  description: TLS certificate to authenticate to the Message Center
+                tlskey:
+                  type: string
+                  description: TLS private key to authenticate to the Message Center
+                uri:
+                  type: string
+                  description: URI to connect to the Message Center
+                insecure:
+                  type: boolean
+                  description: >
+                    Disable transport security when connecting to the Message
+                    Center
+              required:
+                - uri
+                - insecure
+      responses:
+        '200':
+          description: Details of the updated Message Center
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageCenter'
+        '404':
+          description: Could not find Message Center with the specified server ID
+    delete:
+      summary: Delete specific Message Center
+      operationId: deleteMessageCenter
+      tags:
+        - Configuration
+      description: 'Delete a Message Center. Required permission: global ''root''.'
+      parameters:
+        - $ref: '#/components/parameters/McServerId'
+      responses:
+        '200':
+          description: Successfully deleted the Message Center
+        '404':
+          description: Could not find Message Center with the specified server ID
+  /servers/:
+    post:
+      summary: Create a new server
+      operationId: createServer
+      tags:
+        - Servers
+      description: |
+        Create a new server. Required permission: global 'createserver'.
+      requestBody:
+        required: true
+        description: Parameters to initialise the server configuration with
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Server'
+      responses:
+        '200':
+          description: Configuration of the newly-created server
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Server'
+    get:
+      summary: List all your servers
+      operationId: getServers
+      tags:
+        - Servers
+      description: |
+        List all the servers you have access to. Required permission: 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Marker'
+        - name: filter
+          in: query
+          description: >
+            Filter servers based on a property or user attribute, taking the
+            format *key=value*. You can also filter for multiple values at once,
+            e.g., *key=in:value0,value1*. Additionally, pattern-based searches
+            are also supported, i.e., *key=like:%value%*. Finally, it is
+            possible to specify different keys simulataneously by separating
+            them with semi-colons, e.g., *key0=value0;key1=in:value1,value2*.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of servers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servers'
+  '/servers/{serverid}/':
+    get:
+      summary: Configuration of a specific server
+      operationId: getServer
+      tags:
+        - Servers
+      description: >
+        Returns the configuration of a specific server. Required permission:
+        'servers' or 'createserver'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '404':
+          description: Could not find server with the specified ID
+    put:
+      summary: Update configuration of a specific server
+      operationId: updateServer
+      tags:
+        - Servers
+      description: >
+        Update the configuration of a specific server. Required permission:
+        'createserver'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: true
+        description: Parameters to update the server configuration with
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Server'
+      responses:
+        '200':
+          description: Configuration of the updated server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '404':
+          description: Could not find server with the specified ID
+    delete:
+      summary: Delete a specific server
+      operationId: deleteServer
+      tags:
+        - Servers
+      description: 'Delete a server. Required permission: global ''root''.'
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Successfully deleted the server
+        '404':
+          description: Could not find server with the specified ID
+  '/servers/{serverid}/attributes/':
+    post:
+      summary: Set all attributes of a specific server
+      operationId: setServerAttributes
+      tags:
+        - Servers
+      description: >
+        Set the attributes of a specific server. Prior attributes with keys that
+        are not provided in the body of the request will be deleted. Required
+        permission: 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: true
+        description: Dictionary of attributes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attributes'
+      responses:
+        '200':
+          description: Successfully set the server's attributes
+        '404':
+          description: Could not find server with the specified ID
+    get:
+      summary: Get all attributes of a specific server
+      operationId: getServerAttributes
+      tags:
+        - Servers
+      description: >
+        Returns a dictionary containing all attributes corresponding to this
+        server. Required permission: 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Dictionary of attributes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attributes'
+        '404':
+          description: Could not find server with the specified ID
+    put:
+      summary: Update specified attributes of a given server
+      operationId: updateServerAttributes
+      tags:
+        - Servers
+      description: >
+        Update the specified attributes of a given server. Prior attributes with
+        keys that are not provided in the body of the request will not be
+        deleted. Required permission: 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: true
+        description: Dictionary of attributes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attributes'
+      responses:
+        '200':
+          description: Successfully updated the server's attributes
+        '404':
+          description: Could not find server with the specified ID
+    delete:
+      summary: Delete all attributes of a specific server
+      operationId: deleteServerAttributes
+      tags:
+        - Servers
+      description: >
+        Delete all attributes of a specific server. Required permission:
+        'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Successfully deleted the server's attributes
+        '404':
+          description: Could not find server with the specified ID
+  '/servers/{serverid}/attributes/{attributekey}':
+    get:
+      summary: Get specified attribute of a given server
+      operationId: getServerAttribute
+      tags:
+        - Servers
+      description: >
+        Returns the specified attribute corresponding to this server. Required
+        permission: 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AttributeKey'
+      responses:
+        '200':
+          description: Value of the attribute
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attribute'
+        '404':
+          description: >
+            Could not find server with the specified ID or attribute with the
+            given key
+    delete:
+      summary: Delete specific attribute of a given server
+      operationId: deleteServerAttribute
+      tags:
+        - Servers
+      description: >
+        Delete attribute with the specified key of a given server. Required
+        permission: 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AttributeKey'
+      responses:
+        '200':
+          description: Successfully deleted the server's attribute
+        '404':
+          description: >
+            Could not find server with the specified ID or attribute with the
+            given key
+  '/servers/{serverid}/privilegedattributes/':
+    post:
+      summary: Set all privileged attributes of a specific server
+      operationId: setServerPrivilegedAttributes
+      tags:
+        - Global
+      description: >
+        Set the privileged attributes of a specific server. Prior attributes
+        with keys that are not provided in the body of the request will be
+        deleted. Required permission: global 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: true
+        description: Dictionary of attributes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attributes'
+      responses:
+        '200':
+          description: Successfully set the server's privileged attributes
+        '404':
+          description: Could not find server with the specified ID
+    get:
+      summary: Get all privileged attributes of a specific server
+      operationId: getServerPrivilegedAttributes
+      tags:
+        - Global
+      description: >
+        Returns an array containing all privileged attributes corresponding to
+        this server. Required permission: global 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Dictionary of attributes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attributes'
+        '404':
+          description: Could not find server with the specified ID
+    put:
+      summary: Update specified privileged attributes of a given server
+      operationId: updateServerPrivilegedAttributes
+      tags:
+        - Global
+      description: >
+        Update the specified privileged attributes of a given server. Prior
+        privileged attributes with keys that are not provided in the body of the
+        request will not be deleted. Required permission: global 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: true
+        description: Dictionary of attributes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attributes'
+      responses:
+        '200':
+          description: Successfully updated the server's privileged attributes
+        '404':
+          description: Could not find server with the specified ID
+    delete:
+      summary: Delete all privileged attributes of a specific server
+      operationId: deleteServerPrivilegedAttributes
+      tags:
+        - Global
+      description: >
+        Delete all privileged attributes of a specific server. Required
+        permission: global 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Successfully deleted the server's privileged attributes
+        '404':
+          description: Could not find server with the specified ID
+  '/servers/{serverid}/privilegedattributes/{attributekey}':
+    get:
+      summary: Get specified privileged attribute of a given server
+      operationId: getServerPrivilegedAttribute
+      tags:
+        - Global
+      description: >
+        Returns the specified privileged attribute corresponding to this server.
+        Required permission: global 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AttributeKey'
+      responses:
+        '200':
+          description: Value of the attribute
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attribute'
+        '404':
+          description: >
+            Could not find server with the specified ID or privileged attribute
+            with the given key
+    delete:
+      summary: Delete specific privileged attribute of a given server
+      operationId: deleteServerPrivilegedAttribute
+      tags:
+        - Global
+      description: >
+        Delete privileged attribute with the specified key of a given server.
+        Required permission: global 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/AttributeKey'
+      responses:
+        '200':
+          description: Successfully deleted the server's privileged attribute
+        '404':
+          description: >
+            Could not find server with the specified ID or privileged attribute
+            with the given key
+  '/servers/{serverid}/permissions/':
+    get:
+      summary: Get all permissions for the specified server
+      operationId: getAllPermissions
+      tags:
+        - Management
+      description: >
+        Returns all permissions granted on the server. Required permission:
+        'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: List of permissions granted on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permissions'
+        '404':
+          description: Could not find server with the specified ID
+  '/servers/{serverid}/permissions/{roleid}':
+    post:
+      summary: Set new permissions for the specified role on a server
+      operationId: grantPermissions
+      tags:
+        - Management
+      description: >
+        Set new permissions for the specified role on a server. This overwrites
+        any existing permissions on this server for the specified role. Required
+        permission: 'root'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/RoleId'
+      requestBody:
+        required: true
+        description: List of permissions that should be granted
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: >
+            Successfully granted permissions to the specified role on the given
+            server
+        '404':
+          description: >
+            Could not find server with the specified ID or role with the given
+            Role ID
+    get:
+      summary: Get all permissions for the specified server and role
+      operationId: getPermissions
+      tags:
+        - Management
+      description: >
+        Returns all permissions for the specified role on a server. Required
+        permission: 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/RoleId'
+      responses:
+        '200':
+          description: >
+            List of permissions granted to the specified role on the given
+            server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permissions'
+        '404':
+          description: >
+            Could not find server with the specified ID or role with the given
+            Role ID
+    delete:
+      summary: Revoke all permissions for the specified server and role
+      operationId: revokePermissions
+      tags:
+        - Management
+      description: >
+        Revoke all permissions for the specified server and role. Required
+        permission: 'root'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/RoleId'
+      responses:
+        '200':
+          description: >
+            Successfully revoked all permissions for the given role on the
+            specified server
+        '404':
+          description: >
+            Could not find server with the specified ID or role with the given
+            Role ID
+  '/servers/{serverid}/sessions/':
+    get:
+      summary: Check if the user is logged in
+      operationId: getSession
+      tags:
+        - HTML
+        - Sessions
+      description: >
+        Based on the browser/webserver session identifier, check if the user is
+        logged in and return the associated username. This also returns
+        additional information: the data for the login QR code and whether or
+        not a login can be provoked directly from the server. Required
+        permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Current login status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginStatus'
+  '/servers/{serverid}/sessions/html/login':
+    get:
+      summary: Generate HTML for the login block
+      operationId: getHtmlLogin
+      tags:
+        - HTML
+      description: |
+        Generate HTML for the login block. Required permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: false
+        description: Session information to display to user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserContext'
+      responses:
+        '200':
+          description: Generated HTML
+          content:
+            text/html:
+              schema:
+                type: string
+  '/servers/{serverid}/sessions/html/footer':
+    get:
+      summary: >
+        Generic HTML to add to footer. Required for login, logout, and enrol
+        functionality.
+      operationId: getHtmlFooter
+      tags:
+        - HTML
+      description: |
+        HTML to add to footer of HTML page. Required permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: false
+        description: |
+          Additional sessions that should be monitored through the websocket
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HtmlFooterBody'
+      responses:
+        '200':
+          description: Generated HTML
+          content:
+            text/html:
+              schema:
+                type: string
+  '/servers/{serverid}/sessions/html/enrol':
+    get:
+      summary: Generate HTML to enrol a new user
+      operationId: getHtmlEnrol
+      tags:
+        - HTML
+      description: |
+        Generate HTML to enrol a new user. Required permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+        - name: name
+          in: query
+          description: Name to forward to the nextAuth app for this account
+          schema:
+            type: string
+        - name: userid
+          in: query
+          description: Username to register this user under
+          schema:
+            type: string
+        - name: timeout
+          in: query
+          description: >
+            Period during which this enrolment remains valid. This parameter
+            should be formatted as a [Go-style duration
+            string](https://golang.org/pkg/time/#ParseDuration).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Generated HTML
+          content:
+            text/html:
+              schema:
+                type: string
+  '/servers/{serverid}/sessions/qr/login':
+    get:
+      summary: Generate data for a login QR code
+      operationId: getQrLogin
+      tags:
+        - Sessions
+      description: |
+        Returns the data for a login QR code. Required permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+        - name: img
+          in: query
+          description: >
+            Generates a PNG image when this parameter is set to 'png' and raw
+            data when it is not specified
+          schema:
+            type: string
+        - name: s
+          in: query
+          description: Size (in pixels) of the generated PNG image. Defaults to 500.
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        description: Session information to display to user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserContext'
+      responses:
+        '200':
+          description: >
+            Raw byte array containing the login QR code data (either raw or as
+            encoded a PNG image)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  '/servers/{serverid}/sessions/qr/enrol':
+    get:
+      summary: Generate data for an enrol QR code
+      operationId: getQrEnrol
+      tags:
+        - Registration
+      description: |
+        Returns the data for an enrol QR code. Required permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+        - name: name
+          in: query
+          required: true
+          description: Name to forward to the nextAuth app for this account
+          schema:
+            type: string
+        - name: userid
+          in: query
+          description: Username to register this user under
+          schema:
+            type: string
+        - name: timeout
+          in: query
+          description: >
+            Period during which this enrolment remains valid. This parameter
+            should be formatted as a [Go-style duration
+            string](https://golang.org/pkg/time/#ParseDuration).
+          schema:
+            type: string
+        - name: img
+          in: query
+          description: >
+            Generates a PNG image when this parameter is set to 'png' and raw
+            data when it is not specified
+          schema:
+            type: string
+        - name: s
+          in: query
+          description: Size (in pixels) of the generated PNG image. Defaults to 500.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: >
+            Raw byte array containing the enrol QR code data (either raw or
+            encoded as a PNG image)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  '/servers/{serverid}/sessions/logout':
+    post:
+      summary: Force a logout on the given session
+      operationId: logout
+      tags:
+        - HTML
+        - Sessions
+      description: |
+        Force a logout on the given session. Required permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Session was forcifully logged out
+  '/servers/{serverid}/sessions/provokelogin':
+    post:
+      summary: Push a login confirmation to the user's app
+      operationId: provokeLogin
+      tags:
+        - Sessions
+      description: >
+        Push a login to the nextAuth app for the user to confirm, based on the
+        last account that successfully logged in for the given session. Required
+        permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: false
+        description: Session information to display to user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserContext'
+      responses:
+        '200':
+          description: Login was successfully provoked
+  '/servers/{serverid}/sessions/registeruser':
+    post:
+      summary: Register a username for the currently logged in account
+      operationId: registerUser
+      tags:
+        - Registration
+        - Users
+      description: >
+        Register a user for the currently logged in account. You can also
+        directly pass a user name when generating an ENROL qr code. Required
+        permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+        - name: userid
+          in: query
+          description: Username to register for the logged in account
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Username was succesfully registered
+  '/servers/{serverid}/vash':
+    get:
+      summary: Retrieve visual hash of a specific server
+      operationId: getServerVash
+      tags:
+        - Registration
+      description: >
+        Returns a PNG of the visual hash corresponding to this server. This
+        visual hash is used during the registration process (optional), for the
+        user to verify that they are registering with the right server in the
+        nextAuth app. For single-server nextAuth-enabled apps (white-label or
+        Mobile SDK), the public key of the server is typically pinned within the
+        app and hence this visual hash is not displayed to the user. Required
+        permission: 'sessions' or 'servers'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: >
+            Raw byte array containing the visual hash of this server encoded as
+            a PNG image
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Could not find server with the specified ID
+  '/servers/{serverid}/sessions/transactions':
+    post:
+      summary: Create a transaction to be approved within the current session
+      operationId: createTransaction
+      tags:
+        - Transactions
+      description: >
+        Create a transaction for approval within the current session. Required
+        permission: 'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: true
+        description: Details of the transaction
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transaction'
+      responses:
+        '200':
+          description: Transaction ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionId'
+        '404':
+          description: Could not find account associated with this session
+  '/servers/{serverid}/transactions/{transactionid}':
+    get:
+      summary: Get transaction result for a given transaction
+      operationId: getTransactionResult
+      tags:
+        - Transactions
+      description: >
+        Get transaction result for a given transaction ID. Required permission:
+        'sessions'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - name: transactionid
+          in: path
+          required: true
+          description: Transaction ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current result for the given transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResult'
+        '404':
+          description: Could not find transaction with the given ID
+  '/servers/{serverid}/users/':
+    get:
+      summary: Get all users
+      operationId: getUsers
+      tags:
+        - Users
+      description: >
+        Returns an array of arrays containing all accounts corresponding to all
+        users. Required permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Marker'
+        - $ref: '#/components/parameters/Sort'
+        - name: filter
+          in: query
+          description: >
+            Filter users based on a property or user attribute, taking the
+            format *key=value*. You can also filter for multiple values at once,
+            e.g., *key=in:value0,value1*. Additionally, pattern-based searches
+            are also supported, i.e., *key=like:%value%*. Finally, it is
+            possible to specify different keys simulataneously by separating
+            them with semi-colons, e.g., *key0=value0;key1=in:value1,value2*.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+  '/servers/{serverid}/users/{userid}/':
+    delete:
+      summary: Delete a specific user
+      operationId: deleteUser
+      tags:
+        - Users
+      description: 'Delete a user. Required permission: ''users''.'
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successfully deleted the user
+        '404':
+          description: Could not find user with the specified username
+  '/servers/{serverid}/users/{userid}/accounts':
+    get:
+      summary: Get all accounts of a specific user
+      operationId: getUserAccounts
+      tags:
+        - Accounts
+        - Users
+      description: >
+        Returns an array containing all accounts corresponding to this user.
+        Required permission: 'sessions' or 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Marker'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accounts'
+        '404':
+          description: Could not find user with the specified username
+    delete:
+      summary: Delete all accounts of a specific user
+      operationId: deleteUserAccounts
+      tags:
+        - Accounts
+        - Users
+      description: >
+        Delete all accounts corresponding to this user. The user itself is not
+        deleted. Required permission: 'accounts' or 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successfully deleted the user's accounts
+        '404':
+          description: Could not find user with the specified username
+  '/servers/{serverid}/users/{userid}/attributes/':
+    post:
+      summary: Set all attributes of a specific user
+      operationId: setUserAttributes
+      tags:
+        - Users
+      description: >
+        Set the attributes of a specific user. Prior attributes with keys that
+        are not provided in the body of the request will be deleted. Creates the
+        user if not exists. Required permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        description: Dictionary of attributes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attributes'
+      responses:
+        '200':
+          description: Successfully set the user's attributes
+        '404':
+          description: Could not find user with the specified username
+    get:
+      summary: Get all attributes of a specific user
+      operationId: getUserAttributes
+      tags:
+        - Users
+      description: >
+        Returns an array containing all attributes corresponding to this user.
+        Required permission: 'sessions' or 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Dictionary of attributes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attributes'
+        '404':
+          description: Could not find user with the specified username
+    put:
+      summary: Update specified attributes of a given user
+      operationId: updateUserAttributes
+      tags:
+        - Users
+      description: >
+        Update the specified attributes of a given user. Prior attributes with
+        keys that are not provided in the body of the request will not be
+        deleted. Required permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        description: Dictionary of attributes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attributes'
+      responses:
+        '200':
+          description: Successfully updated the user's attributes
+        '404':
+          description: Could not find user with the specified username
+    delete:
+      summary: Delete all attributes of a specific user
+      operationId: deleteUserAttributes
+      tags:
+        - Users
+      description: |
+        Delete all attributes of a specific user. Required permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successfully deleted the user's attributes
+        '404':
+          description: Could not find user with the specified username
+  '/servers/{serverid}/users/{userid}/attributes/{attributekey}':
+    get:
+      summary: Get specific attribute of a given user
+      operationId: getUserAttribute
+      tags:
+        - Users
+      description: >
+        Get attribute with the specified key of a given user. Required
+        permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AttributeKey'
+      responses:
+        '200':
+          description: Value of the attribute
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attribute'
+        '404':
+          description: >
+            Could not find user with the specified username or attribute with
+            the given key
+    delete:
+      summary: Delete specific attribute of a given user
+      operationId: deleteUserAttribute
+      tags:
+        - Users
+      description: >
+        Delete attribute with the specified key of a given user. Required
+        permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AttributeKey'
+      responses:
+        '200':
+          description: Successfully deleted the user's attribute
+        '404':
+          description: >
+            Could not find user with the specified username or attribute with
+            the given key
+  '/servers/{serverid}/users/{userid}/provokelogin':
+    post:
+      summary: Push a login confirmation to the user's app
+      operationId: provokeLoginOnUser
+      tags:
+        - Sessions
+      description: >
+        Push a login to the nextAuth app for the user to confirm, based on the
+        given username. Required permission: 'sessions' or 'users'.
+      parameters:
+        - $ref: '#/components/parameters/Nonce'
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: false
+        description: Session information to display to user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserContext'
+      responses:
+        '200':
+          description: Login was successfully provoked
+  '/servers/{serverid}/users/{userid}/role/':
+    post:
+      summary: Get or create a role for a specific user
+      operationId: getOrCreateUserRole
+      tags:
+        - Management
+      description: >
+        Get or create a role for a specific user on the given server. Required
+        permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Role of the specified user on the given server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: |
+            Could not find user with the given username
+    get:
+      summary: Get role for a specific user
+      operationId: getUserRole
+      tags:
+        - Management
+      description: >
+        Get role for a specific user on a given server. Required permission:
+        'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Role of the specified user on the given server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: >
+            Could not find user with the given username, or the user has no
+            roles
+  '/servers/{serverid}/users/{userid}/recoverykey/':
+    post:
+      summary: Generate a recovery key for a specific user
+      operationId: setUserRecoveryKey
+      tags:
+        - Users
+      description: >
+        Request a recovery key for the given user, which can be used to
+        implement recovery mechanisms. Note that only the latest recovery key
+        for a given user is valid, i.e., any previously requested recovery key
+        for that user is invalidated when a new one is generated. Required
+        permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successfully generated a recovery key for the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryKey'
+        '404':
+          description: Could not find user with the specified username
+        '409':
+          description: A recovery key has already been generated for the user
+    get:
+      summary: Assert that a recovery key has been generated for a specific user
+      operationId: getUserRecoveryKey
+      tags:
+        - Users
+      description: >
+        Assert that a recovery key has been generated for a specific user.
+        Required permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successfully found a recovery key for the given user
+        '404':
+          description: >
+            Could not find user with the specified username or recovery key for
+            the given user
+    delete:
+      summary: Delete the recovery key for a specific user
+      operationId: deleteUserRecoveryKey
+      tags:
+        - Users
+      description: >
+        Clear the recovery key generated for the user. Note that a new recovery
+        key has to be generated if a recovery mechanism should be available to
+        them. Required permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successfully deleted the user's recovery key
+        '404':
+          description: Could not find user with the specified username
+  '/servers/{serverid}/users/{userid}/recoverykey/verify':
+    post:
+      summary: Verify the recovery key of a specific user
+      operationId: verifyUserRecoveryKey
+      tags:
+        - Users
+      description: >
+        Verify whether the provided recovery key matches the one generated for
+        the user. For instance, it could be combined with
+        [deleteUserAccounts](#/Users/deleteUserAccounts) to remove a user's
+        accounts after succesful verification. Required permission: 'users'.
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: false
+        description: Recovery key which should be verified
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoveryKey'
+      responses:
+        '200':
+          description: Successfully verified the user's recovery key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    description: |
+                      Whether the recovery key was successfully verified or not
+        '404':
+          description: >
+            Could not find user with the specified username or recovery key for
+            the given user
+components:
+  parameters:
+    Nonce:
+      name: X-nonce
+      in: header
+      required: true
+      description: Nonce identifying the browser or web server session
+      schema:
+        type: string
+    AccountId:
+      name: accountid
+      in: path
+      required: true
+      description: Account ID
+      schema:
+        type: string
+    ApiKeyHash:
+      name: hash
+      in: path
+      required: true
+      description: Hashed value of the API key
+      schema:
+        type: string
+    AttributeKey:
+      name: attributekey
+      in: path
+      required: true
+      description: Key of the attribute
+      schema:
+        type: string
+    LicenseId:
+      name: licenseid
+      in: path
+      required: true
+      description: ID of the license
+      schema:
+        type: string
+    McServerId:
+      name: mcserverid
+      in: path
+      required: true
+      description: Message Center Server ID
+      schema:
+        type: string
+    RoleId:
+      name: roleid
+      in: path
+      required: true
+      description: Role ID
+      schema:
+        type: string
+    ServerId:
+      name: serverid
+      in: path
+      required: true
+      description: Server ID
+      schema:
+        type: string
+    UserId:
+      name: userid
+      in: path
+      required: true
+      description: Username
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      description: Limit the number of results
+      schema:
+        type: integer
+    Marker:
+      name: marker
+      in: query
+      description: Offset in the results list
+      schema:
+        type: integer
+    Sort:
+      name: sort
+      in: query
+      description: >
+        Sort the results by attribute. You can also specify ascending (default
+        if not specified) or descending, e.g., *key:asc* . You can also sort by
+        multiple attributes, e.g., *key0:desc,key1:asc*
+      schema:
+        type: string
+  schemas:
+    Account:
+      type: object
+      required:
+        - description
+        - id
+      properties:
+        accountid:
+          type: string
+          description: Account ID
+        description:
+          type: string
+          description: 'Description of the account (e.g., device name)'
+        lastlogin:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Timestamp of last login
+        lastprovoke:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Timestamp of last provoke
+        created:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Timestamp of account creation
+        clientVersion:
+          type: string
+          readOnly: true
+          description: Version of nextAuth client embedded in the app
+        userid:
+          type: string
+          description: Username
+        blocked:
+          type: boolean
+          description: Whether the account is blocked
+        rootInfo:
+          type: string
+          description: Probes indicating if the app is running on a rooted device
+    Accounts:
+      type: object
+      properties:
+        accounts:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Account'
+        totalnumber:
+          type: integer
+          readOnly: true
+          description: Total number of accounts
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          description: API key ID
+        description:
+          type: string
+          description: Description of the API key
+        role:
+          type: string
+          description: Role ID
+        apikey:
+          type: string
+          readOnly: true
+          description: Six-character prefix identifying the API key
+        hash:
+          type: string
+          readOnly: true
+          description: Hashed value of the API key
+    ApiKeys:
+      type: object
+      properties:
+        apikeys:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/ApiKey'
+        totalnumber:
+          type: integer
+          readOnly: true
+          description: Total number of API keys
+    Attribute:
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+    Attributes:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Attribute'
+      example:
+        key0: value0
+        key1:
+          - value1
+          - value2
+          - value3
+    HtmlFooterBody:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServerSession'
+    License:
+      type: object
+      properties:
+        licenseid:
+          type: string
+          readOnly: true
+          description: License ID
+        license:
+          type: string
+          description: License string generated by nextAuth
+        notvalidbefore:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Date and time from when the license is valid
+        notvalidafter:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Date and time until when the license is valid
+        maxaccounts:
+          type: integer
+          readOnly: true
+          description: Maximum number of active accounts
+        maxusers:
+          type: integer
+          readOnly: true
+          description: Maximum number of active users
+        valid:
+          type: boolean
+          readOnly: true
+          description: License validation status
+    Licenses:
+      type: object
+      properties:
+        licenses:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/License'
+        totalnumber:
+          type: integer
+          readOnly: true
+          description: Total number of licenses
+    LoginStatus:
+      type: object
+      properties:
+        loggedin:
+          type: boolean
+          readOnly: true
+          description: Whether the user is logged in
+        canprovoke:
+          type: boolean
+          readOnly: true
+          description: Whether a login can be pushed from the server
+        provokeaccounts:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Account'
+          description: Accounts for which a login can be pushed from the server
+        loginqrdata:
+          type: string
+          readOnly: true
+          description: Base64url-encoded data that is represented in the login QR code
+        userid:
+          type: string
+          readOnly: true
+          description: Username
+        accountid:
+          type: string
+          readOnly: true
+          description: Account ID
+        pk:
+          type: string
+          readOnly: true
+          description: >
+            Base64url-encoded public key of the nextAuth app. This uniquely
+            identifies the account on the app, regardless of the username.
+        hsid:
+          type: string
+          readOnly: true
+          description: Converted session ID
+        version:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Version of the active server configuration
+        userinput:
+          type: string
+          readOnly: true
+          description: >
+            Additional data which was associated with the session by the app. In
+            general, the possible inputs will have been provided by the server
+            as part of the session info.
+        otplogin:
+          type: boolean
+          readOnly: true
+          description: Whether the login was started from an OTP
+    MessageCenter:
+      type: object
+      properties:
+        mcserverid:
+          type: string
+          description: Server ID of the Message Center
+        apikey:
+          type: string
+          description: API key to authenticate to the Message Center
+        tlscacert:
+          type: string
+          description: |
+            TLS CA certificate to trust when connecting to the Message Center
+        tlscert:
+          type: string
+          description: TLS certificate to authenticate to the Message Center
+        tlskey:
+          type: string
+          description: TLS private key to authenticate to the Message Center
+        uri:
+          type: string
+          description: URI to connect to the Message Center
+        insecure:
+          type: boolean
+          description: |
+            Disable transport security when connecting to the Message Center
+      required:
+        - mcserverid
+        - uri
+        - insecure
+    MessageCenters:
+      type: object
+      properties:
+        messagecenters:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/MessageCenter'
+        totalnumber:
+          type: integer
+          readOnly: true
+          description: Total number of Message Centers
+    Otp:
+      type: object
+      properties:
+        otp:
+          type: string
+          description: The OTP as returned by the Mobile SDK
+    Permission:
+      type: object
+      properties:
+        role:
+          type: string
+          readOnly: true
+          description: Role ID
+        server:
+          type: string
+          readOnly: true
+          description: Server where this grant is valid
+        acl:
+          type: string
+          description: Comma-separated list of scopes
+    Permissions:
+      type: object
+      properties:
+        permissions:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Permission'
+    RecoveryKey:
+      type: object
+      properties:
+        recoverykey:
+          type: string
+          description: >
+            The generated recovery key, formatted as six groups of four
+            base32-encoded characters
+    Role:
+      type: object
+      properties:
+        role:
+          type: string
+          description: Role ID
+    Server:
+      type: object
+      required:
+        - logo
+        - pinTimeout
+        - pinTransTimeout
+        - pingTime
+        - serverFlags
+        - serverName
+      properties:
+        serverName:
+          type: string
+          description: Name of the server
+        wsurl:
+          type: string
+          description: WebSocket URL
+        appurl:
+          type: string
+          description: URL (prefix) to launch the app
+        appname:
+          type: string
+          description: Name of the app
+        appandroid:
+          type: string
+          description: URL of the app in Google Play
+        appios:
+          type: string
+          description: URL of the app in the App Store
+        siteurl:
+          type: string
+          description: URL of the main website
+        logo:
+          type: string
+          format: byte
+          description: Logo for the server
+          example: null
+        pinTimeout:
+          type: integer
+          description: >
+            Time (in minutes) since the last time the user entered his PIN, that
+            the user is not requested a PIN at login. -1 means that the user is
+            never asked for a PIN before logging in, 0 means that the user is
+            asked every time he wants to login.
+        pinTransTimeout:
+          type: integer
+          description: >
+            Time (in minutes) since the last time the user entered his PIN, that
+            the user is not requested a PIN at transaction approval. -1 means
+            that the user is never asked for a PIN before approving a
+            transaction, 0 means that the user is asked every time he wants to
+            approve a transaction.
+        pingTime:
+          type: integer
+          description: >
+            Time (in seconds) that the nextAuth app has before it needs to reply
+            to a
+
+            ping request from the nextAuth server (continuous authentication).
+            When
+
+            set to zero, the ping mechanism will be disabled and all logins will
+            be
+
+            one-shots (i.e., the backend will only consider the session to be
+            active
+
+            during a ten-second interval after the user has authenticated).
+        serverFlags:
+          type: array
+          items:
+            type: string
+          description: >
+            Configuration flags influencing the server's behaviour. Reserved for
+            future use.
+        serverid:
+          type: string
+          readOnly: true
+          description: Server ID
+        serverpk:
+          type: string
+          readOnly: true
+          description: Base64url-encoded public key of the server
+        serverurl:
+          type: string
+          readOnly: true
+          description: SIGMA-I URL
+        lastLogin:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Timestamp of last login on this server
+        accountCount:
+          type: integer
+          readOnly: true
+          description: Number of accounts registered with this server
+        userCount:
+          type: integer
+          readOnly: true
+          description: Number of users registered with this server
+    ServerSession:
+      type: object
+      required:
+        - serverid
+        - sessionid
+      properties:
+        serverid:
+          type: string
+          description: Server ID
+        sessionid:
+          type: string
+          description: Converted session ID
+    Servers:
+      type: object
+      properties:
+        servers:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Server'
+        totalnumber:
+          type: integer
+          readOnly: true
+          description: Total number of servers
+    SessionInfo:
+      type: object
+      properties:
+        ip:
+          type: string
+          description: IP address of the client
+        logo:
+          type: string
+          format: byte
+          description: Logo displayed in the nextAuth-enabled app
+        useragent:
+          type: string
+          description: User agent of the client's browser
+        info:
+          type: object
+          description: >
+            Additional information associated with a session. This dictionary
+            can contain arbitrary keys, which will be passed as-is to the
+            nextAuth-enabled app.
+    Transaction:
+      type: object
+      required:
+        - beneficiary
+        - amount
+        - description
+      properties:
+        beneficiary:
+          type: string
+          description: Beneficiary of the transaction
+        amount:
+          type: string
+          description: Amount of the transaction
+        description:
+          type: string
+          description: Description of the transaction
+    TransactionId:
+      type: object
+      properties:
+        tid:
+          type: string
+          readOnly: true
+          description: Transaction ID
+    TransactionResult:
+      type: object
+      properties:
+        tstatus:
+          type: integer
+          readOnly: true
+          description: |
+            Current status of the transaction (0: new, 1: approved, 2: declined)
+    User:
+      type: object
+      properties:
+        userid:
+          type: string
+          description: Username
+        numberaccounts:
+          type: integer
+          readOnly: true
+          description: Number of accounts
+        lastlogin:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Aggregated last login over all accounts
+    UserContext:
+      type: object
+      properties:
+        announceinfo:
+          $ref: '#/components/schemas/SessionInfo'
+        sessioninfo:
+          $ref: '#/components/schemas/SessionInfo'
+    Users:
+      type: object
+      properties:
+        users:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/User'
+        totalnumber:
+          type: integer
+          readOnly: true
+          description: Total number of users
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      description: Unique identifier used to authenticate a role
+      name: X-apikey
+      in: header
+    RoleId:
+      type: apiKey
+      description: >
+        ID of the role you want to impersonate (requires that the role
+        associated with the API key passed in the header above has global 'root'
+        or global 'setrid' permissions).
+      name: X-su
+      in: header

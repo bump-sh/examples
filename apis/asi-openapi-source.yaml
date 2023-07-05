@@ -1,0 +1,2345 @@
+---
+openapi: 3.0.0
+info:
+  title: ASI API
+  description: |-
+    This API aims to give access to [ASI](https://asi.swiss/)'s devices' data on the behalf of these device's users.
+    A getting started guide is available on [https://api.asi.swiss/doc/getting_started.html](https://api.asi.swiss/doc/getting_started.html).
+    A JSON schema guide is available on [https://api.asi.swiss/doc/jsonschema_guide.html](https://api.asi.swiss/doc/jsonschema_guide.html).
+    Note that every endpoint has a trailing slash that is not optional.
+
+    **Version 1.4.0 (latest)**
+    - Support for params in websockets to enable reordering buffer of messages (checkout the getting started guide!)
+
+    **Version 1.3.2**
+    - Fixed a bug where pagination of list of devices was inconsistent by ordering them by id
+
+    **Version 1.3**
+    - Improve overall stability of the system
+    - Fixed a bug at user creation
+
+    **Version 1.2.2**
+    - Fixed a bug preventing users reading some preprocessed data
+    - Internal changes
+
+    **Version 1.2.1**
+    - Fixed a bug preventing users of creating timeframes
+
+    **Version 1.2.0**
+    - Support for ISO date-time format in preprocessed data list endpoint (as an alternavive of timestamp format)
+    - Support for ISO date-time format in preprocessed data ranges list endpoint (instead of date only)
+    - Internal changes
+
+    **Version 1.1.2**
+    - Internal changes
+
+    **Version 1.1.1**
+    - Internal changes
+
+    **Version 1.1.0**
+    - List device's preprocessed data ranges of activity
+    - Internal changes
+
+    **Version 1.0.2**
+    - Fixed a bug where taking ownership of an existing device returned 404
+    - Internal changes
+
+    **Version 1.0.1**
+    - Fixed a bug on user activation page
+    - Fixed bugs on websockets streaming
+    - Added ASI logo on pages
+
+    **Version 1.0.0**
+    - ⚠️ This version has breaking changes, a migration guide is available at [https://api.asi.swiss/doc/migration_v1.html](https://api.asi.swiss/doc/migration_v1.html)
+    - Route now contains the API version, currently `/api/v1/` is the only one supported
+    - Remove some fields on device resource
+    - Taking ownership of device is now done on ASI website at https://api.asi.swiss/device-activation/ or via `/take-ownership/` endpoint, `/own/` is removed
+    - Listing of resources now use pagination
+    - Pagination of a device's preprocessed data has been updated to match general pagination parameters et response
+    - Add some filtering options on listing of Activity, TimeFrame, Device and Athlete resources
+    - For streaming of a device's preprocessed data, its `id` must be specified as path parameter (previously `device_name`)
+
+    **Version 0.1.20**
+    - Internal changes
+
+    **Version 0.1.19**
+    - Internal changes
+    - Fix a bug where websockets could not be opened (502)
+
+    **Version 0.1.18**
+    - Internal changes
+
+    **Version 0.1.17**
+    - Internal changes
+
+    **Version 0.1.16**
+    - Internal changes
+
+    **Version 0.1.15**
+    - Fix a bug where time frames added to an activity after a websocket connection to computed data of this activity were not included to the stream
+    - Creation / modification of managed athletes now require the manager to have a specific permission, which is given by the ASI support team if requested
+
+    **Version 0.1.14**
+    - Fix incorrect computed data after timeframe or activity update, `uuid` of this objects are now internal fields so they will soon be removed from API resource representation
+    - Fix a bug where a manager could not create managed athletes
+    - Fix documentation about Matlab jobs
+    - Add JSON schema guide
+
+    **Version 0.1.13**
+    - Athlete accounts managed by managers
+    - Add routes to retrieve athlete or manager by their external ID
+
+    **Version 0.1.12**
+    - Timeframe and activity export to file
+    - Removed device `/activate/` and `/deactivate/`, replaced by `/own/` and `/release-ownership/`
+
+    # Authentication
+
+    <!-- ReDoc-Inject: <security-definitions> -->
+  version: 1.4.0
+tags:
+- name: Account
+  description: 'Authenticated user personnal account and profile.
+
+    '
+- name: Managers
+  description: 'Manager users are users that can interact with athletes and teams.
+    They mainly assign performance data to athletes and invite into teams.
+
+    '
+- name: Athletes
+  description: |
+    Athletes are users whose performances are:
+      1. Measured using ASI's sensors
+      2. Uploaded into the platform to be assigned and analysed by other users.
+- name: ManagerPermissions
+  description: 'As an athlete, it is possible to give read, write or share permissions
+    to manager users.
+
+    '
+- name: Devices
+  description: 'Devices are sensors developped and made available by ASI.
+
+    '
+- name: JsonSchemas
+  description: 'A JsonSchema is used to validate activities metadata (https://json-schema.org/).
+    JsonSchema objects have a `schema` property, an example can be found [here](./examples/schema/schema_activity_soccer.json).
+
+    '
+- name: Activities
+  description: 'A activity can be a football game, a tennis game, bobsleigh session,
+    etc. Activities objects have a `json` property, an example can be found [here](./examples/activity/activity_meta_soccer.json).
+
+    '
+- name: TimeFrames
+  description: 'Time frames made the link between an athlete, a device and an activity
+    during a time interval. Time frames are managed by manager users. TimeFrame objects
+    have a `params` property, an example can be found [here](./examples/timeframe/timeframe_params_soccer.json).
+
+    '
+- name: ComputedData
+  description: 'Computed data from a device worn by an athlete during an activity.
+    Typically min/max values or average of some data.
+
+    '
+- name: PreprocessedData
+  description: 'Preprocessed data from a device worn by an athlete during an activity.
+    Typically raw data with enhancement, like position in GPS cooridnates and relative
+    to the field.
+
+    '
+- name: MatlabJobs
+  description: 'Matlab computing process representation.
+
+    '
+paths:
+  "/api/v1/account/":
+    get:
+      summary: Get authenticated user account and profile data
+      description: 'This operation is restricted to authenticated users.
+
+        '
+      tags:
+      - Account
+      responses:
+        '200':
+          "$ref": "#/components/responses/AccountResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+  "/api/v1/athletes/":
+    get:
+      summary: Lists athlete users
+      description: 'This operation is restricted to manager users. It lists athletes
+        on whom they currently have READ permission.
+
+        '
+      tags:
+      - Athletes
+      parameters:
+      - "$ref": "#/components/parameters/page"
+      - "$ref": "#/components/parameters/limit"
+      - "$ref": "#/components/parameters/user_email"
+      - "$ref": "#/components/parameters/user_username"
+      - "$ref": "#/components/parameters/user_external_id"
+      - "$ref": "#/components/parameters/user_first_name"
+      - "$ref": "#/components/parameters/user_last_name"
+      - "$ref": "#/components/parameters/athlete_gender"
+      - "$ref": "#/components/parameters/athlete_managed_by"
+      - "$ref": "#/components/parameters/athlete_birthdate_from"
+      - "$ref": "#/components/parameters/athlete_birthdate_to"
+      responses:
+        '200':
+          "$ref": "#/components/responses/AthletesCollectionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+    post:
+      summary: Creates an athlete user
+      description: 'This operation create an athlete account and an email is sent
+        to the user''s email address, with the account credentials. This operation
+        is not restricted. Anyone can use this endpoint to register as an athlete.
+
+        '
+      tags:
+      - Athletes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - "$ref": "#/components/schemas/Athlete"
+      responses:
+        '201':
+          "$ref": "#/components/responses/AthleteResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+  "/api/v1/athletes/create-managed/":
+    post:
+      summary: Creates a managed athlete user
+      description: 'This operation create an athlete account managed by a manager.
+        Username will be a random UUID prefixed by `MANAGED-` and email will be empty.
+        This operation target to simplify athlete account creation and permission
+        request processes. Athletes do not need to create their own accounts and accept
+        permissions request. Athlete account created like this are not meant to be
+        logged in to. This operation is restricted to manager users. The manager must
+        have a specific permission to manage managed athletes, which is given by the
+        ASI support team if requested.
+
+        '
+      tags:
+      - Athletes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - "$ref": "#/components/schemas/AthleteManagedSave"
+      responses:
+        '201':
+          "$ref": "#/components/responses/AthleteResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+  "/api/v1/athletes/by-external-id/":
+    get:
+      summary: Retrieves an athlete by its external id
+      description: 'This operation is restricted to manager users who currently have
+        READ permission on this athlete and the athlete himself.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/external_id"
+      tags:
+      - Athletes
+      responses:
+        '200':
+          "$ref": "#/components/responses/AthleteResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/athletes/find-by-username/":
+    get:
+      summary: Find athlete by username
+      description: 'Find an athlete id given its username. This operation is restricted
+        to manager users.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/email"
+      tags:
+      - Athletes
+      responses:
+        '200':
+          "$ref": "#/components/responses/IdResponse"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/athletes/find-by-email/":
+    get:
+      summary: Find athletes by email
+      description: 'Find athletes id given an email. This operation is restricted
+        to manager users.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/email"
+      tags:
+      - Athletes
+      responses:
+        '200':
+          "$ref": "#/components/responses/IdCollectionResponse"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/athletes/{athlete}/":
+    parameters:
+    - "$ref": "#/components/parameters/athlete"
+    get:
+      summary: Retrieves an athlete
+      description: 'This operation is restricted to manager users who currently have
+        READ permission on this athlete and the athlete himself.
+
+        '
+      tags:
+      - Athletes
+      responses:
+        '200':
+          "$ref": "#/components/responses/AthleteResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    put:
+      summary: Updates an athlete
+      description: 'This operation is restricted to the athlete himself.
+
+        '
+      tags:
+      - Athletes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Athlete"
+      responses:
+        '201':
+          "$ref": "#/components/responses/AthleteResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    delete:
+      summary: Deletes an athlete
+      description: 'This operation is restricted to the athlete himself.
+
+        '
+      tags:
+      - Athletes
+      responses:
+        '204':
+          "$ref": "#/components/responses/NoContent"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/athletes/{athlete}/update-managed/":
+    parameters:
+    - "$ref": "#/components/parameters/athlete"
+    put:
+      summary: Updates a managed athlete
+      description: 'This operation is restricted to the manager user who manage this
+        athlete. The manager must have a specific permission to manage managed athletes,
+        which is given by the ASI support team if requested.
+
+        '
+      tags:
+      - Athletes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - "$ref": "#/components/schemas/AthleteManagedSave"
+      responses:
+        '201':
+          "$ref": "#/components/responses/AthleteResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+  "/api/v1/athletes/{athlete}/permissions/":
+    parameters:
+    - "$ref": "#/components/parameters/athlete"
+    get:
+      summary: Lists all the permissions regarding to an athlete
+      description: 'This operation is restricted to the athlete himself.
+
+        '
+      tags:
+      - ManagerPermissions
+      responses:
+        '200':
+          "$ref": "#/components/responses/ManagerPermissionsCollectionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/athletes/{athlete}/managers/{manager}/permissions/":
+    parameters:
+    - "$ref": "#/components/parameters/athlete"
+    - "$ref": "#/components/parameters/manager"
+    get:
+      summary: Lists a manager's permissions regarding to an athlete
+      description: 'This operation is restricted to the athlete himself.
+
+        '
+      tags:
+      - ManagerPermissions
+      parameters:
+      - "$ref": "#/components/parameters/athlete"
+      - "$ref": "#/components/parameters/manager"
+      responses:
+        '200':
+          "$ref": "#/components/responses/ManagerPermissionsCollectionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    post:
+      summary: Creates permissions to a manager
+      description: 'This operation is restricted to the athlete himself.
+
+        '
+      tags:
+      - ManagerPermissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ManagerPermission"
+      responses:
+        '200':
+          "$ref": "#/components/responses/ManagerPermissionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    delete:
+      summary: Revokes all permissions to a manager
+      description: 'This operation is restricted to the athlete himself.
+
+        '
+      tags:
+      - ManagerPermissions
+      responses:
+        '204':
+          "$ref": "#/components/responses/NoContent"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/athletes/{athlete}/managers/{manager}/permissions/{permission}/":
+    parameters:
+    - "$ref": "#/components/parameters/athlete"
+    - "$ref": "#/components/parameters/manager"
+    - "$ref": "#/components/parameters/permission"
+    delete:
+      summary: Revokes a specific permission to a manager
+      description: 'This operation is restricted to the athlete himself.
+
+        '
+      tags:
+      - ManagerPermissions
+      responses:
+        '204':
+          "$ref": "#/components/responses/NoContent"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/athletes/{athlete}/share-permissions/":
+    parameters:
+    - "$ref": "#/components/parameters/athlete"
+    post:
+      summary: Shares a read permission to another manager
+      description: 'The authenticated manager needs to have a `SHARE` permission on
+        the athlete. This action gives `read` access to the specified manager on the
+        athlete. To get `WRITE` access, the athletes needs to grant this permission
+        to the manager. This operation is restricted to manager users.
+
+        '
+      tags:
+      - ManagerPermissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ManagerSharePermission"
+      responses:
+        '200':
+          "$ref": "#/components/responses/ManagerPermissionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/athletes/{athlete}/set_password/":
+    parameters:
+    - "$ref": "#/components/parameters/athlete"
+    post:
+      summary: Changes the user's password
+      description: 'This operation is restricted to the athlete himself.
+
+        '
+      tags:
+      - Athletes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Password"
+      responses:
+        '204':
+          "$ref": "#/components/responses/NoContent"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/managers/":
+    post:
+      summary: Creates a manager
+      description: 'This operation create a manager account and an email is sent to
+        the user''s email address, with the account credentials. This operation is
+        not restricted. Anyone can use this endpoint to register as a manager.
+
+        '
+      tags:
+      - Managers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - "$ref": "#/components/schemas/Manager"
+      responses:
+        '201':
+          "$ref": "#/components/responses/ManagerResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+  "/api/v1/managers/by-external-id/":
+    get:
+      summary: Retrieves a manager by its external id
+      description: 'This operation is restricted to the manager himself.
+
+        '
+      parameters:
+      - "$ref": "#/components/parameters/external_id"
+      tags:
+      - Athletes
+      responses:
+        '200':
+          "$ref": "#/components/responses/ManagerResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/managers/{manager}/":
+    parameters:
+    - "$ref": "#/components/parameters/manager"
+    get:
+      summary: Retrieves a manager
+      description: 'This operation is restricted to the manager himself.
+
+        '
+      tags:
+      - Managers
+      responses:
+        '200':
+          "$ref": "#/components/responses/ManagerResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    put:
+      summary: Updates a manager
+      description: 'This operation is restricted to the manager himself.
+
+        '
+      tags:
+      - Managers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Manager"
+      responses:
+        '201':
+          "$ref": "#/components/responses/ManagerResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    delete:
+      summary: Deletes a manager
+      description: 'This operation is restricted to the manager himself.
+
+        '
+      tags:
+      - Managers
+      responses:
+        '204':
+          "$ref": "#/components/responses/NoContent"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/managers/{manager}/set_password/":
+    parameters:
+    - "$ref": "#/components/parameters/manager"
+    post:
+      summary: Changes the user's password
+      description: 'This operation is restricted to the manager himself.
+
+        '
+      tags:
+      - Managers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Password"
+      responses:
+        '204':
+          "$ref": "#/components/responses/NoContent"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/devices/":
+    get:
+      summary: Lists devices
+      description: 'This operation is restricted to manager users. It lists all devices
+        they ever owned. If `current` is `true`, it lists only devices they currently
+        own.
+
+        '
+      tags:
+      - Devices
+      parameters:
+      - "$ref": "#/components/parameters/current"
+      - "$ref": "#/components/parameters/page"
+      - "$ref": "#/components/parameters/limit"
+      - "$ref": "#/components/parameters/device_device_name"
+      - "$ref": "#/components/parameters/device_serial_number"
+      - "$ref": "#/components/parameters/device_device_type"
+      - "$ref": "#/components/parameters/device_activation_time_from"
+      - "$ref": "#/components/parameters/device_activation_time_to"
+      responses:
+        '200':
+          "$ref": "#/components/responses/DevicesCollectionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+  "/api/v1/devices/take-ownership/":
+    post:
+      summary: Take ownership of a device
+      description: 'Give ownership to authenticated manager user and activate a device
+        if it is not yet activated. Ownership start at request time and end at "2999-12-31T23:59:59.000Z".
+        This operation is restricted to the manager who currently own the device or
+        all manager users if device currently has no owner.
+
+        '
+      tags:
+      - Devices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/DeviceActivation"
+      responses:
+        '201':
+          "$ref": "#/components/responses/DeviceResponse"
+        '400':
+          "$ref": "#/components/responses/DeviceTakeOwnershipBadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/devices/{device}/":
+    parameters:
+    - "$ref": "#/components/parameters/device"
+    get:
+      summary: Retrieves a device
+      description: 'This operation is restricted to the manager user who currently
+        own this device.
+
+        '
+      tags:
+      - Devices
+      responses:
+        '200':
+          "$ref": "#/components/responses/DeviceResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/devices/{device}/release-ownership/":
+    parameters:
+    - "$ref": "#/components/parameters/device"
+    put:
+      summary: Relase device ownership
+      description: 'End authenticated manager user''s current ownership on the device.
+        This operation is restricted to the manager who currently own the device.
+
+        '
+      tags:
+      - Devices
+      responses:
+        '204':
+          "$ref": "#/components/responses/DeviceReleaseOwnershipNoContent"
+        '400':
+          "$ref": "#/components/responses/DeviceReleaseOwnershipBadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/devices/{device}/bulk-load/":
+    parameters:
+    - "$ref": "#/components/parameters/device"
+    post:
+      summary: Bulk load an ASI file for a device
+      description: 'The `.asi` file must be encoded in base64, then included in request
+        body. This operation is restricted to the manager who currently own the device.
+
+        '
+      tags:
+      - Devices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/BulkLoad"
+      responses:
+        '200':
+          "$ref": "#/components/responses/MatlabJobResponse"
+        '400':
+          "$ref": "#/components/responses/BulkLoadBadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/devices/{device}/preprocessed-ranges/":
+    parameters:
+    - "$ref": "#/components/parameters/device"
+    - "$ref": "#/components/parameters/start_iso"
+    - "$ref": "#/components/parameters/stop_iso"
+    - "$ref": "#/components/parameters/page"
+    - "$ref": "#/components/parameters/limit"
+    get:
+      summary: Lists device's preprocessed data ranges of activity
+      description: 'A range is determined by a group of data close to another of **5**
+        minutes or less between the previous and the next. A maximum of two days is
+        allowed between start and stop. This operation is restricted to the manager
+        who owned the device between start and stop.
+
+        '
+      tags:
+      - PreprocessedData
+      responses:
+        '200':
+          "$ref": "#/components/responses/PreprocessedDataRangesCollectionResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/devices/{device}/preprocessed/":
+    parameters:
+    - "$ref": "#/components/parameters/device"
+    - "$ref": "#/components/parameters/start"
+    - "$ref": "#/components/parameters/stop"
+    - "$ref": "#/components/parameters/start_iso"
+    - "$ref": "#/components/parameters/stop_iso"
+    - "$ref": "#/components/parameters/page"
+    - "$ref": "#/components/parameters/limit_preprocessed_data"
+    get:
+      summary: Lists device's preprocessed data
+      description: 'Choose between start and stop (timestamps form) or start_iso and
+        stop_iso (ISO date-time form). This operation is restricted to the manager
+        who owned the device between start and stop.
+
+        '
+      tags:
+      - PreprocessedData
+      responses:
+        '200':
+          "$ref": "#/components/responses/PreprocessedDataCollectionResponse"
+        '400':
+          "$ref": "#/components/responses/PreprocessedDataCollectionBadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/json-schemas/":
+    get:
+      summary: Lists Json schemas
+      description: 'This operation is restricted to manager users.
+
+        '
+      tags:
+      - JsonSchemas
+      parameters:
+      - "$ref": "#/components/parameters/page"
+      - "$ref": "#/components/parameters/limit"
+      responses:
+        '200':
+          "$ref": "#/components/responses/JsonSchemasCollectionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/json-schemas/{json_schema}/":
+    parameters:
+    - "$ref": "#/components/parameters/json_schema"
+    get:
+      summary: Retrieves a Json schema
+      description: 'This operation is restricted to manager users.
+
+        '
+      tags:
+      - JsonSchemas
+      responses:
+        '200':
+          "$ref": "#/components/responses/JsonSchemaResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/activities/":
+    get:
+      summary: Lists activities
+      description: 'This operation is restricted to manager users. It lists activities
+        he created.
+
+        '
+      tags:
+      - Activities
+      parameters:
+      - "$ref": "#/components/parameters/page"
+      - "$ref": "#/components/parameters/limit"
+      - "$ref": "#/components/parameters/activity_name"
+      - "$ref": "#/components/parameters/activity_owner"
+      responses:
+        '200':
+          "$ref": "#/components/responses/ActivitiesCollectionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    post:
+      summary: Creates an activity
+      description: 'This operation is restricted to manager users.
+
+        '
+      tags:
+      - Activities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Activity"
+      responses:
+        '201':
+          "$ref": "#/components/responses/ActivityResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+  "/api/v1/activities/{activity}/":
+    parameters:
+    - "$ref": "#/components/parameters/activity"
+    get:
+      summary: Retrieves an activity
+      description: 'This operation is restricted to the manager user who own this
+        activity.
+
+        '
+      tags:
+      - Activities
+      responses:
+        '200':
+          "$ref": "#/components/responses/ActivityResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    put:
+      summary: Updates an activity
+      description: 'Update an activity and trigger a new computation of all its time
+        frame''s computed data, asynchronously. This operation is restricted to the
+        manager user who own this activity.
+
+        '
+      tags:
+      - Activities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Activity"
+      responses:
+        '200':
+          "$ref": "#/components/responses/ActivityResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+    delete:
+      summary: Deletes an activity
+      description: 'This operation is restricted to the manager user who own this
+        activity.
+
+        '
+      tags:
+      - Activities
+      responses:
+        '204':
+          "$ref": "#/components/responses/NoContent"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/activities/{activity}/export/":
+    parameters:
+    - "$ref": "#/components/parameters/activity"
+    - "$ref": "#/components/parameters/output_format"
+    get:
+      summary: Export an activity to a file
+      description: 'Return a MatlabJob object saying that exporting is in progress.
+        `/api/matlab-jobs/` endpoint can be used to retrieve job status. Once done,
+        get filename from this job details and use it in `/api/activities/{activity}/get-exported-file/`.
+        This operation is restricted manager users who have READ permission on the
+        referenced athlete between start_time and end_time of all this activity''s
+        time frames.
+
+        '
+      tags:
+      - Activities
+      responses:
+        '200':
+          "$ref": "#/components/responses/MatlabJobResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/activities/{activity}/get-exported-file/":
+    parameters:
+    - "$ref": "#/components/parameters/activity"
+    - "$ref": "#/components/parameters/file_name"
+    get:
+      summary: Get an activity exported file
+      description: 'Return a base64 encoded file containing this activity data in
+        requested output format. Requesting a file export is done by `/api/activities/{activity}/export/`
+        endpoint. File name can be found from details field of a `/api/matlab-jobs/`
+        response. It may return a 404 error response both if time frame does not exist,
+        or file does not exist. This operation is restricted manager users who have
+        READ permission on the referenced athletes between start_time and end_time
+        of all this activity''s time frames.
+
+        '
+      tags:
+      - Activities
+      responses:
+        '200':
+          "$ref": "#/components/responses/Base64Response"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/timeframes/":
+    get:
+      summary: Lists time frames
+      description: 'This operation is restricted to the manager users. It lists time
+        frames he created. Optionally filtered by activity to which it''s related.
+
+        '
+      tags:
+      - TimeFrames
+      parameters:
+      - "$ref": "#/components/parameters/activity_query"
+      - "$ref": "#/components/parameters/page"
+      - "$ref": "#/components/parameters/limit"
+      - "$ref": "#/components/parameters/timeframe_device"
+      - "$ref": "#/components/parameters/timeframe_athlete"
+      - "$ref": "#/components/parameters/timeframe_owner"
+      - "$ref": "#/components/parameters/timeframe_activity"
+      - "$ref": "#/components/parameters/timeframe_start_time_from"
+      - "$ref": "#/components/parameters/timeframe_start_time_to"
+      - "$ref": "#/components/parameters/timeframe_end_time_from"
+      - "$ref": "#/components/parameters/timeframe_end_time_to"
+      responses:
+        '200':
+          "$ref": "#/components/responses/TimeFramesCollectionResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+    post:
+      summary: Create a time frame
+      description: 'This operation is restricted to manager users.
+
+        '
+      tags:
+      - TimeFrames
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/TimeFrame"
+      responses:
+        '200':
+          "$ref": "#/components/responses/TimeFramesCollectionResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+  "/api/v1/timeframes/{timeFrame}/":
+    parameters:
+    - "$ref": "#/components/parameters/timeFrame"
+    get:
+      summary: Retrieves a time frame
+      description: 'This operation is restricted to the manager user who own this
+        time frame.
+
+        '
+      tags:
+      - TimeFrames
+      responses:
+        '200':
+          "$ref": "#/components/schemas/TimeFrame"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    put:
+      summary: Updates a time frame
+      description: 'Update a time frame and trigger a new computation of its computed
+        data, asynchronously. This operation is restricted to the manager user who
+        own this time frame.
+
+        '
+      tags:
+      - TimeFrames
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/TimeFrame"
+      responses:
+        '200':
+          "$ref": "#/components/responses/TimeFrameResponse"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    patch:
+      summary: Updates a time frame (partially)
+      description: 'Works the same as `PUT`, but support partial payload, specifying
+        only the fields to update.
+
+        '
+      tags:
+      - TimeFrames
+    delete:
+      summary: Deletes a time frame
+      description: 'This operation is restricted to the manager user who own this
+        time frame.
+
+        '
+      tags:
+      - TimeFrames
+      responses:
+        '204':
+          "$ref": "#/components/responses/NoContent"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/timeframes/{timeFrame}/computed/":
+    parameters:
+    - "$ref": "#/components/parameters/timeFrame"
+    get:
+      summary: Retrieves a time frame's computed data
+      description: 'This operation is restricted to manager users who have READ permission
+        on the referenced athlete between start_time and end_time of this time frame.
+
+        '
+      tags:
+      - ComputedData
+      responses:
+        '200':
+          description: A JSON object containing the time frame's computed data.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ComputedData"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/timeframes/{timeFrame}/export/":
+    parameters:
+    - "$ref": "#/components/parameters/timeFrame"
+    - "$ref": "#/components/parameters/output_format"
+    get:
+      summary: Export a time frame to a file
+      description: 'Return a MatlabJob object saying that exporting is in progress.
+        `/api/matlab-jobs/` endpoint can be used to retrieve job status. Once done,
+        get filename from this job details and use it in `/api/timeframes/{timeFrame}/get-exported-file/`.
+        This operation is restricted manager users who have READ permission on the
+        referenced athlete between start_time and end_time of this time frame.
+
+        '
+      tags:
+      - TimeFrames
+      responses:
+        '200':
+          "$ref": "#/components/responses/MatlabJobResponse"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/timeframes/{timeFrame}/get-exported-file/":
+    parameters:
+    - "$ref": "#/components/parameters/timeFrame"
+    - "$ref": "#/components/parameters/file_name"
+    get:
+      summary: Get a time frame exported file
+      description: 'Return a base64 encoded file containing this time frame data in
+        requested output format. Requesting a file export is done by `/api/timeframes/{timeFrame}/export/`
+        endpoint. File name can be found from details field of a `/api/matlab-jobs/`
+        response. It may return a 404 error response both if time frame does not exist,
+        or file does not exist. This operation is restricted manager users who have
+        READ permission on the referenced athlete between start_time and end_time
+        of this time frame.
+
+        '
+      tags:
+      - TimeFrames
+      responses:
+        '200':
+          "$ref": "#/components/responses/Base64Response"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/matlab-jobs/{job_id}/info/":
+    parameters:
+    - "$ref": "#/components/parameters/job_id"
+    get:
+      summary: Get state and infos about a matlab job
+      parameters:
+      - "$ref": "#/components/parameters/matlab_job_id"
+      tags:
+      - MatlabJobs
+      responses:
+        '200':
+          "$ref": "#/components/responses/MatlabJobResponse"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+security:
+- oauth2Security: []
+components:
+  securitySchemes:
+    oauth2Security:
+      type: oauth2
+      description: This API uses OAuth 2 with the authorization code grant flow.
+      flows:
+        authorizationCode:
+          authorizationUrl: "/oauth2/authorize"
+          tokenUrl: "/oauth2/token"
+          scopes:
+            all: Access to all data
+  parameters:
+    page:
+      name: page
+      in: query
+      description: Page number
+      required: false
+      schema:
+        type: integer
+    limit:
+      name: limit
+      in: query
+      description: Number of results per page (max is 3000)
+      required: false
+      schema:
+        type: integer
+    limit_preprocessed_data:
+      name: limit
+      in: query
+      description: Number of results per page (max is 10000)
+      required: false
+      schema:
+        type: integer
+    activity:
+      name: activity
+      in: path
+      description: Activity ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+    activity_query:
+      name: activity
+      in: query
+      description: Activity ID
+      required: false
+      schema:
+        type: integer
+        format: int64
+    json_schema:
+      name: json_schema
+      in: path
+      description: JsonSchema ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+    athlete:
+      name: athlete
+      in: path
+      description: Athlete ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+    manager:
+      name: manager
+      in: path
+      description: Manager ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+    manufacturer:
+      name: manufacturer
+      in: path
+      description: Manufacturer ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+    device:
+      name: device
+      in: path
+      description: Device ID
+      required: true
+      schema:
+        type: int64
+    permission:
+      name: permission
+      in: path
+      description: Permission ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+    start_time:
+      name: start_time
+      in: query
+      description: Sample start time
+      required: false
+      schema:
+        type: string
+        format: date-time
+    end_time:
+      name: end_time
+      in: query
+      description: Sample end time
+      required: false
+      schema:
+        type: string
+        format: date-time
+    start_iso:
+      name: start_iso
+      in: query
+      description: Query start datetime in iso format
+      required: true
+      schema:
+        type: datetime
+        example: '2021-05-29T00:00:00.000Z'
+    stop_iso:
+      name: stop_iso
+      in: query
+      description: Query stop datetime in iso format
+      required: true
+      schema:
+        type: datetime
+        example: '2021-05-31T00:00:00.000Z'
+    start:
+      name: start
+      in: query
+      description: Sample start time in timestamp format in [ms]
+      required: true
+      schema:
+        type: long
+        example: 1622246400000
+    stop:
+      name: stop
+      in: query
+      description: Sample stop time in timestamp format in [ms]
+      required: true
+      schema:
+        type: long
+        example: 1622419200000
+    timeFrame:
+      name: timeFrame
+      in: path
+      description: Time frame ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+    matlab_job_id:
+      name: job_id
+      in: path
+      description: Matlab job identifier
+      example: job-e429beeb-af8b-47ff-8e17-46e656fd5fa2
+      required: true
+      schema:
+        type: string
+    current:
+      name: current
+      in: query
+      description: If true, list only manager's devices currently owned. If not or
+        unspecified, list all previously and currently owned devices.
+      required: false
+      schema:
+        type: boolean
+    email:
+      name: email
+      in: query
+      description: Email
+      required: true
+      schema:
+        type: string
+    external_id:
+      name: external-id
+      in: query
+      description: External ID
+      required: true
+      schema:
+        type: string
+    file_name:
+      name: file-name
+      in: query
+      description: file name
+      required: true
+      schema:
+        type: string
+    output_format:
+      name: output-format
+      in: query
+      description: Requested output format, one of [`kml`, `csv`, `heatmap`]
+      required: false
+      schema:
+        type: string
+    job_id:
+      name: job_id
+      in: path
+      description: Job ID (for example `job-e429beeb-af8b-47ff-8e17-46e656fd5fa2`)
+      required: true
+      schema:
+        type: integer
+        format: int64
+    activity_name:
+      name: name
+      in: query
+      description: Filter on name (insensitive contains)
+      required: false
+      schema:
+        type: string
+    activity_owner:
+      name: owner
+      in: query
+      description: Filter by owner (id of manager)
+      required: false
+      schema:
+        type: number
+        format: int64
+    device_device_name:
+      name: device_name
+      in: query
+      description: Filter on device_name (insensitive contains)
+      required: false
+      schema:
+        type: string
+    device_serial_number:
+      name: serial_number
+      in: query
+      description: Filter on serial_number (insensitive contains)
+      required: false
+      schema:
+        type: string
+    device_device_type:
+      name: device_type
+      in: query
+      description: Filter on device_type (exact match)
+      required: false
+      schema:
+        type: string
+    device_activation_time_from:
+      name: activation_time_from
+      in: query
+      description: Filter on activation_time (greater than or equal)
+      example: '2020-02-20T13:00:00+0100'
+      required: false
+      schema:
+        type: date-time
+    device_activation_time_to:
+      name: activation_time_to
+      in: query
+      description: Filter on activation_time (lesser than or equal)
+      example: '2020-02-20T18:00:00+0100'
+      required: false
+      schema:
+        type: date-time
+    timeframe_device:
+      name: device
+      in: query
+      description: Filter by device (id)
+      required: false
+      schema:
+        type: number
+        format: int64
+    timeframe_athlete:
+      name: athlete
+      in: query
+      description: Filter by athlete (id)
+      required: false
+      schema:
+        type: number
+        format: int64
+    timeframe_owner:
+      name: owner
+      in: query
+      description: Filter by owner (id of manager)
+      required: false
+      schema:
+        type: number
+        format: int64
+    timeframe_activity:
+      name: activity
+      in: query
+      description: Filter by activity (id)
+      required: false
+      schema:
+        type: number
+        format: int64
+    timeframe_start_time_from:
+      name: start_time_from
+      in: query
+      description: Filter on start_time (greater than or equal)
+      example: '2020-02-20T13:00:00+0100'
+      required: false
+      schema:
+        type: date-time
+    timeframe_start_time_to:
+      name: start_time_from
+      in: query
+      description: Filter on start_time (lesser than or equal)
+      example: '2020-02-20T18:00:00+0100'
+      required: false
+      schema:
+        type: date-time
+    timeframe_end_time_from:
+      name: end_time_from
+      in: query
+      description: Filter on end_time (greater than or equal)
+      example: '2020-02-20T13:00:00+0100'
+      required: false
+      schema:
+        type: date-time
+    timeframe_end_time_to:
+      name: end_time_from
+      in: query
+      description: Filter on end_time (lesser than or equal)
+      example: '2020-02-20T18:00:00+0100'
+      required: false
+      schema:
+        type: date-time
+    user_email:
+      name: email
+      in: query
+      description: Filter on email (insensitive contains)
+      required: false
+      schema:
+        type: string
+    user_username:
+      name: username
+      in: query
+      description: Filter on username (insensitive contains)
+      required: false
+      schema:
+        type: string
+    user_external_id:
+      name: external_id
+      in: query
+      description: Filter on external_id (insensitive contains)
+      required: false
+      schema:
+        type: string
+    user_first_name:
+      name: first_name
+      in: query
+      description: Filter on first_name (insensitive contains)
+      required: false
+      schema:
+        type: string
+    user_last_name:
+      name: last_name
+      in: query
+      description: Filter on last_name (insensitive contains)
+      required: false
+      schema:
+        type: string
+    athlete_gender:
+      name: gender
+      in: query
+      description: Filter on gender (`M` or `F`) (insensitive exact)
+      required: false
+      schema:
+        type: string
+    athlete_managed_by:
+      name: managed_by
+      in: query
+      description: Filter by managed_by (id of manager)
+      required: false
+      schema:
+        type: number
+        format: int64
+    athlete_birthdate_from:
+      name: birthdate_from
+      in: query
+      description: Filter on birthdate (greater than or equal)
+      example: '2020-02-20T13:00:00+0100'
+      required: false
+      schema:
+        type: date-time
+    athlete_birthdate_to:
+      name: birthdate_to
+      in: query
+      description: Filter on birthdate (lesser than or equal)
+      example: '2020-02-20T18:00:00+0100'
+      required: false
+      schema:
+        type: date-time
+  responses:
+    AccountResponse:
+      description: A JSON object of the user account.
+      content:
+        application/json:
+          schema:
+            oneOf:
+            - "$ref": "#/components/schemas/Athlete"
+            - "$ref": "#/components/schemas/Manager"
+            - "$ref": "#/components/schemas/Manufacturer"
+    ActivitiesCollectionResponse:
+      description: A JSON object containing the activities.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ActivitiesCollection"
+    ActivityResponse:
+      description: A JSON object of the activitiy.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Activity"
+    JsonSchemasCollectionResponse:
+      description: A JSON object containing the Json schemas.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/JsonSchemasCollection"
+    JsonSchemaResponse:
+      description: A JSON object of the Json schema.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/JsonSchema"
+    AthleteResponse:
+      description: A JSON object of the athlete.
+      content:
+        application/json:
+          schema:
+            allOf:
+            - "$ref": "#/components/schemas/Athlete"
+    AthletesCollectionResponse:
+      description: A JSON object containing the athletes.
+      content:
+        application/json:
+          schema:
+            allOf:
+            - "$ref": "#/components/schemas/AthletesCollection"
+    ManufacturerResponse:
+      description: A JSON object of the manufacturer.
+      content:
+        application/json:
+          schema:
+            allOf:
+            - "$ref": "#/components/schemas/Manufacturer"
+    ManufacturersCollectionResponse:
+      description: A JSON object containing the manufacturers.
+      content:
+        application/json:
+          schema:
+            allOf:
+            - "$ref": "#/components/schemas/ManufacturersCollection"
+    BadRequest:
+      description: The submitted data is invalid.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+          example:
+            code: 400
+            detail: The submitted data is invalid.
+    DeviceResponse:
+      description: A JSON object of the device.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Device"
+    DevicesCollectionResponse:
+      description: A JSON object containing the devices.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/DevicesCollection"
+    DeviceReleaseOwnershipNoContent:
+      description: Device deactivated successfully.
+    DeviceTakeOwnershipBadRequest:
+      description: Device already owned.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ErrorMessage"
+          example:
+            message: Device already owned.
+    DeviceReleaseOwnershipBadRequest:
+      description: Device has never been activated.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ErrorMessage"
+          example:
+            message: Device has never been activated.
+    DeviceOwnershipResponse:
+      description: A JSON object containing the device ownership.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/DeviceOwnership"
+    PreprocessedDataCollectionResponse:
+      description: A JSON object containing the device's preprocessed data.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/PreprocessedDataCollection"
+    PreprocessedDataRangesCollectionResponse:
+      description: A JSON object containing the device's preprocessed data ranges
+        of activity.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/PreprocessedDataRangesCollection"
+    PreprocessedDataCollectionBadRequest:
+      description: Preprocessed data bad request.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ErrorMessage"
+          examples:
+            Parameters required:
+              value:
+                message: Start and stop query parameters required.
+            Parameters string length:
+              value:
+                message: Start and stop query parameters maximum length should be
+                  14 chars.
+            Parameters are invalid:
+              value:
+                message: Invalid start and/or stop query parameters.
+    Forbidden:
+      description: The user does not have right access to the resource.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+          example:
+            detail: You do not have permission to perform this action.
+    NoContent:
+      description: The specified resource was deleted.
+    NotFound:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+          example:
+            detail: Not found
+    ManagersCollectionResponse:
+      description: A JSON object containing the managers.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ManagersCollection"
+    ManagerPermissionResponse:
+      description: JSON object containing the permission.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ManagerPermission"
+    ManagerPermissionsCollectionResponse:
+      description: JSON object containing the permissions.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ManagerPermissionsCollection"
+    IdResponse:
+      description: JSON object containing the permission.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Id"
+    IdCollectionResponse:
+      description: JSON object containing the ids.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/IdCollection"
+    ManagerResponse:
+      description: A JSON object of the manager.
+      content:
+        application/json:
+          schema:
+            allOf:
+            - "$ref": "#/components/schemas/Manager"
+    TimeFrameResponse:
+      description: A JSON object of the time frame.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/TimeFrame"
+    TimeFramesCollectionResponse:
+      description: A JSON object containing the time frames.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/TimeFramesCollection"
+    MatlabJobResponse:
+      description: A JSON object of the matlab job.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/MatlabJob"
+    BulkLoadBadRequest:
+      description: Invalid payload.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ErrorMessage"
+          example:
+            message: Invalid payload.
+    Base64Response:
+      description: A JSON object of base64 encoded data.
+      content:
+        application/json:
+          schema:
+            allOf:
+            - type: object
+              properties:
+                base64:
+                  type: string
+          example:
+            base64: VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ=
+  schemas:
+    HateosResourceItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          description: Resource's ID
+          example: 12
+    HateosResourceCollection:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of items the unpaginated list contains
+          example: 150
+        page:
+          type: integer
+          description: Current page number
+          example: 2
+        next:
+          type: integer
+          description: Next page number
+          example: 3
+        previous:
+          type: integer
+          description: Previous page number
+          example: 1
+    User:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        required:
+        - username
+        - email
+        properties:
+          username:
+            type: string
+            description: User's name used to authenticate himself/herself
+            example: jon.doe@example.com
+          email:
+            type: string
+            format: email
+            example: jon.doe@example.com
+            description: User's contact email address
+          external_id:
+            type: string
+            description: User's external ID used from another organisation
+            external_id: '0123456789'
+    UsersCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/User"
+    Manager:
+      allOf:
+      - "$ref": "#/components/schemas/User"
+      - type: object
+        properties:
+          manager_profile:
+            "$ref": "#/components/schemas/ManagerProfile"
+    ManagerProfile:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        properties:
+          first_name:
+            type: string
+            description: Manager's firstname
+            example: Jürgen
+          last_name:
+            type: string
+            description: Manager's lastname
+            example: Klopp
+    ManagersCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/Manager"
+      - type: array
+        items:
+          "$ref": "#/components/schemas/Manager"
+    ManagerPermission:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        properties:
+          manager:
+            readOnly: true
+            type: int64
+            example: 1
+          athlete:
+            readOnly: true
+            type: int64
+            example: 2
+          start_time:
+            type: string
+            format: date-time
+            example: '2020-02-20T13:18:29+0100'
+          expiration_time:
+            type: string
+            format: date-time
+            example: '2022-02-20T13:18:29+0100'
+          permission:
+            type: string
+            enum:
+            - READ
+            - WRITE
+            - SHARE
+            example: READ
+          is_active:
+            readOnly: true
+            type: boolean
+    ManagerSharePermission:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        properties:
+          manager:
+            type: int64
+            example: 10
+          athlete:
+            readOnly: true
+            type: int64
+            example: 2
+          start_time:
+            type: string
+            format: date-time
+            example: '2020-02-20T13:18:29+0100'
+          expiration_time:
+            type: string
+            format: date-time
+            example: '2022-02-20T13:18:29+0100'
+          permission:
+            readOnly: true
+            type: string
+            example: READ
+          is_active:
+            readOnly: true
+            type: boolean
+    ManagerPermissionsCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/ManagerPermission"
+    Id:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+    IdCollection:
+      allOf:
+      - type: array
+        items:
+          "$ref": "#/components/schemas/Id"
+    Athlete:
+      allOf:
+      - "$ref": "#/components/schemas/User"
+      - type: object
+        properties:
+          managed_by:
+            readOnly: true
+            type: int64
+            example: 1
+            description: 'If set, reference the manager who manage this athlete account.
+
+              '
+          athlete_profile:
+            "$ref": "#/components/schemas/AthleteProfile"
+    AthleteManagedSave:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        required:
+        - managed_by
+        properties:
+          external_id:
+            type: string
+            description: User's external ID used from another organisation
+            external_id: '0123456789'
+          managed_by:
+            type: int64
+            example: 1
+            description: 'Reference the manager who manage this athlete account. Only
+              managers can create athlete with this field, and the must put their
+              own id. A set of read, write and share permissions are created for this
+              manager at athlete creation, from 1970-01-01 to 2199-12-31
+
+              '
+          athlete_profile:
+            "$ref": "#/components/schemas/AthleteProfile"
+    AthleteProfile:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        properties:
+          external_id:
+            type: string
+            description: "/!\\ DEPRECATED, MOVED TO PARENT ENTITY. External ID used
+              from another organisation"
+            example: e6195b18-2515-410d-a48e-1009d12f2320
+          first_name:
+            type: string
+            example: Usain
+          last_name:
+            type: string
+            example: Bolt
+          gender:
+            type: string
+            enum:
+            - M
+            - F
+            example: M
+          weight:
+            type: number
+            format: float
+            description: Weight in kilogramms
+            example: 94
+          height:
+            type: number
+            format: float
+            description: Height in meters
+            example: 1.95
+          birth_date:
+            type: string
+            format: date
+            example: '1986-08-21'
+          max_heart_rate:
+            type: number
+            format: float
+            description: Maximum heart rate that the athlete should reach
+            example: 140
+    AthletesCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/Athlete"
+    Manufacturer:
+      allOf:
+      - "$ref": "#/components/schemas/User"
+      - type: object
+        properties:
+          manufacturer_profile:
+            "$ref": "#/components/schemas/ManufacturerProfile"
+    ManufacturerProfile:
+      allOf:
+      - type: object
+        properties:
+          address:
+            type: string
+            description: Manufacturer's address
+            example: 1003 Lausanne
+          name:
+            type: string
+            description: Manufacturer's name
+            example: ABC Manufacturing
+    ManufacturersCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/Manufacturer"
+    Device:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        properties:
+          device_name:
+            type: string
+            description: Device name
+            example: '864475041000000'
+          serial_number:
+            type: string
+            description: Serial number
+            example: a8e035ee-66be-4c90-a82a-437ada22a8dd
+          device_type:
+            type: string
+            example: Model X 2000 Series
+          firmware_version:
+            type: string
+            description: Firmware version
+            example: 1.2.3
+    DevicesCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/Device"
+    DeviceOwnership:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        properties:
+          start_time:
+            type: string
+            format: date-time
+            example: '2019-11-21T19:57:45.000Z'
+          end_time:
+            type: string
+            format: date-time
+            readOnly: true
+            example: '2999-12-31T23:59:59.000Z'
+          device:
+            type: int64
+            readOnly: true
+            example: 1
+          manager:
+            type: int64
+            example: 1
+    DeviceActivation:
+      allOf:
+      - type: object
+        properties:
+          serial_number:
+            type: string
+            description: Serial number
+            example: a8e035ee-66be-4c90-a82a-437ada22a8dd
+          device_name:
+            type: string
+            description: Device name (identifier)
+            example: abcdefghij12345
+    JsonSchema:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        required:
+        - name
+        - schema
+        properties:
+          name:
+            type: string
+            example: soccer
+          schema:
+            type: object
+    JsonSchemasCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/JsonSchema"
+    Activity:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        required:
+        - name
+        - sportType
+        - sessionType
+        properties:
+          uuid:
+            type: string
+            readOnly: true
+            example: 92d831c226ab47b0a548a357dd01d704
+            description: 'DEPERECATD: will be removed in upcoming versions'
+          name:
+            type: string
+            example: Soccer of 21 nov 2020 at la maladière
+          json:
+            type: object
+          json_schema:
+            type: int64
+            example: 1
+          owner:
+            type: int64
+            example: 1
+    ActivitiesCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/Activity"
+    TimeFrame:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        properties:
+          uuid:
+            type: string
+            readOnly: true
+            example: 92d831c226ab47b0a548a357dd01d704
+            description: 'DEPERECATD: will be removed in upcoming versions'
+          start_time:
+            type: string
+            format: date-time
+            example: '2022-02-20T13:18:29+0100'
+          end_time:
+            type: string
+            format: date-time
+            example: '2022-02-20T14:18:29+0100'
+          params:
+            type: object
+          device:
+            type: int64
+            example: 1
+          activity:
+            type: int64
+            example: 1
+          athlete:
+            type: int64
+            example: 2
+          owner:
+            type: int64
+            example: 1
+          json_schema:
+            type: int64
+            example: 1
+    TimeFramesCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/TimeFrame"
+    ComputedData:
+      allOf:
+      - type: object
+        properties:
+          average_speed:
+            type: number
+            description: Average speed
+          max_hr:
+            type: number
+            description: Maximum heart rate measured
+          max_speed:
+            type: number
+            description: Maximum speed measured
+          total_distance:
+            type: number
+            description: Total traveled distance
+    PreprocessedDataRange:
+      allOf:
+      - type: object
+        properties:
+          start:
+            type: date-time
+            description: Start of this range of device activity
+            example: '2021-05-29T16:12:00.000Z'
+          stop:
+            type: date-time
+            description: End of this range of device activity
+            example: '2021-05-29T17:31:11.900Z'
+          size:
+            type: number
+            description: Number of preprocessed data in this range of device activtiy
+            example: 43830
+    PreprocessedData:
+      allOf:
+      - type: object
+        properties:
+          gnss.altitude:
+            type: number
+          gnss.latitude:
+            type: number
+          gnss.longitude:
+            type: number
+          gnss.speed:
+            type: number
+          gnss.timestamp:
+            type: number
+          gnss.xEast:
+            type: number
+          gnss.yNorth:
+            type: number
+          gnss.zUp:
+            type: number
+          ecg.hr:
+            type: number
+    PreprocessedDataRangesCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/PreprocessedDataRange"
+    PreprocessedDataCollection:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceCollection"
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              "$ref": "#/components/schemas/PreprocessedData"
+    BulkLoad:
+      allOf:
+      - type: object
+        required: true
+        properties:
+          asi_b64:
+            type: string
+            description: Base64 encoded `.asi` file
+            required: true
+            example: QVNJAAAAEAQEBkFTSSBWMgAAAQUACAcIBwgHCAcIAhoAEAAQAA......
+    MatlabJob:
+      allOf:
+      - "$ref": "#/components/schemas/HateosResourceItem"
+      - type: object
+        properties:
+          job_id:
+            type: string
+            description: Matlab job identifier
+            example: job-e429beeb-af8b-47ff-8e17-46e656fd5fa2
+          state:
+            type: string
+            description: State of the matlab job, can be `SUCCESS`, `ERROR` or `PROCESSING`
+            example: SUCCESS
+          details:
+            type: object
+            description: Details of the error(s) if state is `ERROR`.
+            example: {}
+    Password:
+      allOf:
+      - type: object
+        properties:
+          password:
+            type: string
+            format: password
+            description: User's plain password
+            example: SuperPassword$$123
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+          format: integer
+          description: Error's HTTP code
+          example: 500
+        detail:
+          type: string
+          description: Error's details
+          example: A fatal error occured
+      required:
+      - detail
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error's message
+          example: A fatal error occured
+      required:
+      - message
