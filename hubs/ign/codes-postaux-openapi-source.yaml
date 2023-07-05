@@ -1,0 +1,57 @@
+swagger: '2.0'
+info:
+  title: API Carto - codes-postaux
+  version: 1.0.1
+  description: >
+    API de récupération des communes associées à un code postal donné. Voir https://github.com/BaseAdresseNationale/codes-postaux pour plus d'information sur les sources de données.
+    
+    Consultez la [documentation utilisateur](https://apicarto.ign.fr/api/doc/pdf/docUser_moduleCodesPostaux.pdf) pour plus d’informations sur les paramètres d’appel disponibles et le format des résultats.
+  
+
+consumes:
+  - application/json
+
+basePath: /api
+
+produces:
+  - application/json
+
+paths:
+  /codes-postaux/communes/{codePostal}:
+    get:
+      description: Renvoie les communes correspondant à un code postal
+      parameters:
+        - in: path
+          name: codePostal
+          type: string
+          required: true
+          description: Code postal de la commune.
+      tags:
+        - codes-postaux
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/Commune'
+
+definitions:
+  Commune:
+    type: object
+    description: Commune correspondant au code postal
+    properties:
+      codePostal:
+        type: string
+        description: Le code postal
+      codeCommune:
+        type: string
+        description: Le code INSEE de la commune
+      nomCommune:
+        type: string
+        description: Le nom de la commune
+      libelleAcheminement:
+        type: string
+        description: Le libellé d'acheminement

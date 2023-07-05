@@ -9,3 +9,6 @@ API documentation Hubs. You can view them live at:
 - [Amadeus](https://github.com/bump-sh/examples/tree/main/hubs/amadeus): https://bump.sh/demo/hub/amadeus
 - [Scaleway Developers](https://github.com/bump-sh/examples/tree/main/hubs/scaleway-developers): https://bump.sh/demo/hub/scaleway-developers
 - [Zora Bots MQTT APIs](https://github.com/bump-sh/examples/tree/main/hubs/zbos-mqtt): https://bump.sh/demo/hub/zbos-mqtt
+- [Amazon](https://github.com/bump-sh/examples/tree/main/hubs/amazon): https://bump.sh/demo/hub/amazon
+- [Gravitee](https://github.com/bump-sh/examples/tree/main/hubs/gravitee): https://bump.sh/demo/hub/gravitee
+- [IGN](https://github.com/bump-sh/examples/tree/main/hubs/ign): https://bump.sh/demo/hub/ign
