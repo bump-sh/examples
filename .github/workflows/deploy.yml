@@ -48,3 +48,6 @@ jobs:
           SKALEET_BUMP_TOKEN: ${{ secrets.SKALEET_BUMP_TOKEN }}
           SLACK_API_BUMP_TOKEN: ${{ secrets.SLACK_API_BUMP_TOKEN }}
           TALEEZ_BUMP_TOKEN: ${{ secrets.TALEEZ_BUMP_TOKEN }}
+          AMAZON_BUMP_TOKEN: ${{ secrets.AMAZON_BUMP_TOKEN }}
+          GRAVITEE_BUMP_TOKEN: ${{ secrets.GRAVITEE_BUMP_TOKEN }}
+          IGN_BUMP_TOKEN: ${{ secrets.IGN_BUMP_TOKEN }}
