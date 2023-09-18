@@ -1,0 +1,245 @@
+asyncapi: 2.6.0
+
+# Describe information about the API
+info:
+  # Name of the API
+  title: Food Delivery API
+  # Version of this API. You can use any versioning scheme you like
+  version: 1.0.0
+  # Description of the API. You can use Markdown here and elaborate on
+  # how to get started with the API (eg subscribing, authentication, etc).
+  description: Real-time API that lets you place orders for food at restaurants and track the progress of the meal.
+  # Provide contact information that can be used for support
+  contact:
+    name: "Developer Support"
+    email: "support@example.com"
+
+externalDocs:
+  url: https://example.com
+
+servers:
+  # WebSocket protocol information for `dev` environment
+  dev:
+    url: "ws://localhost:3000"
+    protocol: ws
+
+# Define channels that you can send and receives related messages on
+channels:
+  # The order channel is used to place orders and receive updates
+  /order:
+    # Define messages that the server can send back to the client
+    publish:
+      operationId: publish
+      summary: Receive messages from the Food Tracking API.
+      message:
+        $ref: "#/components/messages/publish"
+    # Define messages that the client can send to the server
+    subscribe:
+      operationId: subscribe
+      summary: Place a new order and subscribe to updates on the order's progress.
+      message:
+        $ref: "#/components/messages/placeOrder"
+
+# Defines messages that can be sent and the schemas that make up
+# those messages.
+components:
+  # The messages that can be sent and received in different channels
+  messages:
+    # The messages that can be published by the server to the client
+    publish:
+      # Give some basic information about the message
+      name: publish
+      summary: >
+        Responses that can be returned by the server after an order is placed.
+      description: >
+        The following messages can be returned by the server after an order is placed. These messages contain information related to the WebSocket connection and order status.
+      # Specify the different message types that could be sent
+      payload:
+        anyOf:
+          - $ref: "#/components/schemas/orderStatusUpdate"
+          - $ref: "#/components/schemas/closeConnection"
+          - $ref: "#/components/schemas/openConnection"
+      # Provide examples of the messages above to be shown in documentation
+      examples:
+        - name: New Connection Example
+          summary: Example message sent by the server as soon as the client connects.
+          payload:
+            messageType: open_connection
+            message: You're connected. Place an order to start receiving real-time status updates.
+        - name: Order Placed Example
+          summary: Example message that is sent by the server as soon as the client places a new order.
+          payload:
+            orderId: 45
+            messageType: status_update
+            status: placed
+            eta: "2023-04-01T14:12:00Z"
+        - name: Order Picked Up Example
+          summary: Example message sent by the server when the driver picks up the order from the restaurant.
+          payload:
+            orderId: 45
+            messageType: status_update
+            status: out_for_delivery
+            eta: "2023-04-01T14:08:00Z"
+        - name: Connection Closed Example
+          summary: Example message that is sent by the server when the order is delivered and the connection with the client is about to close.
+          payload:
+            messageType: close_connection
+            message: Order delivered successfully.
+    # Message that can be sent by the client to the server to place an
+    # order.
+    placeOrder:
+      # Give some basic information about the message
+      name: placeOrder
+      summary: Places a new food order and subscribes to status updates.
+      description: Message containing the details for a new order to be placed. Once the order is placed, the server will send back order status updates as they happen.
+      # Specify that the message should follow the placeOrder schema,
+      # defined in the schemas section.
+      payload:
+        $ref: "#/components/schemas/placeOrder"
+      # Provide example payloads that could be sent by the client to the
+      # server.
+      examples:
+        - name: Simple Order
+          summary: Example order message sent by the client to the server to place a new order.
+          payload:
+            restaurant: "WrapKing"
+            deliveryAddress:
+              addressLine1: 11 5th Avenue, Brooklyn
+              city: New York
+              postalCode: NY 11215
+              countryCode: US
+            items:
+              - name: "Crispy Chicken Wrap"
+                quantity: 1
+        - name: Complex Order
+          summary: Example of a more complex order message sent by the client to the server to place a new order.
+          payload:
+            restaurant: "Subzero"
+            deliveryAddress:
+              addressLine1: 189 President Street, Brooklyn
+              city: New York
+              postalCode: NY 11215
+              countryCode: US
+            items:
+              - name: "Chilli Hotdog"
+                quantity: 2
+              - name: "Coke"
+                quantity: 1
+              - name: "Sparkling Water"
+                quantity: 2
+  # Schema object contains partial message schemas that can be combined
+  # and reused in different messages.
+  schemas:
+    # Address message schema that can represent a delivery or any other
+    # address in the system.
+    address:
+      description: Object that stores address details for various purposes such as the delivery address.
+      type: object
+      properties:
+        addressLine1:
+          description: Address line 1 for the address.
+          type: string
+        addressLine2:
+          description: Address Line 2 for the address if necessary.
+          type: string
+        city:
+          description: The name of the city the address is in.
+          type: string
+        postalCode:
+          description: Postal code for the address.
+          type: string
+        countryCode:
+          description: Two-character country code for the address.
+          type: string
+      required:
+        - addressLine1
+        - postalCode
+        - countryCode
+    # Schema for an individual item in an order
+    orderItem:
+      description: Contains the individual order items in an order.
+      type: object
+      properties:
+        name:
+          description: The name of the menu item to order.
+          type: string
+        quantity:
+          description: How much to order of this particular menu item.
+          type: number
+          minimum: 1
+      required:
+        - name
+        - quantity
+    # Schema for the message to place an order
+    placeOrder:
+      description: Object sent to place a new order.
+      type: object
+      properties:
+        restaurant:
+          description: The name of the restaurant to order from.
+          type: string
+        deliveryAddress:
+          description: The address where the order should be delivered.
+          type: object
+          $ref: "#/components/schemas/address"
+        items:
+          description: An array of items that should be ordered from the restaurant.
+          type: array
+          items:
+            $ref: "#/components/schemas/orderItem"
+      required:
+        - restaurant
+        - deliveryAddress
+        - items
+    # Schema for a status update message sent by the server
+    orderStatusUpdate:
+      description: Message sent by the server to the client containing updates about the order. This message gets sent every time the order status changes.
+      type: object
+      properties:
+        orderId:
+          description: The ID used to identify the order.
+          type: integer
+        messageType:
+          description: Specifies that the message is a "status_update" message.
+          const: "status_update"
+        status:
+          description: The order's new status.
+          type: string
+          enum:
+            - "placed"
+            - "preparing"
+            - "order_ready"
+            - "out_for_delivery"
+            - "delivered"
+        eta:
+          description: The estimated arrival time for the delivery. Only returned if it can be calculated.
+          type: string
+          format: date-time
+      required:
+        - orderId
+        - messageType
+        - status
+    # Schema for the message sent by the server when a connection is opened
+    openConnection:
+      description: Message that gets sent when a client connects. It instructs the client to send an order.
+      type: object
+      properties:
+        messageType:
+          description: Specifies that the message is an `"open_connection"` message.
+          type: string
+          const: "open_connection"
+        message:
+          description: Messaging describing what the user should do next.
+          type: string
+    # Schema for the message sent by the server when a connection is closed
+    closeConnection:
+      description: Message that gets sent just before the server closes the connection with the client. The `message` property gives more information on why the connection was closed.
+      type: object
+      properties:
+        messageType:
+          description: Specifies that the message is a `"close_connection"` message.
+          type: string
+          const: "close_connection"
+        message:
+          description: Message describing why the connection was closed.
+          type: string
