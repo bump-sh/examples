@@ -465,6 +465,8 @@ components:
           type: string
         image:
           type: string
+        details:
+          type: string
     UpdateUser:
       type: object
       properties:
