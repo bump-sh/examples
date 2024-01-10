@@ -743,7 +743,7 @@
   "openapi": "3.0.0",
   "paths": {
     "/alternatives": {
-      "get": {
+      "put": {
         "operationId": "GetAlternatives",
         "responses": {
           "200": {
