@@ -22,11 +22,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Debug
+        run: curl -I https://bump.sh
       - name: Comment pull request with API diff
         uses: bump-sh/github-action@v1
         with:
           file: apis/realworld-openapi-source.yml
-          command: diff
+          command: diffd
         env:
           https_proxy: https://example.org
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
