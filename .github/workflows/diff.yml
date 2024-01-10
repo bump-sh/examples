@@ -28,6 +28,7 @@ jobs:
           file: apis/realworld-openapi-source.yml
           command: diff
         env:
+          https_proxy: https://example.org
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
   gitlab-api-diff:
