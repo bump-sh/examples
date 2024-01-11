@@ -52,6 +52,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Run Bump.sh CLI
+        run: |
+          npx bump-cli diff -d greenly -t ${{ secrets.GREENLY_BUMP_TOKEN }} apis/greenly-openapi-source.json
       - name: Comment pull request with API diff
         uses: bump-sh/github-action@v1
         with:
