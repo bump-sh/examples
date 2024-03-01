@@ -74,13 +74,7 @@
       },
       "AlternativeOutput": {
         "properties": {
-          "recommendedProviders": {
-            "items": {
-              "$ref": "#/components/schemas/RecommendedProviderOutput"
-            },
-            "type": "array",
-            "description": "List of alternative providers"
-          },
+          "addedProperty": {"type": "string"},
           "ratioEstimatedReduction": {
             "type": "number",
             "format": "double",
