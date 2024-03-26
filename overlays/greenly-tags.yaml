@@ -1,0 +1,31 @@
+overlay: 1.0.0
+info:
+  title: Add tags and description to Greenly API
+  version: 0.0.1
+actions:
+  - target: '$'
+    description: Add description to grouping tags.
+    update:
+      tags:
+        - name: "alternatives"
+          description: |
+            Everything about low-carbon alternatives
+        - name: "offsetProjects"
+          description: |
+            Find some carbon-offset related projects, only if you can't find a lower carbon alternative.
+        - name: "live"
+          description: |
+            Status of the API.
+        - name: "purchaseCategories"
+          description: |
+            Purchase categories is about purchasing.
+        - name: "transactions"
+          description: |
+            Compute the carbon footprint of your transactions.
+        - name: "users"
+          description: |
+            All endpoints to manage your users.
+  - target: "$..[?(@['tags'] && @['tags'].includes('ready'))]"
+    description: rename 'ready' tags into 'live' tags
+    update:
+      tags: ["live"]
