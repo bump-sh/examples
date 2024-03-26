@@ -44,13 +44,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Apply overlay to API document
+        run: |
+          npx bump-cli overlay apis/greenly-openapi-source.json overlays/greenly-remove-operation.yaml > tmp/greenly-openapi-public.json
       - name: Comment pull request with API diff
         uses: bump-sh/github-action@v1
         with:
           doc: greenly
           token: ${{ secrets.GREENLY_BUMP_TOKEN }}
-          file: apis/greenly-openapi-source.json
+          file: tmp/greenly-openapi-public.json
           command: diff
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
