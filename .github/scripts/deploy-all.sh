@@ -24,7 +24,7 @@ for hub in hubs/*/; do
         # Create documentation <apiName> from the api definition file
         tokenKey="${hubName//-/_}_BUMP_TOKEN"
         tokenKey="${tokenKey^^}"
-        echo "* API ${apiName}"
+        echo "* API ${apiName} (reading token from ${tokenKey})"
         bump deploy --doc "${apiName}" --token "${!tokenKey}" --hub "${hubName}" --auto-create "${api}"
     done
 done
@@ -40,6 +40,6 @@ for api in apis/*-source.{yml,yaml,json}; do
     # Create documentation <apiName> from the api definition file
     tokenKey="${apiName//-/_}_BUMP_TOKEN"
     tokenKey="${tokenKey^^}"
-    echo "* API ${apiName}"
+    echo "* API ${apiName} (reading token from ${tokenKey})"
     bump deploy --doc "${apiName}" --token "${!tokenKey}" "${api}"
 done
