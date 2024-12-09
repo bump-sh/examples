@@ -32,7 +32,9 @@ jobs:
           GITLAB_BUMP_TOKEN: ${{ secrets.GITLAB_BUMP_TOKEN }}
           REALWORLD_BUMP_TOKEN: ${{ secrets.REALWORLD_BUMP_TOKEN }}
           ASI_BUMP_TOKEN: ${{ secrets.ASI_BUMP_TOKEN }}
+          ATLAN_BUMP_TOKEN: ${{ secrets.ATLAN_BUMP_TOKEN }}
           AXONAUT_BUMP_TOKEN: ${{ secrets.AXONAUT_BUMP_TOKEN }}
+          CHECKR_BUMP_TOKEN: ${{ secrets.CHECKR_BUMP_TOKEN }}
           FAIRJUNGLE_BUMP_TOKEN: ${{ secrets.FAIRJUNGLE_BUMP_TOKEN }}
           GALISE_BUMP_TOKEN: ${{ secrets.GALISE_BUMP_TOKEN }}
           GITGUARDIAN_BUMP_TOKEN: ${{ secrets.GITGUARDIAN_BUMP_TOKEN }}
