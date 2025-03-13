@@ -49,7 +49,7 @@ jobs:
         run: |
           npx bump-cli overlay apis/greenly-openapi-source.json overlays/greenly-remove-operation.yaml > tmp/greenly-openapi-public.json
       - name: Comment pull request with API diff
-        uses: bump-sh/github-action@v1
+        uses: paulrbr/github-action@upgrade-dependencies
         with:
           doc: greenly
           token: ${{ secrets.GREENLY_BUMP_TOKEN }}
