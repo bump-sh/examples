@@ -24,11 +24,12 @@ for hub in hubs/*/; do
 
         # Apply any available overlays from filename
         # `<api_name>-overlay*.yaml`
-        for overlay in "${hub}"/"${apiName}"-overlay*.{yml,yaml}; do
+        for overlay in "${hub}""${apiName}"-overlay*.{yml,yaml}; do
             [ -f "${overlay}" ] || continue
             # Overide current api definition file with overlayed
             # definition
-            yes | npx bump-cli overlay "${api}" "${overlay}" -o "${api}"
+            echo "y" | npx bump-cli overlay "${api}" "${overlay}" -o "${api}"
+            echo "* API ${apiName}: Overlay ${overlay} applied!"
         done
 
         # Create documentation <apiName> from the api definition file
