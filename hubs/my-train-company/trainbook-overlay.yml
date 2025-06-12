@@ -1,0 +1,16 @@
+overlay: 1.0.0
+info:
+  title: Add all the x-topics files as references
+  version: 0.0.1
+actions:
+  - target: '$'
+    update:
+      x-topics:
+        - title: Getting started
+          content:
+            $ref: ./docs/getting-started.md
+        - title: Authentication
+          content:
+            $ref: ./docs/authentication/index.md
+          example:
+            $ref: ./docs/authentication/example.md
