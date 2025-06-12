@@ -11,6 +11,7 @@ npm install -g bump-cli
 # For each directory in the hubs/ directory
 for hub in hubs/*/; do
     for api in "${hub}"*-source.{yml,yaml,json}; do
+        [ -f "${api}" ] || continue
         # Extract the Hub name from directory structure
         hubName="${hub%/*}"
         hubName="${hubName#*/}"
@@ -20,6 +21,15 @@ for hub in hubs/*/; do
         apiName="${apiName%-*}"
         apiName="${apiName#*/}"
         apiName="${apiName#*/}"
+
+        # Apply any available overlays from filename
+        # `<api_name>-overlay*.yaml`
+        for overlay in "${hub}"/"${apiName}"-overlay*.{yml,yaml}; do
+            [ -f "${overlay}" ] || continue
+            # Overide current api definition file with overlayed
+            # definition
+            yes | npx bump-cli overlay "${api}" "${overlay}" -o "${api}"
+        done
 
         # Create documentation <apiName> from the api definition file
         tokenKey="${hubName//-/_}_BUMP_TOKEN"

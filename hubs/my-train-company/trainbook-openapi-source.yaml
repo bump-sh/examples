@@ -31,11 +31,6 @@ security:
   - OAuth2:
       - read
 
-x-topics:
-  - title: Getting started
-    content:
-      $ref: ./docs/getting-started.md
-
 tags:
   - name: Stations
     description: | 
