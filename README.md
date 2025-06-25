@@ -17,6 +17,13 @@ Bump created and owned API contract files are:
 - [Bump](https://github.com/bump-sh/examples/tree/main/apis/bump.yml) is Bump.sh [publicly available API](https://developers.bump.sh)
 - [My train Company](https://github.com/bump-sh/examples/tree/main/hubs/my-train-company) is Bump.sh publicly available demo and has its live generated documentation [available here](https://demo.bump.sh/).
 
+## Mock Server
+
+Use a hosted mock server to simulate and explore the OpenAPI example in this repo. It's a quick way to understand the API behavior, validate requests, and test responses without spinning up any backend or writing mock data yourself. Helpful when experimenting with client-side logic or before wiring into a real backend.
+
+<a href="https://beeceptor.com/openapi-mock-server/?utm_source=github&utm_campaign=bump-sh-examples&url=https://raw.githubusercontent.com/bump-sh/examples/refs/heads/main/openapi_example.yml" target="_blank"><img src="https://cdn.beeceptor.com/assets/images/buttons/mock-openapi-with-beeceptor.png" alt="Mock These APIs Instantly" style="height: 60px;"></a>
+
+
 ## How to contribute?
 
 1️⃣ First, fork this repository and pull it on your local machine.
