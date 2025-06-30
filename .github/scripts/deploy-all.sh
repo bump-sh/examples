@@ -8,6 +8,9 @@ shopt -s nullglob
 # Install bump-cli
 npm install -g bump-cli
 
+orgaTokenKey="ORGANIZATION_DEMO_BUMP_TOKEN"
+echo "Using global token ${orgaTokenKey} for Bump.sh Demo organization"
+
 # For each directory in the hubs/ directory
 for hub in hubs/*/; do
     for api in "${hub}"*-source.{yml,yaml,json}; do
@@ -33,10 +36,8 @@ for hub in hubs/*/; do
         done
 
         # Create documentation <apiName> from the api definition file
-        tokenKey="${hubName//-/_}_BUMP_TOKEN"
-        tokenKey="${tokenKey^^}"
-        echo "* API ${apiName} (reading token from ${tokenKey})"
-        bump deploy --doc "${apiName}" --token "${!tokenKey}" --hub "${hubName}" --auto-create "${api}"
+        echo "* API ${apiName} (reading token from ${orgaTokenKey})"
+        bump deploy --doc "${apiName}" --token "${!orgaTokenKey}" --hub "${hubName}" --auto-create "${api}"
     done
 done
 
@@ -46,14 +47,12 @@ for api in apis/*-source.{yml,yaml,json}; do
     echo "Deploying ${api}"
 
     # Extract the API name from filename `<api_name>-<spec>-source.yaml`
+    # Create documentation <apiName> from the api definition file
     apiName="${api%-*}"
     apiName="${apiName%-*}"
     apiName="${apiName#*/}"
     apiName="${apiName#*/}"
 
-    # Create documentation <apiName> from the api definition file
-    tokenKey="${apiName//-/_}_BUMP_TOKEN"
-    tokenKey="${tokenKey^^}"
-    echo "* API ${apiName} (reading token from ${tokenKey}) from file ${api}"
-    bump deploy --doc "${apiName}" --token "${!tokenKey}" "${api}"
+    echo "* API ${apiName} (reading token from ${orgaTokenKey}) from file ${api}"
+    bump deploy --doc "${apiName}" --token "${!orgaTokenKey}" "${api}"
 done
