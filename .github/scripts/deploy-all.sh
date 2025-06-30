@@ -42,6 +42,9 @@ done
 
 # For each *-source.yaml files in the apis/ directory
 for api in apis/*-source.{yml,yaml,json}; do
+    [ -f "${api}" ] || continue
+    echo "Deploying ${api}"
+
     # Extract the API name from filename `<api_name>-<spec>-source.yaml`
     apiName="${api%-*}"
     apiName="${apiName%-*}"
@@ -51,6 +54,6 @@ for api in apis/*-source.{yml,yaml,json}; do
     # Create documentation <apiName> from the api definition file
     tokenKey="${apiName//-/_}_BUMP_TOKEN"
     tokenKey="${tokenKey^^}"
-    echo "* API ${apiName} (reading token from ${tokenKey})"
+    echo "* API ${apiName} (reading token from ${tokenKey}) from file ${api}"
     bump deploy --doc "${apiName}" --token "${!tokenKey}" "${api}"
 done
