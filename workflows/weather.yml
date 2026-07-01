@@ -1,0 +1,331 @@
+flower: "0.1"
+id: weather_v2
+title: Weather assistant: current conditions, forecast, beach & running
+# Document level: describes the whole MCP server. Put cross-cutting tips agents need here.
+description: >
+  A summer-ready weather assistant. Every flow first geocodes a city name to
+  coordinates via OpenStreetMap Nominatim, then queries Open-Meteo for weather
+  data (no API key required). Conventions an agent should know:
+    * Cities are identified by free-text name (e.g. "Nice", "Biarritz, France").
+      Geocoding returns the best match; an unrecognized name has no result.
+    * Values are metric (°C, km/h, mm). Scalar outputs append the unit; array
+      and aggregated outputs (forecast, running windows) are plain numbers.
+    * The beach flow uses the Open-Meteo Marine API, which only covers
+      coastlines, for an inland city the sea fields come back null while the
+      air fields still resolve.
+
+flows:
+  # Each flow is exposed as one MCP tool.
+  - id: current_weather
+    # A flow's description is the tool description the agent sees: what it does,
+    # when to use it, and what it returns.
+    description: >
+      Get the current weather for a city right now: temperature, how it feels,
+      wind and precipitation. Use this for "what's the weather like in X?".
+      Returns the resolved place name plus live conditions with units.
+    inputs:
+      # Inputs are a JSON Schema. Each field description tells the agent how to fill it.
+      properties:
+        city:
+          type: string
+          description: >
+            City name to look up, optionally with country for disambiguation,
+            e.g. "Nice", "Cambridge, UK", "Springfield, Illinois".
+      required:
+        - city
+
+    # Steps run sequentially, one HTTP request each. A later step can read
+    # earlier steps' outputs.
+    steps:
+      # Step 1: resolve the city name to coordinates. Every flow starts this way.
+      - id: geocode
+        request:
+          method: GET
+          url: https://nominatim.openstreetmap.org/search
+          headers:
+            User-Agent: mcwrapper-weather-demo
+          query:
+            q: $inputs.city
+            format: jsonv2
+            limit: "1"
+        outputs:
+          lat: $response.body.0.lat
+          lon: $response.body.0.lon
+          place: $response.body.0.display_name
+        actions:
+          # Actions run after the step; the first matching 'when' wins (default: next).
+          # Retry on 429: Nominatim rate-limits anonymous use to ~1 req/s.
+          - when: "$statusCode == 429"
+            do: retry
+            wait: 2
+          - do: next
+
+      # Step 2, the chain: pass step 1's lat/lon into the weather request.
+      - id: current
+        request:
+          method: GET
+          url: https://api.open-meteo.com/v1/forecast
+          query:
+            latitude: $steps.geocode.outputs.lat
+            longitude: $steps.geocode.outputs.lon
+            current: temperature_2m,apparent_temperature,wind_speed_10m,precipitation
+            timezone: auto
+        outputs:
+          # Two dot-notation expressions in one string interpolate to e.g. "22.5 °C".
+          temperature: $response.body.current.temperature_2m $response.body.current_units.temperature_2m
+          feels_like: $response.body.current.apparent_temperature $response.body.current_units.apparent_temperature
+          wind: $response.body.current.wind_speed_10m $response.body.current_units.wind_speed_10m
+          precipitation: $response.body.current.precipitation $response.body.current_units.precipitation
+
+    # The tool's return value: map keys to step outputs. Omit this block to
+    # return the last step's outputs as-is.
+    outputs:
+      place: $steps.geocode.outputs.place
+      temperature: $steps.current.outputs.temperature
+      feels_like: $steps.current.outputs.feels_like
+      wind: $steps.current.outputs.wind
+      precipitation: $steps.current.outputs.precipitation
+
+  # Adds: JMESPath aggregations, plus an optional input with a default.
+  - id: weather_forecast
+    description: >
+      Get the daily weather forecast for a city over the next few days: daily
+      highs/lows, rain probability, total rain and max UV, plus handy summaries
+      (warmest day, coolest night, average high, total rain over the period).
+      Use this for "what's the weather this week in X?".
+    inputs:
+      properties:
+        city:
+          type: string
+          description: City name to look up, e.g. "Lisbon" or "Denver, USA".
+        days:
+          type: number
+          default: 7
+          description: >
+            Number of forecast days, from 1 to 16. Defaults to 7 (a week).
+      required:
+        - city
+
+    steps:
+      - id: geocode
+        request:
+          method: GET
+          url: https://nominatim.openstreetmap.org/search
+          headers:
+            User-Agent: mcwrapper-weather-demo
+          query:
+            q: $inputs.city
+            format: jsonv2
+            limit: "1"
+        outputs:
+          lat: $response.body.0.lat
+          lon: $response.body.0.lon
+          place: $response.body.0.display_name
+        actions:
+          - when: "$statusCode == 429"
+            do: retry
+            wait: 2
+          - do: next
+
+      - id: forecast
+        request:
+          method: GET
+          url: https://api.open-meteo.com/v1/forecast
+          query:
+            latitude: $steps.geocode.outputs.lat
+            longitude: $steps.geocode.outputs.lon
+            daily: temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_probability_max,precipitation_sum,uv_index_max
+            forecast_days: $inputs.days
+            timezone: auto
+        outputs:
+          dates: $response.body.daily.time
+          high_per_day: $response.body.daily.temperature_2m_max
+          low_per_day: $response.body.daily.temperature_2m_min
+          rain_probability_per_day: $response.body.daily.precipitation_probability_max
+          uv_max_per_day: $response.body.daily.uv_index_max
+          # JMESPath (triggered by [] or a function call) aggregates the daily arrays.
+          warmest_day_high: max($response.body.daily.temperature_2m_max)
+          coolest_night_low: min($response.body.daily.temperature_2m_min)
+          average_high: avg($response.body.daily.temperature_2m_max)
+          total_rain_mm: sum($response.body.daily.precipitation_sum)
+
+    outputs:
+      place: $steps.geocode.outputs.place
+      dates: $steps.forecast.outputs.dates
+      high_per_day: $steps.forecast.outputs.high_per_day
+      low_per_day: $steps.forecast.outputs.low_per_day
+      rain_probability_per_day: $steps.forecast.outputs.rain_probability_per_day
+      uv_max_per_day: $steps.forecast.outputs.uv_max_per_day
+      warmest_day_high: $steps.forecast.outputs.warmest_day_high
+      coolest_night_low: $steps.forecast.outputs.coolest_night_low
+      average_high: $steps.forecast.outputs.average_high
+      total_rain_mm: $steps.forecast.outputs.total_rain_mm
+
+  # Adds: a second API (Marine) and per-day data via start_date / end_date.
+  - id: beach_weather
+    description: >
+      Get beach and sea conditions for a coastal city on a given day: midday
+      sea surface (water) temperature, wave height and period, plus the day's
+      max air temperature, wind and UV. Use this for "is it good for the beach
+      / swimming in X on <date>?". For an inland city the sea fields come back
+      empty (null) while air fields still resolve. Sea temperature is only
+      forecast about 7 days ahead; beyond that the sea fields are empty too.
+    inputs:
+      properties:
+        city:
+          type: string
+          description: >
+            Coastal city name, e.g. "Biarritz", "Nice", "San Sebastian".
+        date:
+          type: string
+          description: >
+            Target day in YYYY-MM-DD format, e.g. "2026-07-08". Sea temperature
+            is forecast about 7 days ahead; air/UV up to ~16 days. Stay within
+            that window, a date outside it makes the upstream API error out.
+            For today, pass today's date.
+      required:
+        - city
+        - date
+
+    steps:
+      - id: geocode
+        request:
+          method: GET
+          url: https://nominatim.openstreetmap.org/search
+          headers:
+            User-Agent: mcwrapper-weather-demo
+          query:
+            q: $inputs.city
+            format: jsonv2
+            limit: "1"
+        outputs:
+          lat: $response.body.0.lat
+          lon: $response.body.0.lon
+          place: $response.body.0.display_name
+        actions:
+          - when: "$statusCode == 429"
+            do: retry
+            wait: 2
+          - do: next
+
+      - id: sea
+        request:
+          method: GET
+          url: https://marine-api.open-meteo.com/v1/marine
+          query:
+            latitude: $steps.geocode.outputs.lat
+            longitude: $steps.geocode.outputs.lon
+            hourly: sea_surface_temperature,wave_height,wave_period
+            start_date: $inputs.date
+            end_date: $inputs.date
+            timezone: auto
+        outputs:
+          # JMESPath index [14] (not dot .14): an inland city returns HTTP 200 with
+          # an all-null series, and [14] yields null instead of raising. Values at
+          # 14:00: water °C, wave height m, wave period s.
+          water_temperature: $response.body.hourly.sea_surface_temperature[14]
+          wave_height: $response.body.hourly.wave_height[14]
+          wave_period: $response.body.hourly.wave_period[14]
+
+      - id: air
+        request:
+          method: GET
+          url: https://api.open-meteo.com/v1/forecast
+          query:
+            latitude: $steps.geocode.outputs.lat
+            longitude: $steps.geocode.outputs.lon
+            daily: temperature_2m_max,wind_speed_10m_max,uv_index_max
+            start_date: $inputs.date
+            end_date: $inputs.date
+            timezone: auto
+        outputs:
+          air_temperature_max: $response.body.daily.temperature_2m_max.0 $response.body.daily_units.temperature_2m_max
+          wind_max: $response.body.daily.wind_speed_10m_max.0 $response.body.daily_units.wind_speed_10m_max
+          uv_index_max: $response.body.daily.uv_index_max.0
+
+    outputs:
+      place: $steps.geocode.outputs.place
+      date: $inputs.date
+      # Return each step's whole output hash: a single null field addressed
+      # directly (inland sea) would raise, but the hash itself is always safe.
+      sea: $steps.sea.outputs
+      air: $steps.air.outputs
+
+  # Adds: JMESPath slicing to compare morning, midday and evening.
+  - id: best_time_to_run
+    description: >
+      Find the best window to go running on a given day in a city, based on the
+      hourly forecast. Compares morning (6-9h), midday (11-14h) and evening
+      (17-20h) on how it feels, rain chance and UV, so the caller can pick the
+      coolest, driest window. Use this for "when should I run in X on <date>?".
+    inputs:
+      properties:
+        city:
+          type: string
+          description: City name to look up, e.g. "Madrid" or "Austin, Texas".
+        date:
+          type: string
+          description: >
+            Target day in YYYY-MM-DD format, e.g. "2026-07-14". Must fall within
+            Open-Meteo's window (roughly today up to ~16 days ahead). For today,
+            pass today's date.
+      required:
+        - city
+        - date
+
+    steps:
+      - id: geocode
+        request:
+          method: GET
+          url: https://nominatim.openstreetmap.org/search
+          headers:
+            User-Agent: mcwrapper-weather-demo
+          query:
+            q: $inputs.city
+            format: jsonv2
+            limit: "1"
+        outputs:
+          lat: $response.body.0.lat
+          lon: $response.body.0.lon
+          place: $response.body.0.display_name
+        actions:
+          - when: "$statusCode == 429"
+            do: retry
+            wait: 2
+          - do: next
+
+      - id: hourly
+        request:
+          method: GET
+          url: https://api.open-meteo.com/v1/forecast
+          query:
+            latitude: $steps.geocode.outputs.lat
+            longitude: $steps.geocode.outputs.lon
+            hourly: apparent_temperature,precipitation_probability,uv_index,wind_speed_10m
+            start_date: $inputs.date
+            end_date: $inputs.date
+            timezone: auto
+        outputs:
+          # Hourly arrays start at 00:00 local, so [6:10] = 06-09h. avg/max per window.
+          morning_feels_like: avg($response.body.hourly.apparent_temperature[6:10])
+          morning_rain_chance: max($response.body.hourly.precipitation_probability[6:10])
+          morning_uv: max($response.body.hourly.uv_index[6:10])
+          midday_feels_like: avg($response.body.hourly.apparent_temperature[11:15])
+          midday_rain_chance: max($response.body.hourly.precipitation_probability[11:15])
+          midday_uv: max($response.body.hourly.uv_index[11:15])
+          evening_feels_like: avg($response.body.hourly.apparent_temperature[17:21])
+          evening_rain_chance: max($response.body.hourly.precipitation_probability[17:21])
+          evening_uv: max($response.body.hourly.uv_index[17:21])
+
+    outputs:
+      place: $steps.geocode.outputs.place
+      date: $inputs.date
+      morning_feels_like: $steps.hourly.outputs.morning_feels_like
+      morning_rain_chance: $steps.hourly.outputs.morning_rain_chance
+      morning_uv: $steps.hourly.outputs.morning_uv
+      midday_feels_like: $steps.hourly.outputs.midday_feels_like
+      midday_rain_chance: $steps.hourly.outputs.midday_rain_chance
+      midday_uv: $steps.hourly.outputs.midday_uv
+      evening_feels_like: $steps.hourly.outputs.evening_feels_like
+      evening_rain_chance: $steps.hourly.outputs.evening_rain_chance
+      evening_uv: $steps.hourly.outputs.evening_uv
