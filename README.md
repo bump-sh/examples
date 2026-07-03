@@ -2,6 +2,8 @@
 
 This directory holds [OpenAPI](https://spec.openapis.org/oas/latest.html) & [AsyncAPI](https://www.asyncapi.com/docs/reference/specification/latest) example API contract files for [standalone APIs](https://github.com/bump-sh/examples/tree/main/apis) and [API Hubs](https://github.com/bump-sh/examples/tree/main/hubs) which are deployed to [bump.sh](https://bump.sh) to generate elegant and always up-to-date API documentation.
 
+It also holds [Flower](https://github.com/bump-sh/flower-spec) example Workflow files which can generate servers (REST & MCP endpoints) to run your always up-to-date workflows defined thanks to their Flower or [Arazzo](https://spec.openapis.org/arazzo/latest.html) definition file.
+
 ## View example standalone API contract files and generated documentation
 
 You can find all available examples of OpenAPI and AsyncAPI API contract files in the [`apis` folder of this repo](https://github.com/bump-sh/examples/tree/main/apis)
@@ -9,6 +11,10 @@ You can find all available examples of OpenAPI and AsyncAPI API contract files i
 ## View example API Hubs and generated documentation
 
 You can find all available examples of Hubs (or API Portals) of OpenAPI and AsyncAPI API contract files in the [`hubs` folder of this repo](https://github.com/bump-sh/examples/tree/main/hubs)
+
+## View example Workflows and generated runners
+
+You can find all available examples of Workflows of Flower or Arazzo contract files in the [`workflows` folder of this repo](https://github.com/bump-sh/examples/tree/main/workflows)
 
 ## What are these API contract files?
 

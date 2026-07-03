@@ -18,3 +18,16 @@ jobs:
       - run: ./.github/scripts/deploy-all.sh
         env:
           ORGANIZATION_DEMO_BUMP_TOKEN: ${{ secrets.ORGANIZATION_DEMO_BUMP_TOKEN }}
+
+  deploy-workflows:
+    runs-on: ubuntu-latest
+    name: Deploy Workflows on Bump
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Deploy Weather workflow document
+        uses: bump-sh/github-action@v1
+        with:
+          mcp_server: "cdb8573a-fd90-461a-a869-a6166a542592"
+          token: ${{secrets.ORGANIZATION_DEMO_BUMP_TOKEN}}
+          file: workflows/weather.yml
