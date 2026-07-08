@@ -1,6 +1,6 @@
 flower: "0.1"
 id: weather_v2
-title: Weather assistant: current conditions, forecast, beach & running
+title: "Weather assistant: current conditions, forecast, beach & running"
 # Document level: describes the whole MCP server. Put cross-cutting tips agents need here.
 description: >
   A summer-ready weather assistant. Every flow first geocodes a city name to
