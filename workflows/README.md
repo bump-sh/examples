@@ -4,5 +4,6 @@ This directory holds [Flower](https://github.com/bump-sh/flower-spec) example Wo
 
 The files are automatically deployed to Bump.sh, You can test them live at:
 
-- [Weather server](https://github.com/bump-sh/examples/blob/main/workflows/weather.yml): https://run.bump.sh/demo/weather/mcp
+- [Weather server (flower definition)](https://github.com/bump-sh/examples/blob/main/workflows/weather.yml): https://run.bump.sh/demo/weather/mcp
+- [Wikimedia server (arazzo definition)](https://github.com/bump-sh/examples/blob/main/workflows/wikimedia.json): https://run.bump.sh/demo/wikimedia/mcp
 

@@ -31,3 +31,9 @@ jobs:
           mcp_server: "cdb8573a-fd90-461a-a869-a6166a542592"
           token: ${{secrets.ORGANIZATION_DEMO_BUMP_TOKEN}}
           file: workflows/weather.yml
+      - name: Deploy Wikimedia workflow document
+        uses: bump-sh/github-action@v1
+        with:
+          mcp_server: "d1a6ad45-ca49-4c20-9440-f273988abba5"
+          token: ${{secrets.ORGANIZATION_DEMO_BUMP_TOKEN}}
+          file: workflows/wikimedia.json
